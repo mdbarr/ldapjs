@@ -18,7 +18,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/mcavage/node-ldapjs.git"
+    "url": "git@github.com:mdbarr/node-ldapjs.git"
   },
   "main": "lib/index.js",
   "directories": {
@@ -38,9 +38,6 @@
     "once": "^1.4.0",
     "vasync": "^1.6.4",
     "verror": "^1.8.1"
-  },
-  "optionalDependencies": {
-    "dtrace-provider": "~0.8"
   },
   "devDependencies": {
     "node-uuid": "^1.4.7",
