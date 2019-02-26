@@ -11,7 +11,7 @@
     "Patrick Mooney <patrick.f.mooney@gmail.com>",
     "Matt Simerson <matt@tnpi.net>"
   ],
-  "name": "ldapjs",
+  "name": "@mdbarr/ldapjs",
   "homepage": "http://ldapjs.org",
   "description": "LDAP client and server APIs",
   "version": "1.0.2",
