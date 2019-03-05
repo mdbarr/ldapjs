@@ -1,7 +1,7 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
 var test = require('tape').test;
-var uuid = require('node-uuid');
+var uuid = require('uuid/v4');
 
 var ldap = require('../lib/index');
 

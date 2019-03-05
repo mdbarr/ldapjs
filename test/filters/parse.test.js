@@ -7,7 +7,7 @@ var parse = require('../../lib/index').parseFilter;
 
 
 test('GH-48 XML Strings in filter', function (t) {
-  var str = '(&(CentralUIEnrollments=\\<mydoc\\>*)(objectClass=User))';
+  var str = '(&(CentralUIEnrollments=<mydoc>*)(objectClass=User))';
   var f = parse(str);
   t.ok(f);
   t.ok(f.filters);
@@ -27,71 +27,6 @@ test('GH-50 = in filter', function (t) {
   t.equal(f.attribute, 'uniquemember');
   t.equal(f.value,
           'uuid=930896af-bf8c-48d4-885c-6573a94b1853, ou=users, o=smartdc');
-  t.end();
-});
-
-
-test('( in filter', function (t) {
-  var str = '(foo=bar\\()';
-  var f = parse(str);
-  t.ok(f);
-  t.equal(f.attribute, 'foo');
-  t.equal(f.value, 'bar(');
-  t.equal(f.toString(), '(foo=bar\\28)');
-  t.end();
-});
-
-test(') in filter', function (t) {
-  var str = '(foo=bar\\))';
-  var f = parse(str);
-  t.ok(f);
-  t.equal(f.attribute, 'foo');
-  t.equal(f.value, 'bar)');
-  t.equal(f.toString(), '(foo=bar\\29)');
-  t.end();
-});
-
-
-test('( in filter', function (t) {
-  var str = 'foo(bar=baz\\()';
-  var f = parse(str);
-  t.ok(f);
-  t.equal(f.attribute, 'foo(bar');
-  t.equal(f.value, 'baz()');
-  t.equal(f.toString(), '(foo\\28bar=baz\\28\\29)');
-  t.end();
-});
-
-
-test('( in filter', function (t) {
-  var str = 'foo)(&(bar=baz)(';
-  var f = parse(str);
-  t.ok(f);
-  t.equal(f.attribute, 'foo)(&(bar');
-  t.equal(f.value, 'baz)(');
-  t.equal(f.toString(), '(foo\\29\\28&\\28bar=baz\\29\\28)');
-  t.end();
-});
-
-
-test('\\ in filter', function (t) {
-  var str = '(foo=bar\\\\)';
-  var f = parse(str);
-  t.ok(f);
-  t.equal(f.attribute, 'foo');
-  t.equal(f.value, 'bar\\');
-  t.equal(f.toString(), '(foo=bar\\5c)');
-  t.end();
-});
-
-
-test('* in equality filter', function (t) {
-  var str = '(foo=bar\\*)';
-  var f = parse(str);
-  t.ok(f);
-  t.equal(f.attribute, 'foo');
-  t.equal(f.value, 'bar*');
-  t.equal(f.toString(), '(foo=bar\\2a)');
   t.end();
 });
 
