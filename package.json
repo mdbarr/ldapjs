@@ -14,7 +14,7 @@
   "name": "@mdbarr/ldapjs",
   "homepage": "http://ldapjs.org",
   "description": "LDAP client and server APIs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -46,7 +46,8 @@
     "tape": "^4.6.2"
   },
   "scripts": {
-        "report": "./node_modules/.bin/istanbul report html && open ./coverage/lcov-report/index.html",
-        "test": "./node_modules/.bin/istanbul cover --print none test/test.js | ./node_modules/.bin/faucet"
+    "publish": "npm publish --access public",
+    "report": "./node_modules/.bin/istanbul report html && open ./coverage/lcov-report/index.html",
+    "test": "./node_modules/.bin/istanbul cover --print none test/test.js | ./node_modules/.bin/faucet"
   }
 }
