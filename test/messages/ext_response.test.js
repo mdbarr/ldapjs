@@ -1,16 +1,14 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
-var test = require('tape').test;
+const test = require('tape').test;
 
-var asn1 = require('asn1');
-
+const asn1 = require('asn1');
 
 ///--- Globals
 
-var BerReader = asn1.BerReader;
-var BerWriter = asn1.BerWriter;
-var ExtendedResponse;
-
+const BerReader = asn1.BerReader;
+const BerWriter = asn1.BerWriter;
+let ExtendedResponse;
 
 ///--- Tests
 
@@ -20,15 +18,13 @@ test('load library', function (t) {
   t.end();
 });
 
-
 test('new no args', function (t) {
   t.ok(new ExtendedResponse());
   t.end();
 });
 
-
 test('new with args', function (t) {
-  var res = new ExtendedResponse({
+  const res = new ExtendedResponse({
     messageID: 123,
     status: 0,
     responseName: '1.2.3.4',
@@ -42,16 +38,15 @@ test('new with args', function (t) {
   t.end();
 });
 
-
 test('parse', function (t) {
-  var ber = new BerWriter();
+  const ber = new BerWriter();
   ber.writeEnumeration(0);
   ber.writeString('cn=root');
   ber.writeString('foo');
   ber.writeString('1.2.3.4', 0x8a);
   ber.writeString('test', 0x8b);
 
-  var res = new ExtendedResponse();
+  const res = new ExtendedResponse();
   t.ok(res._parse(new BerReader(ber.buffer)));
   t.equal(res.status, 0);
   t.equal(res.matchedDN, 'cn=root');
@@ -61,9 +56,8 @@ test('parse', function (t) {
   t.end();
 });
 
-
 test('toBer', function (t) {
-  var res = new ExtendedResponse({
+  const res = new ExtendedResponse({
     messageID: 123,
     status: 3,
     matchedDN: 'cn=root',
@@ -73,7 +67,7 @@ test('toBer', function (t) {
   });
   t.ok(res);
 
-  var ber = new BerReader(res.toBer());
+  const ber = new BerReader(res.toBer());
   t.ok(ber);
   t.equal(ber.readSequence(), 0x30);
   t.equal(ber.readInt(), 123);

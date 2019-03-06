@@ -1,21 +1,18 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
-var test = require('tape').test;
+const test = require('tape').test;
 
-var asn1 = require('asn1');
-
+const asn1 = require('asn1');
 
 ///--- Globals
 
-var EqualityFilter;
-var OrFilter;
-
-
+let EqualityFilter;
+let OrFilter;
 
 ///--- Tests
 
 test('load library', function (t) {
-  var filters = require('../../lib/index').filters;
+  const filters = require('../../lib/index').filters;
   t.ok(filters);
   EqualityFilter = filters.EqualityFilter;
   OrFilter = filters.OrFilter;
@@ -24,15 +21,13 @@ test('load library', function (t) {
   t.end();
 });
 
-
 test('Construct no args', function (t) {
   t.ok(new OrFilter());
   t.end();
 });
 
-
 test('Construct args', function (t) {
-  var f = new OrFilter();
+  const f = new OrFilter();
   f.addFilter(new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
@@ -46,9 +41,8 @@ test('Construct args', function (t) {
   t.end();
 });
 
-
 test('match true', function (t) {
-  var f = new OrFilter();
+  const f = new OrFilter();
   f.addFilter(new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
@@ -58,13 +52,15 @@ test('match true', function (t) {
     value: 'zag'
   }));
   t.ok(f);
-  t.ok(f.matches({ foo: 'bar', zig: 'zonk' }));
+  t.ok(f.matches({
+    foo: 'bar',
+    zig: 'zonk'
+  }));
   t.end();
 });
 
-
 test('match false', function (t) {
-  var f = new OrFilter();
+  const f = new OrFilter();
   f.addFilter(new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
@@ -74,6 +70,9 @@ test('match false', function (t) {
     value: 'zag'
   }));
   t.ok(f);
-  t.ok(!f.matches({ foo: 'baz', zig: 'zonk' }));
+  t.ok(!f.matches({
+    foo: 'baz',
+    zig: 'zonk'
+  }));
   t.end();
 });

@@ -1,16 +1,14 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
-var test = require('tape').test;
+const test = require('tape').test;
 
-var asn1 = require('asn1');
-
+const asn1 = require('asn1');
 
 ///--- Globals
 
-var BerReader = asn1.BerReader;
-var BerWriter = asn1.BerWriter;
-var Attribute;
-
+const BerReader = asn1.BerReader;
+const BerWriter = asn1.BerWriter;
+let Attribute;
 
 ///--- Tests
 
@@ -20,17 +18,15 @@ test('load library', function (t) {
   t.end();
 });
 
-
 test('new no args', function (t) {
   t.ok(new Attribute());
   t.end();
 });
 
-
 test('new with args', function (t) {
-  var attr = new Attribute({
+  let attr = new Attribute({
     type: 'cn',
-    vals: ['foo', 'bar']
+    vals: [ 'foo', 'bar' ]
   });
   t.ok(attr);
   attr.addValue('baz');
@@ -43,7 +39,7 @@ test('new with args', function (t) {
     attr = new Attribute('not an object');
   });
   t.throws(function () {
-    var typeThatIsNotAString = 1;
+    const typeThatIsNotAString = 1;
     attr = new Attribute({
       type: typeThatIsNotAString
     });
@@ -51,16 +47,15 @@ test('new with args', function (t) {
   t.end();
 });
 
-
 test('toBer', function (t) {
-  var attr = new Attribute({
+  const attr = new Attribute({
     type: 'cn',
-    vals: ['foo', 'bar']
+    vals: [ 'foo', 'bar' ]
   });
   t.ok(attr);
-  var ber = new BerWriter();
+  const ber = new BerWriter();
   attr.toBer(ber);
-  var reader = new BerReader(ber.buffer);
+  const reader = new BerReader(ber.buffer);
   t.ok(reader.readSequence());
   t.equal(reader.readString(), 'cn');
   t.equal(reader.readSequence(), 0x31); // lber set
@@ -69,17 +64,16 @@ test('toBer', function (t) {
   t.end();
 });
 
-
 test('parse', function (t) {
-  var ber = new BerWriter();
+  const ber = new BerWriter();
   ber.startSequence();
   ber.writeString('cn');
   ber.startSequence(0x31);
-  ber.writeStringArray(['foo', 'bar']);
+  ber.writeStringArray([ 'foo', 'bar' ]);
   ber.endSequence();
   ber.endSequence();
 
-  var attr = new Attribute();
+  const attr = new Attribute();
   t.ok(attr);
   t.ok(attr.parse(new BerReader(ber.buffer)));
 
@@ -91,12 +85,12 @@ test('parse', function (t) {
 });
 
 test('parse - without 0x31', function (t) {
-  var ber = new BerWriter;
+  const ber = new BerWriter;
   ber.startSequence();
   ber.writeString('sn');
   ber.endSequence();
 
-  var attr = new Attribute;
+  const attr = new Attribute;
   t.ok(attr);
   t.ok(attr.parse(new BerReader(ber.buffer)));
 
@@ -107,53 +101,52 @@ test('parse - without 0x31', function (t) {
 });
 
 test('toString', function (t) {
-  var attr = new Attribute({
+  const attr = new Attribute({
     type: 'foobar',
-    vals: ['asdf']
+    vals: [ 'asdf' ]
   });
-  var expected = attr.toString();
-  var actual = JSON.stringify(attr.json);
+  const expected = attr.toString();
+  const actual = JSON.stringify(attr.json);
   t.equal(actual, expected);
   t.end();
 });
 
 test('isAttribute', function (t) {
-  var isA = Attribute.isAttribute;
+  const isA = Attribute.isAttribute;
   t.notOk(isA(null));
   t.notOk(isA('asdf'));
   t.ok(isA(new Attribute({
     type: 'foobar',
-    vals: ['asdf']
+    vals: [ 'asdf' ]
   })));
 
   t.ok(isA({
     type: 'foo',
-    vals: ['item', new Buffer(5)],
+    vals: [ 'item', new Buffer(5) ],
     toBer: function () { /* placeholder */ }
   }));
 
   // bad type in vals
   t.notOk(isA({
     type: 'foo',
-    vals: ['item', null],
+    vals: [ 'item', null ],
     toBer: function () { /* placeholder */ }
   }));
 
   t.end();
 });
 
-
 test('compare', function (t) {
-  var comp = Attribute.compare;
-  var a = new Attribute({
+  const comp = Attribute.compare;
+  const a = new Attribute({
     type: 'foo',
-    vals: ['bar']
+    vals: [ 'bar' ]
   });
-  var b = new Attribute({
+  const b = new Attribute({
     type: 'foo',
-    vals: ['bar']
+    vals: [ 'bar' ]
   });
-  var notAnAttribute = 'this is not an attribute';
+  const notAnAttribute = 'this is not an attribute';
 
   t.throws(function () {
     comp(a, notAnAttribute);
@@ -171,12 +164,12 @@ test('compare', function (t) {
   a.type = 'foo';
 
   // Different value counts
-  a.vals = ['bar', 'baz'];
+  a.vals = [ 'bar', 'baz' ];
   t.equal(comp(a, b), 1);
   t.equal(comp(b, a), -1);
 
   // Different value contents (same count)
-  a.vals = ['baz'];
+  a.vals = [ 'baz' ];
   t.equal(comp(a, b), 1);
   t.equal(comp(b, a), -1);
 

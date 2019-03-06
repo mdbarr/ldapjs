@@ -1,15 +1,11 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
-var test = require('tape').test;
-
-
+const test = require('tape').test;
 
 ///--- Globals
 
-var url;
-var parseURL;
-
-
+let url;
+let parseURL;
 
 ///--- Tests
 
@@ -20,9 +16,8 @@ test('load library', function (t) {
   t.end();
 });
 
-
 test('parse empty', function (t) {
-  var u = parseURL('ldap:///');
+  const u = parseURL('ldap:///');
   t.equal(u.hostname, 'localhost');
   t.equal(u.port, 389);
   t.ok(!u.DN);
@@ -31,9 +26,8 @@ test('parse empty', function (t) {
   t.end();
 });
 
-
 test('parse hostname', function (t) {
-  var u = parseURL('ldap://example.com/');
+  const u = parseURL('ldap://example.com/');
   t.equal(u.hostname, 'example.com');
   t.equal(u.port, 389);
   t.ok(!u.DN);
@@ -42,9 +36,8 @@ test('parse hostname', function (t) {
   t.end();
 });
 
-
 test('parse host and port', function (t) {
-  var u = parseURL('ldap://example.com:1389/');
+  const u = parseURL('ldap://example.com:1389/');
   t.equal(u.hostname, 'example.com');
   t.equal(u.port, 1389);
   t.ok(!u.DN);
@@ -53,10 +46,9 @@ test('parse host and port', function (t) {
   t.end();
 });
 
-
 test('parse full', function (t) {
 
-  var u = parseURL('ldaps://ldap.example.com:1389/dc=example%20,dc=com' +
+  const u = parseURL('ldaps://ldap.example.com:1389/dc=example%20,dc=com' +
                     '?cn,sn?sub?(cn=Babs%20Jensen)');
 
   t.equal(u.secure, true);

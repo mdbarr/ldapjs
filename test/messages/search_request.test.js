@@ -1,17 +1,16 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
-var test = require('tape').test;
+const test = require('tape').test;
 
-var asn1 = require('asn1');
-
+const asn1 = require('asn1');
 
 ///--- Globals
 
-var BerReader = asn1.BerReader;
-var BerWriter = asn1.BerWriter;
-var SearchRequest;
-var EqualityFilter;
-var dn;
+const BerReader = asn1.BerReader;
+const BerWriter = asn1.BerWriter;
+let SearchRequest;
+let EqualityFilter;
+let dn;
 
 ///--- Tests
 
@@ -25,21 +24,19 @@ test('load library', function (t) {
   t.end();
 });
 
-
 test('new no args', function (t) {
   t.ok(new SearchRequest());
   t.end();
 });
 
-
 test('new with args', function (t) {
-  var req = new SearchRequest({
+  const req = new SearchRequest({
     baseObject: dn.parse('cn=foo, o=test'),
     filter: new EqualityFilter({
       attribute: 'email',
       value: 'foo@bar.com'
     }),
-    attributes: ['cn', 'sn']
+    attributes: [ 'cn', 'sn' ]
   });
   t.ok(req);
   t.equal(req.dn.toString(), 'cn=foo, o=test');
@@ -50,14 +47,13 @@ test('new with args', function (t) {
   t.end();
 });
 
-
 test('parse', function (t) {
-  var f = new EqualityFilter({
+  const f = new EqualityFilter({
     attribute: 'email',
     value: 'foo@bar.com'
   });
 
-  var ber = new BerWriter();
+  let ber = new BerWriter();
   ber.writeString('cn=foo, o=test');
   ber.writeEnumeration(0);
   ber.writeEnumeration(0);
@@ -66,7 +62,7 @@ test('parse', function (t) {
   ber.writeBoolean(false);
   ber = f.toBer(ber);
 
-  var req = new SearchRequest();
+  const req = new SearchRequest();
   t.ok(req._parse(new BerReader(ber.buffer)));
   t.equal(req.dn.toString(), 'cn=foo, o=test');
   t.equal(req.scope, 'base');
@@ -79,9 +75,8 @@ test('parse', function (t) {
   t.end();
 });
 
-
 test('toBer', function (t) {
-  var req = new SearchRequest({
+  const req = new SearchRequest({
     messageID: 123,
     baseObject: dn.parse('cn=foo, o=test'),
     scope: 1,
@@ -93,12 +88,12 @@ test('toBer', function (t) {
       attribute: 'email',
       value: 'foo@bar.com'
     }),
-    attributes: ['cn', 'sn']
+    attributes: [ 'cn', 'sn' ]
   });
 
   t.ok(req);
 
-  var ber = new BerReader(req.toBer());
+  const ber = new BerReader(req.toBer());
   t.ok(ber);
   t.equal(ber.readSequence(), 0x30);
   t.equal(ber.readInt(), 123);

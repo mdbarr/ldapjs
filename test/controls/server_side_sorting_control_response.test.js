@@ -1,16 +1,15 @@
-var test = require('tape').test;
+const test = require('tape').test;
 
-var asn1 = require('asn1');
+const asn1 = require('asn1');
 
-var BerReader = asn1.BerReader;
-var BerWriter = asn1.BerWriter;
-var ldap;
-var getControl;
-var SSSResponseControl;
-var OID = '1.2.840.113556.1.4.474';
+const BerReader = asn1.BerReader;
+const BerWriter = asn1.BerWriter;
+let ldap;
+let getControl;
+let SSSResponseControl;
+const OID = '1.2.840.113556.1.4.474';
 
 ///--- Tests
-
 
 test('load library', function (t) {
   ldap = require('../../lib');
@@ -22,7 +21,7 @@ test('load library', function (t) {
 });
 
 test('new no args', function (t) {
-  var c = new SSSResponseControl();
+  const c = new SSSResponseControl();
   t.ok(c);
   t.equal(c.type, OID);
   t.equal(c.criticality, false);
@@ -30,7 +29,7 @@ test('new no args', function (t) {
 });
 
 test('new with args', function (t) {
-  var c = new SSSResponseControl({
+  const c = new SSSResponseControl({
     criticality: true,
     value: {
       result: ldap.LDAP_SUCCESS,
@@ -47,16 +46,17 @@ test('new with args', function (t) {
 });
 
 test('toBer - success', function (t) {
-  var sssc = new SSSResponseControl({
+  const sssc = new SSSResponseControl({
     value: {
       result: ldap.LDAP_SUCCESS,
       failedAttribute: 'foobar'
-  }});
+    }
+  });
 
-  var ber = new BerWriter();
+  const ber = new BerWriter();
   sssc.toBer(ber);
 
-  var c = getControl(new BerReader(ber.buffer));
+  const c = getControl(new BerReader(ber.buffer));
   t.ok(c);
   t.equal(c.type, '1.2.840.113556.1.4.474');
   t.equal(c.criticality, false);
@@ -66,15 +66,16 @@ test('toBer - success', function (t) {
 });
 
 test('toBer - simple failure', function (t) {
-  var sssc = new SSSResponseControl({
+  const sssc = new SSSResponseControl({
     value: {
       result: ldap.LDAP_NO_SUCH_ATTRIBUTE
-  }});
+    }
+  });
 
-  var ber = new BerWriter();
+  const ber = new BerWriter();
   sssc.toBer(ber);
 
-  var c = getControl(new BerReader(ber.buffer));
+  const c = getControl(new BerReader(ber.buffer));
   t.ok(c);
   t.equal(c.type, OID);
   t.equal(c.criticality, false);
@@ -84,16 +85,17 @@ test('toBer - simple failure', function (t) {
 });
 
 test('toBer - detailed failure', function (t) {
-  var sssc = new SSSResponseControl({
+  const sssc = new SSSResponseControl({
     value: {
       result: ldap.LDAP_NO_SUCH_ATTRIBUTE,
       failedAttribute: 'foobar'
-  }});
+    }
+  });
 
-  var ber = new BerWriter();
+  const ber = new BerWriter();
   sssc.toBer(ber);
 
-  var c = getControl(new BerReader(ber.buffer));
+  const c = getControl(new BerReader(ber.buffer));
   t.ok(c);
   t.equal(c.type, OID);
   t.equal(c.criticality, false);
@@ -103,11 +105,11 @@ test('toBer - detailed failure', function (t) {
 });
 
 test('toBer - empty', function (t) {
-  var sssc = new SSSResponseControl();
-  var ber = new BerWriter();
+  const sssc = new SSSResponseControl();
+  const ber = new BerWriter();
   sssc.toBer(ber);
 
-  var c = getControl(new BerReader(ber.buffer));
+  const c = getControl(new BerReader(ber.buffer));
   t.ok(c);
   t.equal(c.type, OID);
   t.equal(c.criticality, false);

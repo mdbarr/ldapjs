@@ -1,27 +1,26 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
-var Logger = require('bunyan');
+const Logger = require('bunyan');
 
-var test = require('tape').test;
-var uuid = require('uuid/v4');
-var vasync = require('vasync');
-
+const test = require('tape').test;
+const uuid = require('uuid/v4');
+const vasync = require('vasync');
 
 ///--- Globals
 
-var BIND_DN = 'cn=root';
-var BIND_PW = 'secret';
+const BIND_DN = 'cn=root';
+const BIND_PW = 'secret';
 
-var SUFFIX = 'dc=test';
+const SUFFIX = 'dc=test';
 
-var SERVER_PORT = process.env.SERVER_PORT || 1389;
+const SERVER_PORT = process.env.SERVER_PORT || 1389;
 
-var ldap;
-var Attribute;
-var Change;
-var client;
-var server;
-var sock;
+let ldap;
+let Attribute;
+let Change;
+let client;
+let server;
+let sock;
 
 function getSock() {
   if (process.platform === 'win32') {
@@ -78,7 +77,7 @@ test('listen on static port', function (t) {
   t.plan(2);
   server = ldap.createServer();
   server.listen(SERVER_PORT, '127.0.0.1', function () {
-    var addr = server.address();
+    const addr = server.address();
     t.equal(addr.port, parseInt(SERVER_PORT, 10));
     t.equals(server.url, 'ldap://127.0.0.1:' + SERVER_PORT);
     server.close();
@@ -90,7 +89,7 @@ test('listen on ephemeral port', function (t) {
   t.plan(2);
   server = ldap.createServer();
   server.listen(0, 'localhost', function () {
-    var addr = server.address();
+    const addr = server.address();
     t.ok(addr.port > 0);
     t.ok(addr.port < 65535);
     server.close();
@@ -100,7 +99,7 @@ test('listen on ephemeral port', function (t) {
 
 test('route order', function (t) {
   function generateHandler(response) {
-    var func = function handler(req, res, next) {
+    const func = function handler(req, res, next) {
       res.send({
         dn: response,
         attributes: { }
@@ -113,9 +112,9 @@ test('route order', function (t) {
 
   server = ldap.createServer();
   sock = getSock();
-  var dnShort = SUFFIX;
-  var dnMed = 'dc=sub, ' + SUFFIX;
-  var dnLong = 'dc=long, dc=sub, ' + SUFFIX;
+  const dnShort = SUFFIX;
+  const dnMed = 'dc=sub, ' + SUFFIX;
+  const dnLong = 'dc=long, dc=sub, ' + SUFFIX;
 
   // Mount routes out of order
   server.search(dnMed, generateHandler(dnMed));
@@ -123,7 +122,9 @@ test('route order', function (t) {
   server.search(dnLong, generateHandler(dnLong));
   server.listen(sock, function () {
     t.ok(true, 'server listen');
-    client = ldap.createClient({ socketPath: sock });
+    client = ldap.createClient({
+      socketPath: sock
+    });
     function runSearch(value, cb) {
       client.search(value, '(objectclass=*)', function (err, res) {
         t.ifError(err);
@@ -139,7 +140,7 @@ test('route order', function (t) {
 
     vasync.forEachParallel({
       'func': runSearch,
-      'inputs': [dnShort, dnMed, dnLong]
+      'inputs': [ dnShort, dnMed, dnLong ]
     }, function (err, results) {
       t.notOk(err);
       client.unbind();
@@ -152,8 +153,8 @@ test('route order', function (t) {
 test('route absent', function (t) {
   server = ldap.createServer();
   sock = getSock();
-  var DN_ROUTE = 'dc=base';
-  var DN_MISSING = 'dc=absent';
+  const DN_ROUTE = 'dc=base';
+  const DN_MISSING = 'dc=absent';
 
   server.bind(DN_ROUTE, function (req, res, next) {
     res.end();
@@ -165,7 +166,9 @@ test('route absent', function (t) {
     vasync.parallel({
       'funcs': [
         function presentBind(cb) {
-          var clt = ldap.createClient({ socketPath: sock });
+          const clt = ldap.createClient({
+            socketPath: sock
+          });
           clt.bind(DN_ROUTE, '', function (err) {
             t.notOk(err);
             clt.unbind();
@@ -173,7 +176,9 @@ test('route absent', function (t) {
           });
         },
         function absentBind(cb) {
-          var clt = ldap.createClient({ socketPath: sock });
+          const clt = ldap.createClient({
+            socketPath: sock
+          });
           clt.bind(DN_MISSING, '', function (err) {
             t.ok(err);
             t.equal(err.code, ldap.LDAP_NO_SUCH_OBJECT);
@@ -203,7 +208,9 @@ test('route unbind', function (t) {
 
   server.listen(sock, function () {
     t.ok(true, 'server startup');
-    client = ldap.createClient({ socketPath: sock });
+    client = ldap.createClient({
+      socketPath: sock
+    });
     client.bind('', '', function (err) {
       t.ifError(err, 'client bind error');
       client.unbind(function (err) {
@@ -216,8 +223,8 @@ test('route unbind', function (t) {
 });
 
 test('strict routing', function (t) {
-  var testDN = 'cn=valid';
-  var clt;
+  const testDN = 'cn=valid';
+  let clt;
   vasync.pipeline({
     funcs: [
       function setup(_, cb) {
@@ -243,7 +250,9 @@ test('strict routing', function (t) {
         });
       },
       function testBad(_, cb) {
-        clt.search('not a dn', {scope: 'base'}, function (err, res) {
+        clt.search('not a dn', {
+          scope: 'base'
+        }, function (err, res) {
           t.ifError(err);
           res.once('error', function (err2) {
             t.ok(err2);
@@ -257,7 +266,9 @@ test('strict routing', function (t) {
         });
       },
       function testGood(_, cb) {
-        clt.search(testDN, {scope: 'base'}, function (err, res) {
+        clt.search(testDN, {
+          scope: 'base'
+        }, function (err, res) {
           t.ifError(err);
           res.once('error', function (err2) {
             t.ifError(err2);
@@ -284,7 +295,7 @@ test('non-strict routing', function (t) {
     strictDN: false
   });
   sock = getSock();
-  var testDN = 'this ain\'t a DN';
+  const testDN = 'this ain\'t a DN';
 
   // invalid DNs go to default handler
   server.search('', function (req, res, next) {
@@ -297,11 +308,13 @@ test('non-strict routing', function (t) {
 
   server.listen(sock, function () {
     t.ok(true, 'server startup');
-    var clt = ldap.createClient({
+    const clt = ldap.createClient({
       socketPath: sock,
       strictDN: false
     });
-    clt.search(testDN, {scope: 'base'}, function (err, res) {
+    clt.search(testDN, {
+      scope: 'base'
+    }, function (err, res) {
       t.ifError(err);
       res.on('end', function () {
         clt.destroy();

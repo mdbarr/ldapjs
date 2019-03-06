@@ -1,17 +1,16 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
-var test = require('tape').test;
+const test = require('tape').test;
 
-var asn1 = require('asn1');
-
+const asn1 = require('asn1');
 
 ///--- Globals
 
-var BerReader = asn1.BerReader;
-var BerWriter = asn1.BerWriter;
-var AddRequest;
-var Attribute;
-var dn;
+const BerReader = asn1.BerReader;
+const BerWriter = asn1.BerWriter;
+let AddRequest;
+let Attribute;
+let dn;
 
 ///--- Tests
 
@@ -25,18 +24,22 @@ test('load library', function (t) {
   t.end();
 });
 
-
 test('new no args', function (t) {
   t.ok(new AddRequest());
   t.end();
 });
 
-
 test('new with args', function (t) {
-  var req = new AddRequest({
+  const req = new AddRequest({
     entry: dn.parse('cn=foo, o=test'),
-    attributes: [new Attribute({type: 'cn', vals: ['foo']}),
-                 new Attribute({type: 'objectclass', vals: ['person']})]
+    attributes: [ new Attribute({
+      type: 'cn',
+      vals: [ 'foo' ]
+    }),
+    new Attribute({
+      type: 'objectclass',
+      vals: [ 'person' ]
+    }) ]
   });
   t.ok(req);
   t.equal(req.dn.toString(), 'cn=foo, o=test');
@@ -48,9 +51,8 @@ test('new with args', function (t) {
   t.end();
 });
 
-
 test('parse', function (t) {
-  var ber = new BerWriter();
+  const ber = new BerWriter();
   ber.writeString('cn=foo, o=test');
 
   ber.startSequence();
@@ -71,7 +73,7 @@ test('parse', function (t) {
 
   ber.endSequence();
 
-  var req = new AddRequest();
+  const req = new AddRequest();
   t.ok(req._parse(new BerReader(ber.buffer)));
   t.equal(req.dn.toString(), 'cn=foo, o=test');
   t.equal(req.attributes.length, 2);
@@ -82,18 +84,23 @@ test('parse', function (t) {
   t.end();
 });
 
-
 test('toBer', function (t) {
-  var req = new AddRequest({
+  const req = new AddRequest({
     messageID: 123,
     entry: dn.parse('cn=foo, o=test'),
-    attributes: [new Attribute({type: 'cn', vals: ['foo']}),
-                 new Attribute({type: 'objectclass', vals: ['person']})]
+    attributes: [ new Attribute({
+      type: 'cn',
+      vals: [ 'foo' ]
+    }),
+    new Attribute({
+      type: 'objectclass',
+      vals: [ 'person' ]
+    }) ]
   });
 
   t.ok(req);
 
-  var ber = new BerReader(req.toBer());
+  const ber = new BerReader(req.toBer());
   t.ok(ber);
   t.equal(ber.readSequence(), 0x30);
   t.equal(ber.readInt(), 123);
@@ -114,17 +121,22 @@ test('toBer', function (t) {
   t.end();
 });
 
-
 test('toObject', function (t) {
-  var req = new AddRequest({
+  const req = new AddRequest({
     entry: dn.parse('cn=foo, o=test'),
-    attributes: [new Attribute({type: 'cn', vals: ['foo', 'bar']}),
-                 new Attribute({type: 'objectclass', vals: ['person']})]
+    attributes: [ new Attribute({
+      type: 'cn',
+      vals: [ 'foo', 'bar' ]
+    }),
+    new Attribute({
+      type: 'objectclass',
+      vals: [ 'person' ]
+    }) ]
   });
 
   t.ok(req);
 
-  var obj = req.toObject();
+  const obj = req.toObject();
   t.ok(obj);
 
   t.ok(obj.dn);

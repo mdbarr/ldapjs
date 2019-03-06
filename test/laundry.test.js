@@ -1,20 +1,17 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
-var test = require('tape').test;
-var uuid = require('uuid/v4');
+const test = require('tape').test;
+const uuid = require('uuid/v4');
 
-var ldap = require('../lib/index');
-
+const ldap = require('../lib/index');
 
 ///--- Globals
 
-var SOCKET = '/tmp/.' + uuid();
-var SUFFIX = 'dc=' + uuid();
+const SOCKET = '/tmp/.' + uuid();
+const SUFFIX = 'dc=' + uuid();
 
-var client;
-var server;
-
-
+let client;
+let server;
 
 ///--- Helper
 
@@ -22,7 +19,7 @@ function search(t, options, callback) {
   client.search(SUFFIX, options, function (err, res) {
     t.ifError(err);
     t.ok(res);
-    var found = false;
+    let found = false;
     res.on('searchEntry', function (entry) {
       t.ok(entry);
       found = true;
@@ -36,8 +33,6 @@ function search(t, options, callback) {
     });
   });
 }
-
-
 
 ///--- Tests
 
@@ -57,10 +52,10 @@ test('setup', function (t) {
     return next();
   });
   server.search(SUFFIX, function (req, res, next) {
-    var entry = {
+    const entry = {
       dn: 'cn=foo, ' + SUFFIX,
       attributes: {
-        objectclass: ['person', 'top'],
+        objectclass: [ 'person', 'top' ],
         cn: 'Pogo Stick',
         sn: 'Stick',
         givenname: 'ogo',
@@ -75,10 +70,9 @@ test('setup', function (t) {
   });
 });
 
-
 test('Evolution search filter (GH-3)', function (t) {
   // This is what Evolution sends, when searching for a contact 'ogo'. Wow.
-  var filter =
+  const filter =
     '(|(cn=ogo*)(givenname=ogo*)(sn=ogo*)(mail=ogo*)(member=ogo*)' +
     '(primaryphone=ogo*)(telephonenumber=ogo*)(homephone=ogo*)(mobile=ogo*)' +
     '(carphone=ogo*)(facsimiletelephonenumber=ogo*)' +
@@ -99,9 +93,8 @@ test('Evolution search filter (GH-3)', function (t) {
   return search(t, filter);
 });
 
-
 test('GH-49 Client errors on bad attributes', function (t) {
-  var searchOpts = {
+  const searchOpts = {
     filter: 'cn=*ogo*',
     scope: 'one',
     attributes: 'dn'
@@ -109,13 +102,12 @@ test('GH-49 Client errors on bad attributes', function (t) {
   return search(t, searchOpts);
 });
 
-
 test('GH-55 Client emits connect multiple times', function (t) {
-  var c = ldap.createClient({
+  const c = ldap.createClient({
     socketPath: SOCKET
   });
 
-  var count = 0;
+  let count = 0;
   c.on('connect', function (socket) {
     t.ok(socket);
     count++;
@@ -128,7 +120,6 @@ test('GH-55 Client emits connect multiple times', function (t) {
     });
   });
 });
-
 
 test('shutdown', function (t) {
   client.unbind(function () {

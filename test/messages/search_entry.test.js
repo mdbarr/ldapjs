@@ -1,17 +1,16 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
-var test = require('tape').test;
+const test = require('tape').test;
 
-var asn1 = require('asn1');
-
+const asn1 = require('asn1');
 
 ///--- Globals
 
-var BerReader = asn1.BerReader;
-var BerWriter = asn1.BerWriter;
-var SearchEntry;
-var Attribute;
-var dn;
+const BerReader = asn1.BerReader;
+const BerWriter = asn1.BerWriter;
+let SearchEntry;
+let Attribute;
+let dn;
 
 ///--- Tests
 
@@ -25,19 +24,23 @@ test('load library', function (t) {
   t.end();
 });
 
-
 test('new no args', function (t) {
   t.ok(new SearchEntry());
   t.end();
 });
 
-
 test('new with args', function (t) {
-  var res = new SearchEntry({
+  const res = new SearchEntry({
     messageID: 123,
     objectName: dn.parse('cn=foo, o=test'),
-    attributes: [new Attribute({type: 'cn', vals: ['foo']}),
-                 new Attribute({type: 'objectclass', vals: ['person']})]
+    attributes: [ new Attribute({
+      type: 'cn',
+      vals: [ 'foo' ]
+    }),
+    new Attribute({
+      type: 'objectclass',
+      vals: [ 'person' ]
+    }) ]
   });
   t.ok(res);
   t.equal(res.messageID, 123);
@@ -50,9 +53,8 @@ test('new with args', function (t) {
   t.end();
 });
 
-
 test('parse', function (t) {
-  var ber = new BerWriter();
+  const ber = new BerWriter();
   ber.writeString('cn=foo, o=test');
 
   ber.startSequence();
@@ -73,7 +75,7 @@ test('parse', function (t) {
 
   ber.endSequence();
 
-  var res = new SearchEntry();
+  const res = new SearchEntry();
   t.ok(res._parse(new BerReader(ber.buffer)));
   t.equal(res.dn, 'cn=foo, o=test');
   t.equal(res.attributes.length, 2);
@@ -84,17 +86,22 @@ test('parse', function (t) {
   t.end();
 });
 
-
 test('toBer', function (t) {
-  var res = new SearchEntry({
+  const res = new SearchEntry({
     messageID: 123,
     objectName: dn.parse('cn=foo, o=test'),
-    attributes: [new Attribute({type: 'cn', vals: ['foo']}),
-                 new Attribute({type: 'objectclass', vals: ['person']})]
+    attributes: [ new Attribute({
+      type: 'cn',
+      vals: [ 'foo' ]
+    }),
+    new Attribute({
+      type: 'objectclass',
+      vals: [ 'person' ]
+    }) ]
   });
   t.ok(res);
 
-  var ber = new BerReader(res.toBer());
+  const ber = new BerReader(res.toBer());
   t.ok(ber);
   t.equal(ber.readSequence(), 0x30);
   t.equal(ber.readInt(), 123);

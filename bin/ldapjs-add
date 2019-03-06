@@ -2,82 +2,86 @@
 // -*- mode: js -*-
 // Copyright 2011 Mark Cavage.  All rights reserved.
 
-var fs = require('fs');
-var path = require('path');
+const fs = require('fs');
+const path = require('path');
 
-var dashdash = require('dashdash');
-var vasync = require('vasync');
+const dashdash = require('dashdash');
+const vasync = require('vasync');
 
-var ldap = require('../lib/index');
-var Logger = require('bunyan');
-
+const ldap = require('../lib/index');
+const Logger = require('bunyan');
 
 ///--- Globals
 
-var opts = [
+const opts = [
   {
-    names: ['file', 'f'],
+    names: [ 'file', 'f' ],
     type: 'string',
     help: 'Input file',
     helpArg: 'FILE'
   },
-  { group: 'General Options' },
   {
-    names: ['help', 'h'],
+    group: 'General Options'
+  },
+  {
+    names: [ 'help', 'h' ],
     type: 'bool',
     help: 'Print this help and exit.'
   },
   {
-    names: ['debug', 'd'],
+    names: [ 'debug', 'd' ],
     type: 'integer',
     help: 'Set debug level <0-2>',
     helpArg: 'LEVEL'
   },
-  { group: 'Connection Options' },
   {
-    names: ['url', 'u'],
+    group: 'Connection Options'
+  },
+  {
+    names: [ 'url', 'u' ],
     type: 'string',
     help: 'LDAP server URL',
     helpArg: 'URL',
     default: 'ldap://127.0.0.1:389'
   },
   {
-    names: ['binddn', 'D'],
+    names: [ 'binddn', 'D' ],
     type: 'string',
     help: 'Bind DN',
     helpArg: 'BIND_DN',
     default: ''
   },
   {
-    names: ['password', 'w'],
+    names: [ 'password', 'w' ],
     type: 'string',
     help: 'Bind password',
     helpArg: 'PASSWD',
     default: ''
   },
   {
-    names: ['insecure', 'i'],
+    names: [ 'insecure', 'i' ],
     type: 'bool',
     env: 'LDAPJS_TLS_INSECURE',
     help: 'Disable SSL certificate verification',
     default: false
   }
 ];
-var parser = dashdash.createParser({options: opts});
-
-
+const parser = dashdash.createParser({
+  options: opts
+});
 
 ///--- Helpers
 
 function usage(code, message) {
-  var msg = (message ? message + '\n' : '') +
+  const msg = (message ? message + '\n' : '') +
     'Usage: ' + path.basename(process.argv[1]) + ' [OPTIONS] [JSON]\n\n' +
-    parser.help({includeEnv: true});
+    parser.help({
+      includeEnv: true
+    });
 
   process.stderr.write(msg + '\n');
   process.exit(code);
 }
-
 
 function perror(err) {
   if (parsed.debug) {
@@ -88,19 +92,17 @@ function perror(err) {
   process.exit(1);
 }
 
-
-
 ///--- Mainline
 
-var logLevel = 'info';
-var parsed;
+let logLevel = 'info';
+let parsed;
 
 try {
   parsed = parser.parse(process.argv);
   if (parsed.file) {
     parsed.file = JSON.parse(fs.readFileSync(parsed.file, 'utf8'));
     if (!Array.isArray(parsed.file))
-      parsed.file = [parsed.file];
+      parsed.file = [ parsed.file ];
   }
 } catch (e) {
   usage(1, e.toString());
@@ -111,7 +113,7 @@ if (parsed.help)
 if (!parsed.file) {
   parsed.file = [];
   parsed._args.forEach(function (a) {
-    var o = JSON.parse(a);
+    const o = JSON.parse(a);
     if (Array.isArray(o)) {
       o.forEach(function (i) {
         parsed.file.push(o);
@@ -130,14 +132,14 @@ if (!parsed.file)
 if (parsed.debug)
   logLevel = (parsed.debug > 1 ? 'trace' : 'debug');
 
-var log = new Logger({
-    name: 'ldapjs',
-    component: 'client',
-    stream: process.stderr,
-    level: logLevel
+const log = new Logger({
+  name: 'ldapjs',
+  component: 'client',
+  stream: process.stderr,
+  level: logLevel
 });
 
-var client = ldap.createClient({
+const client = ldap.createClient({
   url: parsed.url,
   log: log,
   strictDN: false,
@@ -158,7 +160,7 @@ client.bind(parsed.binddn, parsed.password, function (err, res) {
   vasync.forEachPipeline({
     inputs: parsed.file,
     func: function (entry, cb) {
-      var dn = entry.dn;
+      const dn = entry.dn;
       delete entry.dn;
       client.add(dn, entry, cb);
     }
@@ -166,6 +168,6 @@ client.bind(parsed.binddn, parsed.password, function (err, res) {
     if (err2) {
       perror(err2);
     }
-    client.unbind(function () { return; });
+    client.unbind(function () { });
   });
 });

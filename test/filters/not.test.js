@@ -1,21 +1,18 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
-var test = require('tape').test;
+const test = require('tape').test;
 
-var asn1 = require('asn1');
-
+const asn1 = require('asn1');
 
 ///--- Globals
 
-var EqualityFilter;
-var NotFilter;
-
-
+let EqualityFilter;
+let NotFilter;
 
 ///--- Tests
 
 test('load library', function (t) {
-  var filters = require('../../lib/index').filters;
+  const filters = require('../../lib/index').filters;
   t.ok(filters);
   EqualityFilter = filters.EqualityFilter;
   NotFilter = filters.NotFilter;
@@ -24,15 +21,13 @@ test('load library', function (t) {
   t.end();
 });
 
-
 test('Construct no args', function (t) {
   t.ok(new NotFilter());
   t.end();
 });
 
-
 test('Construct args', function (t) {
-  var f = new NotFilter({
+  const f = new NotFilter({
     filter: new EqualityFilter({
       attribute: 'foo',
       value: 'bar'
@@ -43,28 +38,30 @@ test('Construct args', function (t) {
   t.end();
 });
 
-
 test('match true', function (t) {
-  var f = new NotFilter({
+  const f = new NotFilter({
     filter: new EqualityFilter({
       attribute: 'foo',
       value: 'bar'
     })
   });
   t.ok(f);
-  t.ok(f.matches({ foo: 'baz' }));
+  t.ok(f.matches({
+    foo: 'baz'
+  }));
   t.end();
 });
 
-
 test('match false', function (t) {
-  var f = new NotFilter({
+  const f = new NotFilter({
     filter: new EqualityFilter({
       attribute: 'foo',
       value: 'bar'
     })
   });
   t.ok(f);
-  t.ok(!f.matches({ foo: 'bar' }));
+  t.ok(!f.matches({
+    foo: 'bar'
+  }));
   t.end();
 });

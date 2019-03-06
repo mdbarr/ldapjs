@@ -1,18 +1,15 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
-
-var asn1 = require('asn1');
-var Logger = require('bunyan');
-var test = require('tape').test;
-
+const asn1 = require('asn1');
+const Logger = require('bunyan');
+const test = require('tape').test;
 
 ///--- Globals
 
-var BerReader = asn1.BerReader;
-var BerWriter = asn1.BerWriter;
-var DeleteRequest;
-var dn;
-
+const BerReader = asn1.BerReader;
+const BerWriter = asn1.BerWriter;
+let DeleteRequest;
+let dn;
 
 ///--- Tests
 
@@ -23,15 +20,13 @@ test('load library', function (t) {
   t.end();
 });
 
-
 test('new no args', function (t) {
   t.ok(new DeleteRequest());
   t.end();
 });
 
-
 test('new with args', function (t) {
-  var req = new DeleteRequest({
+  const req = new DeleteRequest({
     entry: dn.parse('cn=test')
   });
   t.ok(req);
@@ -39,30 +34,30 @@ test('new with args', function (t) {
   t.end();
 });
 
-
 test('parse', function (t) {
-  var ber = new BerWriter();
+  const ber = new BerWriter();
   ber.writeString('cn=test', 0x4a);
 
-  var req = new DeleteRequest({
-    log: new Logger({name: 'del_request.test.js'})
+  const req = new DeleteRequest({
+    log: new Logger({
+      name: 'del_request.test.js'
+    })
   });
-  var reader = new BerReader(ber.buffer);
+  const reader = new BerReader(ber.buffer);
   reader.readSequence(0x4a);
   t.ok(req.parse(reader, reader.length));
   t.equal(req.dn.toString(), 'cn=test');
   t.end();
 });
 
-
 test('toBer', function (t) {
-  var req = new DeleteRequest({
+  const req = new DeleteRequest({
     messageID: 123,
     entry: dn.parse('cn=test')
   });
   t.ok(req);
 
-  var ber = new BerReader(req.toBer());
+  const ber = new BerReader(req.toBer());
   t.ok(ber);
   t.equal(ber.readSequence(), 0x30);
   t.equal(ber.readInt(), 123);

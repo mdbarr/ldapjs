@@ -1,16 +1,15 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 
-var test = require('tape').test;
+const test = require('tape').test;
 
-var asn1 = require('asn1');
-
+const asn1 = require('asn1');
 
 ///--- Globals
 
-var BerReader = asn1.BerReader;
-var BerWriter = asn1.BerWriter;
-var ExtendedRequest;
-var dn;
+const BerReader = asn1.BerReader;
+const BerWriter = asn1.BerWriter;
+let ExtendedRequest;
+let dn;
 
 ///--- Tests
 
@@ -22,15 +21,13 @@ test('load library', function (t) {
   t.end();
 });
 
-
 test('new no args', function (t) {
   t.ok(new ExtendedRequest());
   t.end();
 });
 
-
 test('new with args', function (t) {
-  var req = new ExtendedRequest({
+  const req = new ExtendedRequest({
     requestName: '1.2.3.4',
     requestValue: 'test'
   });
@@ -40,23 +37,20 @@ test('new with args', function (t) {
   t.end();
 });
 
-
 test('parse', function (t) {
-  var ber = new BerWriter();
+  const ber = new BerWriter();
   ber.writeString('1.2.3.4', 0x80);
   ber.writeString('test', 0x81);
 
-
-  var req = new ExtendedRequest();
+  const req = new ExtendedRequest();
   t.ok(req._parse(new BerReader(ber.buffer)));
   t.equal(req.requestName, '1.2.3.4');
   t.equal(req.requestValue, 'test');
   t.end();
 });
 
-
 test('toBer', function (t) {
-  var req = new ExtendedRequest({
+  const req = new ExtendedRequest({
     messageID: 123,
     requestName: '1.2.3.4',
     requestValue: 'test'
@@ -64,7 +58,7 @@ test('toBer', function (t) {
 
   t.ok(req);
 
-  var ber = new BerReader(req.toBer());
+  const ber = new BerReader(req.toBer());
   t.ok(ber);
   t.equal(ber.readSequence(), 0x30);
   t.equal(ber.readInt(), 123);

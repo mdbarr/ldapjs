@@ -1,13 +1,15 @@
 // Copyright 2014 Joyent, Inc.  All rights reserved.
 
-var test = require('tape').test;
-var bunyan = require('bunyan');
+const test = require('tape').test;
+const bunyan = require('bunyan');
 
 ///--- Globals
 
-var lib;
-var Parser;
-var LOG = bunyan.createLogger({name: 'ldapjs-test'});
+let lib;
+let Parser;
+const LOG = bunyan.createLogger({
+  name: 'ldapjs-test'
+});
 
 ///--- Tests
 test('load library', function (t) {
@@ -19,7 +21,9 @@ test('load library', function (t) {
 });
 
 test('wrong protocol error', function (t) {
-  var p = new Parser({log: LOG});
+  const p = new Parser({
+    log: LOG
+  });
 
   p.once('error', function (err) {
     t.ok(err);
@@ -27,12 +31,14 @@ test('wrong protocol error', function (t) {
   });
 
   // Send some bogus data to incur an error
-  p.write(new Buffer([16, 1, 4]));
+  p.write(new Buffer([ 16, 1, 4 ]));
 });
 
 test('bad protocol op', function (t) {
-  var p = new Parser({log: LOG});
-  var message = new lib.LDAPMessage({
+  const p = new Parser({
+    log: LOG
+  });
+  const message = new lib.LDAPMessage({
     protocolOp: 254 // bogus (at least today)
   });
   p.once('error', function (err) {
@@ -44,14 +50,16 @@ test('bad protocol op', function (t) {
 });
 
 test('bad message structure', function (t) {
-  var p = new Parser({log: LOG});
+  const p = new Parser({
+    log: LOG
+  });
 
   // message with bogus structure
-  var message = new lib.LDAPMessage({
+  const message = new lib.LDAPMessage({
     protocolOp: lib.LDAP_REQ_EXTENSION
   });
   message._toBer = function (writer) {
-    writer.writeBuffer(new Buffer([16, 1, 4]), 80);
+    writer.writeBuffer(new Buffer([ 16, 1, 4 ]), 80);
     return writer;
   };
 
