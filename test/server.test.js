@@ -1,4 +1,5 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
+'use strict';
 
 const Logger = require('bunyan');
 
@@ -228,9 +229,8 @@ test('strict routing', function (t) {
   vasync.pipeline({
     funcs: [
       function setup(_, cb) {
-        server = ldap.createServer({
-          // strictDN: true - on by default
-        });
+        // strictDN: true - on by default
+        server = ldap.createServer({});
         sock = getSock();
         // invalid DNs would go to default handler
         server.search('', function (req, res, next) {

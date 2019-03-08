@@ -1,3 +1,5 @@
+'use strict';
+
 const test = require('tape').test;
 
 const asn1 = require('asn1');

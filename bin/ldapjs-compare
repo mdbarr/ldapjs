@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // -*- mode: js -*-
 // Copyright 2011 Mark Cavage.  All rights reserved.
+'use strict';
 
 const fs = require('fs');
 const path = require('path');

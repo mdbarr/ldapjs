@@ -1,4 +1,5 @@
 // Copyright 2014 Joyent, Inc.  All rights reserved.
+'use strict';
 
 const test = require('tape').test;
 const bunyan = require('bunyan');

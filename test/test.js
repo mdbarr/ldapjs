@@ -1,4 +1,5 @@
 // Copyright 2014 Mark Cavage.  All rights reserved.
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');

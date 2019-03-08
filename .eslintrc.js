@@ -72,12 +72,10 @@ module.exports = {
       "error",
       {
         "allow": [
-          "body",
+          "err",
           "error",
-          "reject",
-          "resolve",
-          "response",
-          "result"
+          "req",
+          "res"
         ]
       }
     ],

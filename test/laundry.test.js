@@ -1,4 +1,5 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
+'use strict';
 
 const test = require('tape').test;
 const uuid = require('uuid/v4');
