@@ -47,8 +47,7 @@ test('setup', function (t) {
   t.ok(server);
 
   server.bind(BIND_DN, function (req, res, next) {
-    if (req.credentials !== BIND_PW)
-      return next(new ldap.InvalidCredentialsError('Invalid password'));
+    if (req.credentials !== BIND_PW) {return next(new ldap.InvalidCredentialsError('Invalid password'));}
 
     res.end();
     return next();
@@ -840,8 +839,7 @@ test('GH-21 binary attributes', function (t) {
       t.ok(entry.attributes[1].type, 'gb18030');
       t.equal(entry.attributes[1].buffers.length, 1);
       t.equal(expect2.length, entry.attributes[1].buffers[0].length);
-      for (let i = 0; i < expect2.length; i++)
-        t.equal(expect2[i], entry.attributes[1].buffers[0][i]);
+      for (let i = 0; i < expect2.length; i++) {t.equal(expect2[i], entry.attributes[1].buffers[0][i]);}
 
       t.ok(entry.object);
       gotEntry++;

@@ -102,15 +102,13 @@ try {
   parsed = parser.parse(process.argv);
   if (parsed.file) {
     parsed.file = JSON.parse(fs.readFileSync(parsed.file, 'utf8'));
-    if (!Array.isArray(parsed.file))
-      parsed.file = [ parsed.file ];
+    if (!Array.isArray(parsed.file)) {parsed.file = [ parsed.file ];}
   }
 } catch (e) {
   usage(1, e.toString());
 }
 
-if (parsed.help)
-  usage(0);
+if (parsed.help) {usage(0);}
 if (!parsed.file) {
   parsed.file = [];
   parsed._args.forEach(function (a) {
@@ -123,15 +121,12 @@ if (!parsed.file) {
     }
     parsed.file.push(o);
   });
-  if (parsed.file.length === 0)
-    parsed.file = null;
+  if (parsed.file.length === 0) {parsed.file = null;}
 }
 
-if (!parsed.file)
-  usage(1, 'either -f or arguments must be used for adding objects');
+if (!parsed.file) {usage(1, 'either -f or arguments must be used for adding objects');}
 
-if (parsed.debug)
-  logLevel = (parsed.debug > 1 ? 'trace' : 'debug');
+if (parsed.debug) {logLevel = (parsed.debug > 1 ? 'trace' : 'debug');}
 
 const log = new Logger({
   name: 'ldapjs',

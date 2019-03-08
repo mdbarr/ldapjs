@@ -27,8 +27,7 @@ function search(t, options, callback) {
     });
     res.on('end', function () {
       t.ok(found);
-      if (callback)
-        return callback();
+      if (callback) {return callback();}
 
       return t.end();
     });
@@ -64,8 +63,7 @@ test('setup', function (t) {
       }
     };
 
-    if (req.filter.matches(entry.attributes))
-      res.send(entry);
+    if (req.filter.matches(entry.attributes)) {res.send(entry);}
 
     res.end();
   });

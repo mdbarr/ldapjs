@@ -19,6 +19,7 @@ module.exports = {
     }],
     "comma-spacing": "error",
     "semi": "error",
+    "curly": "error",
     "space-infix-ops": "error",
     "space-before-blocks": "error",
     "no-trailing-spaces": "error",

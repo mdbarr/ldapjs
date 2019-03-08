@@ -109,11 +109,9 @@ try {
   usage(1, e.toString());
 }
 
-if (parsed.help)
-  usage(0);
+if (parsed.help) {usage(0);}
 
-if (parsed._args.length < 1)
-  usage(1, 'DN required');
+if (parsed._args.length < 1) {usage(1, 'DN required');}
 try {
   parsed._args.forEach(function (dn) {
     ldap.parseDN(dn);
@@ -122,11 +120,9 @@ try {
   usage(1, e.toString());
 }
 
-if (!parsed.attribute || typeof (parsed.value) !== 'string')
-  usage(1, 'attribute and value required');
+if (!parsed.attribute || typeof (parsed.value) !== 'string') {usage(1, 'attribute and value required');}
 
-if (parsed.debug)
-  logLevel = (parsed.debug > 1 ? 'trace' : 'debug');
+if (parsed.debug) {logLevel = (parsed.debug > 1 ? 'trace' : 'debug');}
 
 const log = new Logger({
   name: 'ldapjs',
@@ -149,14 +145,12 @@ client.on('error', function (err) {
 });
 
 client.bind(parsed.binddn, parsed.password, function (err, res) {
-  if (err)
-    perror(err);
+  if (err) {perror(err);}
 
   let finished = 0;
   parsed._args.forEach(function (dn) {
     client.compare(dn, parsed.attribute, parsed.value, function (err, match) {
-      if (err)
-        perror(err);
+      if (err) {perror(err);}
 
       process.stdout.write(match + '\n');
 

@@ -115,11 +115,9 @@ try {
   usage(1, e.toString());
 }
 
-if (parsed.help)
-  usage(0);
+if (parsed.help) {usage(0);}
 
-if (parsed._args.length < 1)
-  usage(1, 'DN required');
+if (parsed._args.length < 1) {usage(1, 'DN required');}
 try {
   parsed._args.forEach(function (dn) {
     ldap.parseDN(dn);
@@ -128,13 +126,10 @@ try {
   usage(1, e.toString());
 }
 
-if (!parsed.type)
-  parsed.type = 'replace';
-if (!parsed.attribute || !Array.isArray(parsed.value))
-  usage(1, 'attribute and value required');
+if (!parsed.type) {parsed.type = 'replace';}
+if (!parsed.attribute || !Array.isArray(parsed.value)) {usage(1, 'attribute and value required');}
 
-if (parsed.debug)
-  logLevel = (parsed.debug > 1 ? 'trace' : 'debug');
+if (parsed.debug) {logLevel = (parsed.debug > 1 ? 'trace' : 'debug');}
 
 const log = new Logger({
   name: 'ldapjs',
@@ -157,8 +152,7 @@ client.on('error', function (err) {
 });
 
 client.bind(parsed.binddn, parsed.password, function (err, res) {
-  if (err)
-    perror(err);
+  if (err) {perror(err);}
 
   let finished = 0;
   const mod = {};
@@ -172,8 +166,7 @@ client.bind(parsed.binddn, parsed.password, function (err, res) {
   });
 
   function callback(err) {
-    if (err)
-      perror(err);
+    if (err) {perror(err);}
 
     if (++finished === parsed._args.length) {
       client.unbind(function () {
