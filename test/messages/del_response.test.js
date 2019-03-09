@@ -5,26 +5,28 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
 let DeleteResponse;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   DeleteResponse = require('../../lib/index').DeleteResponse;
   t.ok(DeleteResponse);
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new DeleteResponse());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const res = new DeleteResponse({
     messageID: 123,
     status: 0
@@ -35,7 +37,7 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('parse', function (t) {
+test('parse', (t) => {
   const ber = new BerWriter();
   ber.writeEnumeration(0);
   ber.writeString('cn=root');
@@ -49,7 +51,7 @@ test('parse', function (t) {
   t.end();
 });
 
-test('toBer', function (t) {
+test('toBer', (t) => {
   const res = new DeleteResponse({
     messageID: 123,
     status: 3,

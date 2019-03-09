@@ -5,9 +5,10 @@ const test = require('tape').test;
 
 const ldap = require('../lib/index');
 
-///--- Tests
+////////////////////
+// Tests
 
-test('basic error', function (t) {
+test('basic error', (t) => {
   const msg = 'mymsg';
   const err = new ldap.LDAPError(msg, null, null);
   t.ok(err);
@@ -18,7 +19,7 @@ test('basic error', function (t) {
   t.end();
 });
 
-test('"custom" errors', function (t) {
+test('"custom" errors', (t) => {
   const errors = [
     {
       name: 'ConnectionError',
@@ -34,8 +35,8 @@ test('"custom" errors', function (t) {
     }
   ];
 
-  errors.forEach(function (entry) {
-    const msg = entry.name + 'msg';
+  errors.forEach((entry) => {
+    const msg = `${ entry.name }msg`;
     const err = new entry.func(msg);
     t.ok(err);
     t.equal(err.name, entry.name);

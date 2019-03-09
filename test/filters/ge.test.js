@@ -5,15 +5,17 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 let GreaterThanEqualsFilter;
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   const filters = require('../../lib/index').filters;
   t.ok(filters);
   GreaterThanEqualsFilter = filters.GreaterThanEqualsFilter;
@@ -21,7 +23,7 @@ test('load library', function (t) {
   t.end();
 });
 
-test('Construct no args', function (t) {
+test('Construct no args', (t) => {
   const f = new GreaterThanEqualsFilter();
   t.ok(f);
   t.ok(!f.attribute);
@@ -29,7 +31,7 @@ test('Construct no args', function (t) {
   t.end();
 });
 
-test('Construct args', function (t) {
+test('Construct args', (t) => {
   const f = new GreaterThanEqualsFilter({
     attribute: 'foo',
     value: 'bar'
@@ -41,7 +43,7 @@ test('Construct args', function (t) {
   t.end();
 });
 
-test('GH-109 = escape value only in toString()', function (t) {
+test('GH-109 = escape value only in toString()', (t) => {
   const f = new GreaterThanEqualsFilter({
     attribute: 'foo',
     value: 'ba(r)'
@@ -53,43 +55,37 @@ test('GH-109 = escape value only in toString()', function (t) {
   t.end();
 });
 
-test('match true', function (t) {
+test('match true', (t) => {
   const f = new GreaterThanEqualsFilter({
     attribute: 'foo',
     value: 'bar'
   });
   t.ok(f);
-  t.ok(f.matches({
-    foo: 'baz'
-  }));
+  t.ok(f.matches({ foo: 'baz' }));
   t.end();
 });
 
-test('match multiple', function (t) {
+test('match multiple', (t) => {
   const f = new GreaterThanEqualsFilter({
     attribute: 'foo',
     value: 'bar'
   });
   t.ok(f);
-  t.ok(f.matches({
-    foo: [ 'beuha', 'baz' ]
-  }));
+  t.ok(f.matches({ foo: [ 'beuha', 'baz' ] }));
   t.end();
 });
 
-test('match false', function (t) {
+test('match false', (t) => {
   const f = new GreaterThanEqualsFilter({
     attribute: 'foo',
     value: 'bar'
   });
   t.ok(f);
-  t.ok(!f.matches({
-    foo: 'abc'
-  }));
+  t.ok(!f.matches({ foo: 'abc' }));
   t.end();
 });
 
-test('parse ok', function (t) {
+test('parse ok', (t) => {
   const writer = new BerWriter();
   writer.writeString('foo');
   writer.writeString('bar');
@@ -97,13 +93,11 @@ test('parse ok', function (t) {
   const f = new GreaterThanEqualsFilter();
   t.ok(f);
   t.ok(f.parse(new BerReader(writer.buffer)));
-  t.ok(f.matches({
-    foo: 'bar'
-  }));
+  t.ok(f.matches({ foo: 'bar' }));
   t.end();
 });
 
-test('parse bad', function (t) {
+test('parse bad', (t) => {
   const writer = new BerWriter();
   writer.writeString('foo');
   writer.writeInt(20);
@@ -119,7 +113,7 @@ test('parse bad', function (t) {
   t.end();
 });
 
-test('GH-109 = to ber uses plain values', function (t) {
+test('GH-109 = to ber uses plain values', (t) => {
   let f = new GreaterThanEqualsFilter({
     attribute: 'foo',
     value: 'ba(r)'

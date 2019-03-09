@@ -5,7 +5,8 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
@@ -13,9 +14,10 @@ let SearchRequest;
 let EqualityFilter;
 let dn;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   SearchRequest = require('../../lib/index').SearchRequest;
   EqualityFilter = require('../../lib/index').EqualityFilter;
   dn = require('../../lib/index').dn;
@@ -25,12 +27,12 @@ test('load library', function (t) {
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new SearchRequest());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const req = new SearchRequest({
     baseObject: dn.parse('cn=foo, o=test'),
     filter: new EqualityFilter({
@@ -48,7 +50,7 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('parse', function (t) {
+test('parse', (t) => {
   const f = new EqualityFilter({
     attribute: 'email',
     value: 'foo@bar.com'
@@ -76,7 +78,7 @@ test('parse', function (t) {
   t.end();
 });
 
-test('toBer', function (t) {
+test('toBer', (t) => {
   const req = new SearchRequest({
     messageID: 123,
     baseObject: dn.parse('cn=foo, o=test'),

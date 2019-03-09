@@ -9,9 +9,10 @@ const BerWriter = asn1.BerWriter;
 let getControl;
 let SSSRControl;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   SSSRControl = require('../../lib').ServerSideSortingRequestControl;
   t.ok(SSSRControl);
   getControl = require('../../lib').getControl;
@@ -19,17 +20,15 @@ test('load library', function (t) {
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new SSSRControl());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const c = new SSSRControl({
     criticality: true,
-    value: {
-      attributeType: 'sn'
-    }
+    value: { attributeType: 'sn' }
   });
   t.ok(c);
   t.equal(c.type, '1.2.840.113556.1.4.473');
@@ -40,7 +39,7 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('toBer - object', function (t) {
+test('toBer - object', (t) => {
   const sssc = new SSSRControl({
     criticality: true,
     value: {
@@ -64,7 +63,7 @@ test('toBer - object', function (t) {
   t.end();
 });
 
-test('toBer - array', function (t) {
+test('toBer - array', (t) => {
   const sssc = new SSSRControl({
     criticality: true,
     value: [
@@ -97,7 +96,7 @@ test('toBer - array', function (t) {
   t.end();
 });
 
-test('toBer - empty', function (t) {
+test('toBer - empty', (t) => {
   const sssc = new SSSRControl();
   const ber = new BerWriter();
   sssc.toBer(ber);

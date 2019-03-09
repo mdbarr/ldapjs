@@ -5,32 +5,34 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
 let UnbindRequest;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   UnbindRequest = require('../../lib/index').UnbindRequest;
   t.ok(UnbindRequest);
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new UnbindRequest());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const req = new UnbindRequest({});
   t.ok(req);
   t.end();
 });
 
-test('parse', function (t) {
+test('parse', (t) => {
   const ber = new BerWriter();
 
   const req = new UnbindRequest();
@@ -38,10 +40,8 @@ test('parse', function (t) {
   t.end();
 });
 
-test('toBer', function (t) {
-  const req = new UnbindRequest({
-    messageID: 123
-  });
+test('toBer', (t) => {
+  const req = new UnbindRequest({ messageID: 123 });
   t.ok(req);
 
   const ber = new BerReader(req.toBer());

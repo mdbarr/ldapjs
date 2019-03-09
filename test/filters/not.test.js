@@ -3,16 +3,16 @@
 
 const test = require('tape').test;
 
-const asn1 = require('asn1');
-
-///--- Globals
+////////////////////
+// Globals
 
 let EqualityFilter;
 let NotFilter;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   const filters = require('../../lib/index').filters;
   t.ok(filters);
   EqualityFilter = filters.EqualityFilter;
@@ -22,47 +22,37 @@ test('load library', function (t) {
   t.end();
 });
 
-test('Construct no args', function (t) {
+test('Construct no args', (t) => {
   t.ok(new NotFilter());
   t.end();
 });
 
-test('Construct args', function (t) {
-  const f = new NotFilter({
-    filter: new EqualityFilter({
-      attribute: 'foo',
-      value: 'bar'
-    })
-  });
+test('Construct args', (t) => {
+  const f = new NotFilter({ filter: new EqualityFilter({
+    attribute: 'foo',
+    value: 'bar'
+  }) });
   t.ok(f);
   t.equal(f.toString(), '(!(foo=bar))');
   t.end();
 });
 
-test('match true', function (t) {
-  const f = new NotFilter({
-    filter: new EqualityFilter({
-      attribute: 'foo',
-      value: 'bar'
-    })
-  });
+test('match true', (t) => {
+  const f = new NotFilter({ filter: new EqualityFilter({
+    attribute: 'foo',
+    value: 'bar'
+  }) });
   t.ok(f);
-  t.ok(f.matches({
-    foo: 'baz'
-  }));
+  t.ok(f.matches({ foo: 'baz' }));
   t.end();
 });
 
-test('match false', function (t) {
-  const f = new NotFilter({
-    filter: new EqualityFilter({
-      attribute: 'foo',
-      value: 'bar'
-    })
-  });
+test('match false', (t) => {
+  const f = new NotFilter({ filter: new EqualityFilter({
+    attribute: 'foo',
+    value: 'bar'
+  }) });
   t.ok(f);
-  t.ok(!f.matches({
-    foo: 'bar'
-  }));
+  t.ok(!f.matches({ foo: 'bar' }));
   t.end();
 });

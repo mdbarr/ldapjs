@@ -5,16 +5,18 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
 let BindRequest;
 let dn;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   BindRequest = require('../../lib/index').BindRequest;
   dn = require('../../lib/index').dn;
   t.ok(BindRequest);
@@ -22,12 +24,12 @@ test('load library', function (t) {
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new BindRequest());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const req = new BindRequest({
     version: 3,
     name: dn.parse('cn=root'),
@@ -40,7 +42,7 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('parse', function (t) {
+test('parse', (t) => {
   const ber = new BerWriter();
   ber.writeInt(3);
   ber.writeString('cn=root');
@@ -54,7 +56,7 @@ test('parse', function (t) {
   t.end();
 });
 
-test('toBer', function (t) {
+test('toBer', (t) => {
   const req = new BindRequest({
     messageID: 123,
     version: 3,

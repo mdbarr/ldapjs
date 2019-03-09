@@ -5,16 +5,18 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
 let Attribute;
 let Change;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   Attribute = require('../lib/index').Attribute;
   Change = require('../lib/index').Change;
   t.ok(Attribute);
@@ -22,12 +24,12 @@ test('load library', function (t) {
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new Change());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const change = new Change({
     operation: 'add',
     modification: new Attribute({
@@ -46,27 +48,25 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('validate fields', function (t) {
+test('validate fields', (t) => {
   const c = new Change();
   t.ok(c);
-  t.throws(function () {
+  t.throws(() => {
     c.operation = 'bogus';
   });
-  t.throws(function () {
+  t.throws(() => {
     c.modification = {
       too: 'many',
       fields: 'here'
     };
   });
-  c.modification = {
-    foo: [ 'bar', 'baz' ]
-  };
+  c.modification = { foo: [ 'bar', 'baz' ] };
   t.ok(c.modification);
   t.end();
 });
 
-test('GH-31 (multiple attributes per Change)', function (t) {
-  t.throws(function () {
+test('GH-31 (multiple attributes per Change)', (t) => {
+  t.throws(() => {
     const c = new Change({
       operation: 'replace',
       modification: {
@@ -79,7 +79,7 @@ test('GH-31 (multiple attributes per Change)', function (t) {
   t.end();
 });
 
-test('toBer', function (t) {
+test('toBer', (t) => {
   const change = new Change({
     operation: 'Add',
     modification: new Attribute({
@@ -102,7 +102,7 @@ test('toBer', function (t) {
   t.end();
 });
 
-test('parse', function (t) {
+test('parse', (t) => {
   const ber = new BerWriter();
   ber.startSequence();
   ber.writeEnumeration(0x00);
@@ -127,7 +127,7 @@ test('parse', function (t) {
   t.end();
 });
 
-test('apply - replace', function (t) {
+test('apply - replace', (t) => {
   let res;
   const single = new Change({
     operation: 'replace',
@@ -152,46 +152,34 @@ test('apply - replace', function (t) {
   });
 
   // plain
-  res = Change.apply(single, {
-    cn: [ 'old' ]
-  });
+  res = Change.apply(single, { cn: [ 'old' ] });
   t.deepEqual(res.cn, [ 'new' ]);
 
   // multiple
-  res = Change.apply(single, {
-    cn: [ 'old', 'also' ]
-  });
+  res = Change.apply(single, { cn: [ 'old', 'also' ] });
   t.deepEqual(res.cn, [ 'new' ]);
 
   // empty
-  res = Change.apply(empty, {
-    cn: [ 'existing' ]
-  });
+  res = Change.apply(empty, { cn: [ 'existing' ] });
   t.equal(res.cn, undefined);
   t.ok(Object.keys(res).indexOf('cn') === -1);
 
   //absent
-  res = Change.apply(single, {
-    dn: [ 'otherjunk' ]
-  });
+  res = Change.apply(single, { dn: [ 'otherjunk' ] });
   t.deepEqual(res.cn, [ 'new' ]);
 
   // scalar formatting "success"
-  res = Change.apply(single, {
-    cn: 'old'
-  }, true);
+  res = Change.apply(single, { cn: 'old' }, true);
   t.equal(res.cn, 'new');
 
   // scalar formatting "failure"
-  res = Change.apply(twin, {
-    cn: 'old'
-  }, true);
+  res = Change.apply(twin, { cn: 'old' }, true);
   t.deepEqual(res.cn, [ 'new', 'two' ]);
 
   t.end();
 });
 
-test('apply - add', function (t) {
+test('apply - add', (t) => {
   let res;
   const single = new Change({
     operation: 'add',
@@ -202,21 +190,15 @@ test('apply - add', function (t) {
   });
 
   // plain
-  res = Change.apply(single, {
-    cn: [ 'old' ]
-  });
+  res = Change.apply(single, { cn: [ 'old' ] });
   t.deepEqual(res.cn, [ 'old', 'new' ]);
 
   // multiple
-  res = Change.apply(single, {
-    cn: [ 'old', 'also' ]
-  });
+  res = Change.apply(single, { cn: [ 'old', 'also' ] });
   t.deepEqual(res.cn, [ 'old', 'also', 'new' ]);
 
   //absent
-  res = Change.apply(single, {
-    dn: [ 'otherjunk' ]
-  });
+  res = Change.apply(single, { dn: [ 'otherjunk' ] });
   t.deepEqual(res.cn, [ 'new' ]);
 
   // scalar formatting "success"
@@ -224,21 +206,17 @@ test('apply - add', function (t) {
   t.equal(res.cn, 'new');
 
   // scalar formatting "failure"
-  res = Change.apply(single, {
-    cn: 'old'
-  }, true);
+  res = Change.apply(single, { cn: 'old' }, true);
   t.deepEqual(res.cn, [ 'old', 'new' ]);
 
   // duplicate add
-  res = Change.apply(single, {
-    cn: 'new'
-  });
+  res = Change.apply(single, { cn: 'new' });
   t.deepEqual(res.cn, [ 'new' ]);
 
   t.end();
 });
 
-test('apply - delete', function (t) {
+test('apply - delete', (t) => {
   let res;
   const single = new Change({
     operation: 'delete',
@@ -249,34 +227,24 @@ test('apply - delete', function (t) {
   });
 
   // plain
-  res = Change.apply(single, {
-    cn: [ 'old', 'new' ]
-  });
+  res = Change.apply(single, { cn: [ 'old', 'new' ] });
   t.deepEqual(res.cn, [ 'new' ]);
 
   // empty
-  res = Change.apply(single, {
-    cn: [ 'old' ]
-  });
+  res = Change.apply(single, { cn: [ 'old' ] });
   t.equal(res.cn, undefined);
   t.ok(Object.keys(res).indexOf('cn') === -1);
 
   // scalar formatting "success"
-  res = Change.apply(single, {
-    cn: [ 'old', 'one' ]
-  }, true);
+  res = Change.apply(single, { cn: [ 'old', 'one' ] }, true);
   t.equal(res.cn, 'one');
 
   // scalar formatting "failure"
-  res = Change.apply(single, {
-    cn: [ 'old', 'several', 'items' ]
-  }, true);
+  res = Change.apply(single, { cn: [ 'old', 'several', 'items' ] }, true);
   t.deepEqual(res.cn, [ 'several', 'items' ]);
 
   //absent
-  res = Change.apply(single, {
-    dn: [ 'otherjunk' ]
-  });
+  res = Change.apply(single, { dn: [ 'otherjunk' ] });
   t.ok(res);
   t.equal(res.cn, undefined);
 

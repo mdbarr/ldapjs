@@ -5,15 +5,17 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 let ApproximateFilter;
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   const filters = require('../../lib/index').filters;
   t.ok(filters);
   ApproximateFilter = filters.ApproximateFilter;
@@ -21,7 +23,7 @@ test('load library', function (t) {
   t.end();
 });
 
-test('Construct no args', function (t) {
+test('Construct no args', (t) => {
   const f = new ApproximateFilter();
   t.ok(f);
   t.ok(!f.attribute);
@@ -29,7 +31,7 @@ test('Construct no args', function (t) {
   t.end();
 });
 
-test('Construct args', function (t) {
+test('Construct args', (t) => {
   const f = new ApproximateFilter({
     attribute: 'foo',
     value: 'bar'
@@ -41,7 +43,7 @@ test('Construct args', function (t) {
   t.end();
 });
 
-test('GH-109 = escape value only in toString()', function (t) {
+test('GH-109 = escape value only in toString()', (t) => {
   const f = new ApproximateFilter({
     attribute: 'foo',
     value: 'ba(r)'
@@ -53,7 +55,7 @@ test('GH-109 = escape value only in toString()', function (t) {
   t.end();
 });
 
-test('parse ok', function (t) {
+test('parse ok', (t) => {
   const writer = new BerWriter();
   writer.writeString('foo');
   writer.writeString('bar');
@@ -64,7 +66,7 @@ test('parse ok', function (t) {
   t.end();
 });
 
-test('parse bad', function (t) {
+test('parse bad', (t) => {
   const writer = new BerWriter();
   writer.writeString('foo');
   writer.writeInt(20);
@@ -80,7 +82,7 @@ test('parse bad', function (t) {
   t.end();
 });
 
-test('GH-109 = to ber uses plain values', function (t) {
+test('GH-109 = to ber uses plain values', (t) => {
   let f = new ApproximateFilter({
     attribute: 'foo',
     value: 'ba(r)'

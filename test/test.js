@@ -6,19 +6,21 @@ const fs = require('fs');
 const path = require('path');
 
 function runTests(directory) {
-  fs.readdir(directory, function (err, files) {
+  fs.readdir(directory, (err, files) => {
     assert.ifError(err);
 
     console.dir(files);
-    files.filter(function (f) {
-      return (/\.test\.js$/.test(f));
-    }).map(function (f) {
-      return (path.join(directory, f));
-    }).forEach(require);
+    files.filter((f) => {
+      return /\.test\.js$/.test(f);
+    }).map((f) => {
+      return path.join(directory, f);
+    }).
+      forEach(require);
   });
 }
 
-///--- Run All Tests
+////////////////////
+// Run All Tests
 
 (function main() {
   runTests(__dirname);

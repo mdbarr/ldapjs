@@ -5,45 +5,41 @@ const asn1 = require('asn1');
 const Logger = require('bunyan');
 const test = require('tape').test;
 
-///--- Globals
+////////////////////
+// Globals
 
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
 let DeleteRequest;
 let dn;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   DeleteRequest = require('../../lib/index').DeleteRequest;
   dn = require('../../lib/index').dn;
   t.ok(DeleteRequest);
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new DeleteRequest());
   t.end();
 });
 
-test('new with args', function (t) {
-  const req = new DeleteRequest({
-    entry: dn.parse('cn=test')
-  });
+test('new with args', (t) => {
+  const req = new DeleteRequest({ entry: dn.parse('cn=test') });
   t.ok(req);
   t.equal(req.dn.toString(), 'cn=test');
   t.end();
 });
 
-test('parse', function (t) {
+test('parse', (t) => {
   const ber = new BerWriter();
   ber.writeString('cn=test', 0x4a);
 
-  const req = new DeleteRequest({
-    log: new Logger({
-      name: 'del_request.test.js'
-    })
-  });
+  const req = new DeleteRequest({ log: new Logger({ name: 'del_request.test.js' }) });
   const reader = new BerReader(ber.buffer);
   reader.readSequence(0x4a);
   t.ok(req.parse(reader, reader.length));
@@ -51,7 +47,7 @@ test('parse', function (t) {
   t.end();
 });
 
-test('toBer', function (t) {
+test('toBer', (t) => {
   const req = new DeleteRequest({
     messageID: 123,
     entry: dn.parse('cn=test')

@@ -9,9 +9,10 @@ const BerWriter = asn1.BerWriter;
 let getControl;
 let EntryChangeNotificationControl;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   EntryChangeNotificationControl =
     require('../../lib').EntryChangeNotificationControl;
   t.ok(EntryChangeNotificationControl);
@@ -20,12 +21,12 @@ test('load library', function (t) {
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new EntryChangeNotificationControl());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const c = new EntryChangeNotificationControl({
     type: '2.16.840.1.113730.3.4.7',
     criticality: true,
@@ -57,7 +58,7 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('tober', function (t) {
+test('tober', (t) => {
   const psc = new EntryChangeNotificationControl({
     type: '2.16.840.1.113730.3.4.7',
     criticality: true,

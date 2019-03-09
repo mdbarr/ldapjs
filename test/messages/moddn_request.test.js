@@ -5,16 +5,18 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
 let ModifyDNRequest;
 let dn;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   ModifyDNRequest = require('../../lib/index').ModifyDNRequest;
   dn = require('../../lib/index').dn;
   t.ok(ModifyDNRequest);
@@ -22,12 +24,12 @@ test('load library', function (t) {
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new ModifyDNRequest());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const req = new ModifyDNRequest({
     entry: dn.parse('cn=foo, o=test'),
     newRdn: dn.parse('cn=foo2'),
@@ -40,7 +42,7 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('parse', function (t) {
+test('parse', (t) => {
   const ber = new BerWriter();
   ber.writeString('cn=foo, o=test');
   ber.writeString('cn=foo2');
@@ -55,7 +57,7 @@ test('parse', function (t) {
   t.end();
 });
 
-test('toBer', function (t) {
+test('toBer', (t) => {
   const req = new ModifyDNRequest({
     messageID: 123,
     entry: dn.parse('cn=foo, o=test'),

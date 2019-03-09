@@ -7,7 +7,8 @@ const test = require('tape').test;
 const uuid = require('uuid/v4');
 const vasync = require('vasync');
 
-///--- Globals
+////////////////////
+// Globals
 
 const BIND_DN = 'cn=root';
 const BIND_PW = 'secret';
@@ -25,27 +26,28 @@ let sock;
 
 function getSock() {
   if (process.platform === 'win32') {
-    return '\\\\.\\pipe\\' + uuid();
-  } else {
-    return '/tmp/.' + uuid();
+    return `\\\\.\\pipe\\${ uuid() }`;
   }
+  return `/tmp/.${ uuid() }`;
+
 }
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   ldap = require('../lib/index');
   t.ok(ldap.createServer);
   t.end();
 });
 
-test('basic create', function (t) {
+test('basic create', (t) => {
   server = ldap.createServer();
   t.ok(server);
   t.end();
 });
 
-test('properties', function (t) {
+test('properties', (t) => {
   t.equal(server.name, 'LDAPServer');
 
   // TODO: better test
@@ -54,7 +56,7 @@ test('properties', function (t) {
 
   t.equal(server.url, null, 'url empty before bind');
   // listen on a random port so we have a url
-  server.listen(0, 'localhost', function () {
+  server.listen(0, 'localhost', () => {
     t.ok(server.url);
 
     server.close();
@@ -62,11 +64,11 @@ test('properties', function (t) {
   });
 });
 
-test('listen on unix/named socket', function (t) {
+test('listen on unix/named socket', (t) => {
   t.plan(2);
   server = ldap.createServer();
   sock = getSock();
-  server.listen(sock, function () {
+  server.listen(sock, () => {
     t.ok(server.url);
     t.equal(server.url.split(':')[0], 'ldapi');
     server.close();
@@ -74,22 +76,22 @@ test('listen on unix/named socket', function (t) {
   });
 });
 
-test('listen on static port', function (t) {
+test('listen on static port', (t) => {
   t.plan(2);
   server = ldap.createServer();
-  server.listen(SERVER_PORT, '127.0.0.1', function () {
+  server.listen(SERVER_PORT, '127.0.0.1', () => {
     const addr = server.address();
     t.equal(addr.port, parseInt(SERVER_PORT, 10));
-    t.equals(server.url, 'ldap://127.0.0.1:' + SERVER_PORT);
+    t.equals(server.url, `ldap://127.0.0.1:${ SERVER_PORT }`);
     server.close();
     t.end();
   });
 });
 
-test('listen on ephemeral port', function (t) {
+test('listen on ephemeral port', (t) => {
   t.plan(2);
   server = ldap.createServer();
-  server.listen(0, 'localhost', function () {
+  server.listen(0, 'localhost', () => {
     const addr = server.address();
     t.ok(addr.port > 0);
     t.ok(addr.port < 65535);
@@ -98,7 +100,7 @@ test('listen on ephemeral port', function (t) {
   });
 });
 
-test('route order', function (t) {
+test('route order', (t) => {
   function generateHandler(response) {
     const func = function handler(req, res, next) {
       res.send({
@@ -114,26 +116,24 @@ test('route order', function (t) {
   server = ldap.createServer();
   sock = getSock();
   const dnShort = SUFFIX;
-  const dnMed = 'dc=sub, ' + SUFFIX;
-  const dnLong = 'dc=long, dc=sub, ' + SUFFIX;
+  const dnMed = `dc=sub, ${ SUFFIX }`;
+  const dnLong = `dc=long, dc=sub, ${ SUFFIX }`;
 
   // Mount routes out of order
   server.search(dnMed, generateHandler(dnMed));
   server.search(dnShort, generateHandler(dnShort));
   server.search(dnLong, generateHandler(dnLong));
-  server.listen(sock, function () {
+  server.listen(sock, () => {
     t.ok(true, 'server listen');
-    client = ldap.createClient({
-      socketPath: sock
-    });
+    client = ldap.createClient({ socketPath: sock });
     function runSearch(value, cb) {
-      client.search(value, '(objectclass=*)', function (err, res) {
+      client.search(value, '(objectclass=*)', (err, res) => {
         t.ifError(err);
         t.ok(res);
-        res.on('searchEntry', function (entry) {
+        res.on('searchEntry', (entry) => {
           t.equal(entry.dn.toString(), value);
         });
-        res.on('end', function () {
+        res.on('end', () => {
           cb();
         });
       });
@@ -142,7 +142,7 @@ test('route order', function (t) {
     vasync.forEachParallel({
       'func': runSearch,
       'inputs': [ dnShort, dnMed, dnLong ]
-    }, function (err, results) {
+    }, (err, results) => {
       t.notOk(err);
       client.unbind();
       server.close();
@@ -151,44 +151,38 @@ test('route order', function (t) {
   });
 });
 
-test('route absent', function (t) {
+test('route absent', (t) => {
   server = ldap.createServer();
   sock = getSock();
   const DN_ROUTE = 'dc=base';
   const DN_MISSING = 'dc=absent';
 
-  server.bind(DN_ROUTE, function (req, res, next) {
+  server.bind(DN_ROUTE, (req, res, next) => {
     res.end();
     return next();
   });
 
-  server.listen(sock, function () {
+  server.listen(sock, () => {
     t.ok(true, 'server startup');
-    vasync.parallel({
-      'funcs': [
-        function presentBind(cb) {
-          const clt = ldap.createClient({
-            socketPath: sock
-          });
-          clt.bind(DN_ROUTE, '', function (err) {
-            t.notOk(err);
-            clt.unbind();
-            cb();
-          });
-        },
-        function absentBind(cb) {
-          const clt = ldap.createClient({
-            socketPath: sock
-          });
-          clt.bind(DN_MISSING, '', function (err) {
-            t.ok(err);
-            t.equal(err.code, ldap.LDAP_NO_SUCH_OBJECT);
-            clt.unbind();
-            cb();
-          });
-        }
-      ]
-    }, function (err, result) {
+    vasync.parallel({ 'funcs': [
+      function presentBind(cb) {
+        const clt = ldap.createClient({ socketPath: sock });
+        clt.bind(DN_ROUTE, '', (err) => {
+          t.notOk(err);
+          clt.unbind();
+          cb();
+        });
+      },
+      function absentBind(cb) {
+        const clt = ldap.createClient({ socketPath: sock });
+        clt.bind(DN_MISSING, '', (err) => {
+          t.ok(err);
+          t.equal(err.code, ldap.LDAP_NO_SUCH_OBJECT);
+          clt.unbind();
+          cb();
+        });
+      }
+    ] }, (err, result) => {
       t.notOk(err);
       server.close();
       t.end();
@@ -196,25 +190,23 @@ test('route absent', function (t) {
   });
 });
 
-test('route unbind', function (t) {
+test('route unbind', (t) => {
   t.plan(4);
   server = ldap.createServer();
   sock = getSock();
 
-  server.unbind(function (req, res, next) {
+  server.unbind((req, res, next) => {
     t.ok(true, 'server unbind successful');
     res.end();
     return next();
   });
 
-  server.listen(sock, function () {
+  server.listen(sock, () => {
     t.ok(true, 'server startup');
-    client = ldap.createClient({
-      socketPath: sock
-    });
-    client.bind('', '', function (err) {
+    client = ldap.createClient({ socketPath: sock });
+    client.bind('', '', (err) => {
       t.ifError(err, 'client bind error');
-      client.unbind(function (err) {
+      client.unbind((err) => {
         t.ifError(err, 'client unbind error');
         server.close();
         t.end();
@@ -223,65 +215,59 @@ test('route unbind', function (t) {
   });
 });
 
-test('strict routing', function (t) {
+test('strict routing', (t) => {
   const testDN = 'cn=valid';
   let clt;
-  vasync.pipeline({
-    funcs: [
-      function setup(_, cb) {
-        // strictDN: true - on by default
-        server = ldap.createServer({});
-        sock = getSock();
-        // invalid DNs would go to default handler
-        server.search('', function (req, res, next) {
-          t.ok(req.dn);
-          t.equal(typeof (req.dn), 'object');
-          t.equal(req.dn.toString(), testDN);
-          res.end();
-          next();
+  vasync.pipeline({ funcs: [
+    function setup(_, cb) {
+      // strictDN: true - on by default
+      server = ldap.createServer({});
+      sock = getSock();
+      // invalid DNs would go to default handler
+      server.search('', (req, res, next) => {
+        t.ok(req.dn);
+        t.equal(typeof req.dn, 'object');
+        t.equal(req.dn.toString(), testDN);
+        res.end();
+        next();
+      });
+      server.listen(sock, () => {
+        t.ok(true, 'server startup');
+        clt = ldap.createClient({
+          socketPath: sock,
+          strictDN: false
         });
-        server.listen(sock, function () {
-          t.ok(true, 'server startup');
-          clt = ldap.createClient({
-            socketPath: sock,
-            strictDN: false
-          });
+        cb();
+      });
+    },
+    function testBad(_, cb) {
+      clt.search('not a dn', { scope: 'base' }, (err, res) => {
+        t.ifError(err);
+        res.once('error', (err2) => {
+          t.ok(err2);
+          t.equal(err2.code, ldap.LDAP_INVALID_DN_SYNTAX);
           cb();
         });
-      },
-      function testBad(_, cb) {
-        clt.search('not a dn', {
-          scope: 'base'
-        }, function (err, res) {
-          t.ifError(err);
-          res.once('error', function (err2) {
-            t.ok(err2);
-            t.equal(err2.code, ldap.LDAP_INVALID_DN_SYNTAX);
-            cb();
-          });
-          res.once('end', function () {
-            t.fail('accepted invalid dn');
-            cb('bogus');
-          });
+        res.once('end', () => {
+          t.fail('accepted invalid dn');
+          cb('bogus');
         });
-      },
-      function testGood(_, cb) {
-        clt.search(testDN, {
-          scope: 'base'
-        }, function (err, res) {
-          t.ifError(err);
-          res.once('error', function (err2) {
-            t.ifError(err2);
-            cb(err2);
-          });
-          res.once('end', function (result) {
-            t.ok(result, 'accepted invalid dn');
-            cb();
-          });
+      });
+    },
+    function testGood(_, cb) {
+      clt.search(testDN, { scope: 'base' }, (err, res) => {
+        t.ifError(err);
+        res.once('error', (err2) => {
+          t.ifError(err2);
+          cb(err2);
         });
-      }
-    ]
-  }, function (err, res) {
+        res.once('end', (result) => {
+          t.ok(result, 'accepted invalid dn');
+          cb();
+        });
+      });
+    }
+  ] }, (err, res) => {
     if (clt) {
       clt.destroy();
     }
@@ -290,33 +276,29 @@ test('strict routing', function (t) {
   });
 });
 
-test('non-strict routing', function (t) {
-  server = ldap.createServer({
-    strictDN: false
-  });
+test('non-strict routing', (t) => {
+  server = ldap.createServer({ strictDN: false });
   sock = getSock();
   const testDN = 'this ain\'t a DN';
 
   // invalid DNs go to default handler
-  server.search('', function (req, res, next) {
+  server.search('', (req, res, next) => {
     t.ok(req.dn);
-    t.equal(typeof (req.dn), 'string');
+    t.equal(typeof req.dn, 'string');
     t.equal(req.dn, testDN);
     res.end();
     next();
   });
 
-  server.listen(sock, function () {
+  server.listen(sock, () => {
     t.ok(true, 'server startup');
     const clt = ldap.createClient({
       socketPath: sock,
       strictDN: false
     });
-    clt.search(testDN, {
-      scope: 'base'
-    }, function (err, res) {
+    clt.search(testDN, { scope: 'base' }, (err, res) => {
       t.ifError(err);
-      res.on('end', function () {
+      res.on('end', () => {
         clt.destroy();
         server.close();
         t.end();

@@ -3,7 +3,6 @@
 // Copyright 2011 Mark Cavage.  All rights reserved.
 'use strict';
 
-const fs = require('fs');
 const path = require('path');
 
 const dashdash = require('dashdash');
@@ -11,7 +10,10 @@ const dashdash = require('dashdash');
 const ldap = require('../lib/index');
 const Logger = require('bunyan');
 
-///--- Globals
+////////////////////
+// Globals
+
+let parsed;
 
 const opts = [
   {
@@ -32,9 +34,7 @@ const opts = [
     help: 'Attribute type',
     helpArg: 'TYPE'
   },
-  {
-    group: 'General options'
-  },
+  { group: 'General options' },
   {
     names: [ 'help', 'h' ],
     type: 'bool',
@@ -46,9 +46,7 @@ const opts = [
     help: 'Set debug level <0-2>',
     helpArg: 'LEVEL'
   },
-  {
-    group: 'Connection Options'
-  },
+  { group: 'Connection Options' },
   {
     names: [ 'url', 'u' ],
     type: 'string',
@@ -78,36 +76,33 @@ const opts = [
     default: false
   }
 ];
-const parser = dashdash.createParser({
-  options: opts
-});
+const parser = dashdash.createParser({ options: opts });
 
-///--- Helpers
+////////////////////
+// Helpers
 
 function usage(code, message) {
-  const msg = (message ? message + '\n' : '') +
-    'Usage: ' + path.basename(process.argv[1]) + ' [OPTIONS] DN\n\n' +
-    parser.help({
-      includeEnv: true
-    });
+  const msg = `${ message ? `${ message }\n` : ''
+  }Usage: ${ path.basename(process.argv[1]) } [OPTIONS] DN\n\n${
+    parser.help({ includeEnv: true }) }`;
 
-  process.stderr.write(msg + '\n');
+  process.stderr.write(`${ msg }\n`);
   process.exit(code);
 }
 
 function perror(err) {
   if (parsed.debug) {
-    process.stderr.write(err.stack + '\n');
+    process.stderr.write(`${ err.stack }\n`);
   } else {
-    process.stderr.write(err.message + '\n');
+    process.stderr.write(`${ err.message }\n`);
   }
   process.exit(1);
 }
 
-///--- Mainline
+////////////////////
+// Mainline
 
 let logLevel = 'info';
-let parsed;
 
 try {
   parsed = parser.parse(process.argv);
@@ -119,7 +114,7 @@ if (parsed.help) {usage(0);}
 
 if (parsed._args.length < 1) {usage(1, 'DN required');}
 try {
-  parsed._args.forEach(function (dn) {
+  parsed._args.forEach((dn) => {
     ldap.parseDN(dn);
   });
 } catch (e) {
@@ -129,7 +124,7 @@ try {
 if (!parsed.type) {parsed.type = 'replace';}
 if (!parsed.attribute || !Array.isArray(parsed.value)) {usage(1, 'attribute and value required');}
 
-if (parsed.debug) {logLevel = (parsed.debug > 1 ? 'trace' : 'debug');}
+if (parsed.debug) {logLevel = parsed.debug > 1 ? 'trace' : 'debug';}
 
 const log = new Logger({
   name: 'ldapjs',
@@ -140,24 +135,24 @@ const log = new Logger({
 
 const client = ldap.createClient({
   url: parsed.url,
-  log: log,
+  log,
   strictDN: false,
-  tlsOptions: {
-    rejectUnauthorized: !parsed.insecure
-  }
+  tlsOptions: { rejectUnauthorized: !parsed.insecure }
 });
 
-client.on('error', function (err) {
+client.on('error', (err) => {
   perror(err);
 });
 
-client.bind(parsed.binddn, parsed.password, function (err, res) {
-  if (err) {perror(err);}
+client.bind(parsed.binddn, parsed.password, (err) => {
+  if (err) {
+    perror(err);
+  }
 
   let finished = 0;
   const mod = {};
   mod[parsed.attribute] = [];
-  parsed.value.forEach(function (v) {
+  parsed.value.forEach((v) => {
     mod[parsed.attribute].push(v);
   });
   const change = new ldap.Change({
@@ -169,13 +164,13 @@ client.bind(parsed.binddn, parsed.password, function (err, res) {
     if (err) {perror(err);}
 
     if (++finished === parsed._args.length) {
-      client.unbind(function () {
+      client.unbind(() => {
 
       });
     }
   }
 
-  parsed._args.forEach(function (dn) {
+  parsed._args.forEach((dn) => {
     client.modify(dn, change, callback);
   });
 });

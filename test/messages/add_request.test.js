@@ -5,7 +5,8 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
@@ -13,9 +14,10 @@ let AddRequest;
 let Attribute;
 let dn;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   AddRequest = require('../../lib/index').AddRequest;
   Attribute = require('../../lib/index').Attribute;
   dn = require('../../lib/index').dn;
@@ -25,12 +27,12 @@ test('load library', function (t) {
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new AddRequest());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const req = new AddRequest({
     entry: dn.parse('cn=foo, o=test'),
     attributes: [ new Attribute({
@@ -52,7 +54,7 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('parse', function (t) {
+test('parse', (t) => {
   const ber = new BerWriter();
   ber.writeString('cn=foo, o=test');
 
@@ -85,7 +87,7 @@ test('parse', function (t) {
   t.end();
 });
 
-test('toBer', function (t) {
+test('toBer', (t) => {
   const req = new AddRequest({
     messageID: 123,
     entry: dn.parse('cn=foo, o=test'),
@@ -122,7 +124,7 @@ test('toBer', function (t) {
   t.end();
 });
 
-test('toObject', function (t) {
+test('toObject', (t) => {
   const req = new AddRequest({
     entry: dn.parse('cn=foo, o=test'),
     attributes: [ new Attribute({

@@ -6,26 +6,28 @@ const uuid = require('uuid/v4');
 
 const ldap = require('../lib/index');
 
-///--- Globals
+////////////////////
+// Globals
 
-const SOCKET = '/tmp/.' + uuid();
-const SUFFIX = 'dc=' + uuid();
+const SOCKET = `/tmp/.${ uuid() }`;
+const SUFFIX = `dc=${ uuid() }`;
 
 let client;
 let server;
 
-///--- Helper
+////////////////////
+// Helper
 
 function search(t, options, callback) {
-  client.search(SUFFIX, options, function (err, res) {
+  client.search(SUFFIX, options, (err, res) => {
     t.ifError(err);
     t.ok(res);
     let found = false;
-    res.on('searchEntry', function (entry) {
+    res.on('searchEntry', (entry) => {
       t.ok(entry);
       found = true;
     });
-    res.on('end', function () {
+    res.on('end', () => {
       t.ok(found);
       if (callback) {return callback();}
 
@@ -34,32 +36,31 @@ function search(t, options, callback) {
   });
 }
 
-///--- Tests
+////////////////////
+// Tests
 
-test('setup', function (t) {
+test('setup', (t) => {
   server = ldap.createServer();
   t.ok(server);
-  server.listen(SOCKET, function () {
-    client = ldap.createClient({
-      socketPath: SOCKET
-    });
+  server.listen(SOCKET, () => {
+    client = ldap.createClient({ socketPath: SOCKET });
     t.ok(client);
     t.end();
   });
 
-  server.bind('cn=root', function (req, res, next) {
+  server.bind('cn=root', (req, res, next) => {
     res.end();
     return next();
   });
-  server.search(SUFFIX, function (req, res, next) {
+  server.search(SUFFIX, (req, res, next) => {
     const entry = {
-      dn: 'cn=foo, ' + SUFFIX,
+      dn: `cn=foo, ${ SUFFIX }`,
       attributes: {
         objectclass: [ 'person', 'top' ],
         cn: 'Pogo Stick',
         sn: 'Stick',
         givenname: 'ogo',
-        mail: uuid() + '@pogostick.org'
+        mail: `${ uuid() }@pogostick.org`
       }
     };
 
@@ -69,7 +70,7 @@ test('setup', function (t) {
   });
 });
 
-test('Evolution search filter (GH-3)', function (t) {
+test('Evolution search filter (GH-3)', (t) => {
   // This is what Evolution sends, when searching for a contact 'ogo'. Wow.
   const filter =
     '(|(cn=ogo*)(givenname=ogo*)(sn=ogo*)(mail=ogo*)(member=ogo*)' +
@@ -92,7 +93,7 @@ test('Evolution search filter (GH-3)', function (t) {
   return search(t, filter);
 });
 
-test('GH-49 Client errors on bad attributes', function (t) {
+test('GH-49 Client errors on bad attributes', (t) => {
   const searchOpts = {
     filter: 'cn=*ogo*',
     scope: 'one',
@@ -101,18 +102,16 @@ test('GH-49 Client errors on bad attributes', function (t) {
   return search(t, searchOpts);
 });
 
-test('GH-55 Client emits connect multiple times', function (t) {
-  const c = ldap.createClient({
-    socketPath: SOCKET
-  });
+test('GH-55 Client emits connect multiple times', (t) => {
+  const c = ldap.createClient({ socketPath: SOCKET });
 
   let count = 0;
-  c.on('connect', function (socket) {
+  c.on('connect', (socket) => {
     t.ok(socket);
     count++;
-    c.bind('cn=root', 'secret', function (err, res) {
+    c.bind('cn=root', 'secret', (err, res) => {
       t.ifError(err);
-      c.unbind(function () {
+      c.unbind(() => {
         t.equal(count, 1);
         t.end();
       });
@@ -120,9 +119,9 @@ test('GH-55 Client emits connect multiple times', function (t) {
   });
 });
 
-test('shutdown', function (t) {
-  client.unbind(function () {
-    server.on('close', function () {
+test('shutdown', (t) => {
+  client.unbind(() => {
+    server.on('close', () => {
       t.end();
     });
     server.close();

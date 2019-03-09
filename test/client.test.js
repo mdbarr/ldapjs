@@ -8,18 +8,19 @@ const uuid = require('uuid/v4');
 const vasync = require('vasync');
 const util = require('util');
 
-///--- Globals
+////////////////////
+// Globals
 
 const BIND_DN = 'cn=root';
 const BIND_PW = 'secret';
-const SOCKET = '/tmp/.' + uuid();
+const SOCKET = `/tmp/.${ uuid() }`;
 
 const SUFFIX = 'dc=test';
 
 const LOG = new Logger({
   name: 'ldapjs_unit_test',
   stream: process.stderr,
-  level: (process.env.LOG_LEVEL || 'info'),
+  level: process.env.LOG_LEVEL || 'info',
   serializers: Logger.stdSerializers,
   src: true
 });
@@ -30,9 +31,10 @@ let Change;
 let client;
 let server;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('setup', function (t) {
+test('setup', (t) => {
   ldap = require('../lib/index');
   t.ok(ldap);
   t.ok(ldap.createClient);
@@ -46,46 +48,46 @@ test('setup', function (t) {
   server = ldap.createServer();
   t.ok(server);
 
-  server.bind(BIND_DN, function (req, res, next) {
+  server.bind(BIND_DN, (req, res, next) => {
     if (req.credentials !== BIND_PW) {return next(new ldap.InvalidCredentialsError('Invalid password'));}
 
     res.end();
     return next();
   });
 
-  server.add(SUFFIX, function (req, res, next) {
+  server.add(SUFFIX, (req, res, next) => {
     res.end();
     return next();
   });
 
-  server.compare(SUFFIX, function (req, res, next) {
+  server.compare(SUFFIX, (req, res, next) => {
     res.end(req.value === 'test');
     return next();
   });
 
-  server.del(SUFFIX, function (req, res, next) {
+  server.del(SUFFIX, (req, res, next) => {
     res.end();
     return next();
   });
 
   // LDAP whoami
-  server.exop('1.3.6.1.4.1.4203.1.11.3', function (req, res, next) {
+  server.exop('1.3.6.1.4.1.4203.1.11.3', (req, res, next) => {
     res.value = 'u:xxyyz@EXAMPLE.NET';
     res.end();
     return next();
   });
 
-  server.modify(SUFFIX, function (req, res, next) {
+  server.modify(SUFFIX, (req, res, next) => {
     res.end();
     return next();
   });
 
-  server.modifyDN(SUFFIX, function (req, res, next) {
+  server.modifyDN(SUFFIX, (req, res, next) => {
     res.end();
     return next();
   });
 
-  server.search('dc=slow', function (req, res, next) {
+  server.search('dc=slow', (req, res, next) => {
     res.send({
       dn: 'dc=slow',
       attributes: {
@@ -94,21 +96,21 @@ test('setup', function (t) {
         'faster': '.'
       }
     });
-    setTimeout(function () {
+    setTimeout(() => {
       res.end();
       next();
     }, 250);
   });
 
-  server.search('dc=timeout', function (req, res, next) {
+  server.search('dc=timeout', (req, res, next) => {
     // Haha client!
   });
 
-  server.search(SUFFIX, function (req, res, next) {
+  server.search(SUFFIX, (req, res, next) => {
 
-    if (req.dn.equals('cn=ref,' + SUFFIX)) {
+    if (req.dn.equals(`cn=ref,${ SUFFIX }`)) {
       res.send(res.createSearchReference('ldap://localhost'));
-    } else if (req.dn.equals('cn=bin,' + SUFFIX)) {
+    } else if (req.dn.equals(`cn=bin,${ SUFFIX }`)) {
       res.send(res.createSearchEntry({
         objectName: req.dn,
         attributes: {
@@ -133,7 +135,7 @@ test('setup', function (t) {
     return next();
   });
 
-  server.search('cn=sizelimit', function (req, res, next) {
+  server.search('cn=sizelimit', (req, res, next) => {
     const sizeLimit = 200;
     let i;
     for (i = 0; i < 1000; i++) {
@@ -155,13 +157,13 @@ test('setup', function (t) {
     return next();
   });
 
-  server.search('cn=paged', function (req, res, next) {
+  server.search('cn=paged', (req, res, next) => {
     const min = 0;
     const max = 1000;
 
     function sendResults(start, end) {
-      start = (start < min) ? min : start;
-      end = (end > max || end < min) ? max : end;
+      start = start < min ? min : start;
+      end = end > max || end < min ? max : end;
       let i;
       for (i = start; i < end; i++) {
         res.send({
@@ -177,7 +179,7 @@ test('setup', function (t) {
 
     let cookie = null;
     let pageSize = 0;
-    req.controls.forEach(function (control) {
+    req.controls.forEach((control) => {
       if (control.type === ldap.PagedResultsControl.OID) {
         pageSize = control.value.size;
         cookie = control.value.cookie;
@@ -198,12 +200,10 @@ test('setup', function (t) {
       } else {
         resultCookie = new Buffer('');
       }
-      res.controls.push(new ldap.PagedResultsControl({
-        value: {
-          size: pageSize, // correctness not required here
-          cookie: resultCookie
-        }
-      }));
+      res.controls.push(new ldap.PagedResultsControl({ value: {
+        size: pageSize, // correctness not required here
+        cookie: resultCookie
+      } }));
       res.end();
       next();
     } else {
@@ -212,9 +212,9 @@ test('setup', function (t) {
     }
   });
 
-  server.search('cn=pagederr', function (req, res, next) {
+  server.search('cn=pagederr', (req, res, next) => {
     let cookie = null;
-    req.controls.forEach(function (control) {
+    req.controls.forEach((control) => {
       if (control.type === ldap.PagedResultsControl.OID) {
         cookie = control.value.cookie;
       }
@@ -228,22 +228,20 @@ test('setup', function (t) {
           objectclass: [ 'pagedResult' ]
         }
       });
-      res.controls.push(new ldap.PagedResultsControl({
-        value: {
-          size: 2,
-          cookie: new Buffer('a')
-        }
-      }));
+      res.controls.push(new ldap.PagedResultsControl({ value: {
+        size: 2,
+        cookie: new Buffer('a')
+      } }));
       res.end();
       return next();
-    } else {
-      // send error instead of second page
-      res.end(ldap.LDAP_SIZE_LIMIT_EXCEEDED);
-      return next();
     }
+    // send error instead of second page
+    res.end(ldap.LDAP_SIZE_LIMIT_EXCEEDED);
+    return next();
+
   });
 
-  server.search('dc=empty', function (req, res, next) {
+  server.search('dc=empty', (req, res, next) => {
     res.send({
       dn: 'dc=empty',
       attributes: {
@@ -255,33 +253,31 @@ test('setup', function (t) {
     return next();
   });
 
-  server.search('cn=busy', function (req, res, next) {
+  server.search('cn=busy', (req, res, next) => {
     next(new ldap.BusyError('too much to do'));
   });
 
-  server.search('', function (req, res, next) {
+  server.search('', (req, res, next) => {
     if (req.dn.toString() === '') {
       res.send({
         dn: '',
-        attributes: {
-          objectclass: [ 'RootDSE', 'top' ]
-        }
+        attributes: { objectclass: [ 'RootDSE', 'top' ] }
       });
       res.end();
     } else {
       // Turn away any other requests (since '' is the fallthrough route)
-      res.errorMessage = 'No tree found for: ' + req.dn.toString();
+      res.errorMessage = `No tree found for: ${ req.dn.toString() }`;
       res.end(ldap.LDAP_NO_SUCH_OBJECT);
     }
     return next();
   });
 
-  server.unbind(function (req, res, next) {
+  server.unbind((req, res, next) => {
     res.end();
     return next();
   });
 
-  server.listen(SOCKET, function () {
+  server.listen(SOCKET, () => {
     client = ldap.createClient({
       connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
       socketPath: SOCKET,
@@ -293,8 +289,8 @@ test('setup', function (t) {
 
 });
 
-test('simple bind failure', function (t) {
-  client.bind(BIND_DN, uuid(), function (err, res) {
+test('simple bind failure', (t) => {
+  client.bind(BIND_DN, uuid(), (err, res) => {
     t.ok(err);
     t.notOk(res);
 
@@ -308,8 +304,8 @@ test('simple bind failure', function (t) {
   });
 });
 
-test('simple bind success', function (t) {
-  client.bind(BIND_DN, BIND_PW, function (err, res) {
+test('simple bind success', (t) => {
+  client.bind(BIND_DN, BIND_PW, (err, res) => {
     t.ifError(err);
     t.ok(res);
     t.equal(res.status, 0);
@@ -317,8 +313,8 @@ test('simple bind success', function (t) {
   });
 });
 
-test('simple anonymous bind (empty credentials)', function (t) {
-  client.bind('', '', function (err, res) {
+test('simple anonymous bind (empty credentials)', (t) => {
+  client.bind('', '', (err, res) => {
     t.ifError(err);
     t.ok(res);
     t.equal(res.status, 0);
@@ -326,42 +322,42 @@ test('simple anonymous bind (empty credentials)', function (t) {
   });
 });
 
-test('auto-bind bad credentials', function (t) {
+test('auto-bind bad credentials', (t) => {
   const clt = ldap.createClient({
     socketPath: SOCKET,
     bindDN: BIND_DN,
     bindCredentials: 'totallybogus',
     log: LOG
   });
-  clt.once('error', function (err) {
+  clt.once('error', (err) => {
     t.equal(err.code, ldap.LDAP_INVALID_CREDENTIALS);
     clt.destroy();
     t.end();
   });
 });
 
-test('auto-bind success', function (t) {
+test('auto-bind success', (t) => {
   const clt = ldap.createClient({
     socketPath: SOCKET,
     bindDN: BIND_DN,
     bindCredentials: BIND_PW,
     log: LOG
   });
-  clt.once('connect', function () {
+  clt.once('connect', () => {
     t.ok(clt);
     clt.destroy();
     t.end();
   });
 });
 
-test('add success', function (t) {
+test('add success', (t) => {
   const attrs = [
     new Attribute({
       type: 'cn',
       vals: [ 'test' ]
     })
   ];
-  client.add('cn=add, ' + SUFFIX, attrs, function (err, res) {
+  client.add(`cn=add, ${ SUFFIX }`, attrs, (err, res) => {
     t.ifError(err);
     t.ok(res);
     t.equal(res.status, 0);
@@ -369,12 +365,12 @@ test('add success', function (t) {
   });
 });
 
-test('add success with object', function (t) {
+test('add success with object', (t) => {
   const entry = {
     cn: [ 'unit', 'add' ],
     sn: 'test'
   };
-  client.add('cn=add, ' + SUFFIX, entry, function (err, res) {
+  client.add(`cn=add, ${ SUFFIX }`, entry, (err, res) => {
     t.ifError(err);
     t.ok(res);
     t.equal(res.status, 0);
@@ -382,10 +378,10 @@ test('add success with object', function (t) {
   });
 });
 
-test('compare success', function (t) {
-  client.compare('cn=compare, ' + SUFFIX, 'cn', 'test', function (err,
+test('compare success', (t) => {
+  client.compare(`cn=compare, ${ SUFFIX }`, 'cn', 'test', (err,
     matched,
-    res) {
+    res) => {
     t.ifError(err);
     t.ok(matched);
     t.ok(res);
@@ -393,10 +389,10 @@ test('compare success', function (t) {
   });
 });
 
-test('compare false', function (t) {
-  client.compare('cn=compare, ' + SUFFIX, 'cn', 'foo', function (err,
+test('compare false', (t) => {
+  client.compare(`cn=compare, ${ SUFFIX }`, 'cn', 'foo', (err,
     matched,
-    res) {
+    res) => {
     t.ifError(err);
     t.notOk(matched);
     t.ok(res);
@@ -404,10 +400,10 @@ test('compare false', function (t) {
   });
 });
 
-test('compare bad suffix', function (t) {
-  client.compare('cn=' + uuid(), 'cn', 'foo', function (err,
+test('compare bad suffix', (t) => {
+  client.compare(`cn=${ uuid() }`, 'cn', 'foo', (err,
     matched,
-    res) {
+    res) => {
     t.ok(err);
     t.ok(err instanceof ldap.NoSuchObjectError);
     t.notOk(matched);
@@ -416,28 +412,28 @@ test('compare bad suffix', function (t) {
   });
 });
 
-test('delete success', function (t) {
-  client.del('cn=delete, ' + SUFFIX, function (err, res) {
+test('delete success', (t) => {
+  client.del(`cn=delete, ${ SUFFIX }`, (err, res) => {
     t.ifError(err);
     t.ok(res);
     t.end();
   });
 });
 
-test('delete with control (GH-212)', function (t) {
+test('delete with control (GH-212)', (t) => {
   const control = new ldap.Control({
     type: '1.2.3.4',
     criticality: false
   });
-  client.del('cn=delete, ' + SUFFIX, control, function (err, res) {
+  client.del(`cn=delete, ${ SUFFIX }`, control, (err, res) => {
     t.ifError(err);
     t.ok(res);
     t.end();
   });
 });
 
-test('exop success', function (t) {
-  client.exop('1.3.6.1.4.1.4203.1.11.3', function (err, value, res) {
+test('exop success', (t) => {
+  client.exop('1.3.6.1.4.1.4203.1.11.3', (err, value, res) => {
     t.ifError(err);
     t.ok(value);
     t.ok(res);
@@ -446,8 +442,8 @@ test('exop success', function (t) {
   });
 });
 
-test('exop invalid', function (t) {
-  client.exop('1.2.3.4', function (err, res) {
+test('exop invalid', (t) => {
+  client.exop('1.2.3.4', (err, res) => {
     t.ok(err);
     t.ok(err instanceof ldap.ProtocolError);
     t.notOk(res);
@@ -455,14 +451,14 @@ test('exop invalid', function (t) {
   });
 });
 
-test('bogus exop (GH-17)', function (t) {
-  client.exop('cn=root', function (err, value) {
+test('bogus exop (GH-17)', (t) => {
+  client.exop('cn=root', (err, value) => {
     t.ok(err);
     t.end();
   });
 });
 
-test('modify success', function (t) {
+test('modify success', (t) => {
   const change = new Change({
     type: 'Replace',
     modification: new Attribute({
@@ -470,7 +466,7 @@ test('modify success', function (t) {
       vals: [ 'test' ]
     })
   });
-  client.modify('cn=modify, ' + SUFFIX, change, function (err, res) {
+  client.modify(`cn=modify, ${ SUFFIX }`, change, (err, res) => {
     t.ifError(err);
     t.ok(res);
     t.equal(res.status, 0);
@@ -478,14 +474,12 @@ test('modify success', function (t) {
   });
 });
 
-test('modify change plain object success', function (t) {
+test('modify change plain object success', (t) => {
   const change = new Change({
     type: 'Replace',
-    modification: {
-      cn: 'test'
-    }
+    modification: { cn: 'test' }
   });
-  client.modify('cn=modify, ' + SUFFIX, change, function (err, res) {
+  client.modify(`cn=modify, ${ SUFFIX }`, change, (err, res) => {
     t.ifError(err);
     t.ok(res);
     t.equal(res.status, 0);
@@ -493,7 +487,7 @@ test('modify change plain object success', function (t) {
   });
 });
 
-test('modify array success', function (t) {
+test('modify array success', (t) => {
   const changes = [
     new Change({
       operation: 'Replace',
@@ -504,12 +498,10 @@ test('modify array success', function (t) {
     }),
     new Change({
       operation: 'Delete',
-      modification: new Attribute({
-        type: 'sn'
-      })
+      modification: new Attribute({ type: 'sn' })
     })
   ];
-  client.modify('cn=modify, ' + SUFFIX, changes, function (err, res) {
+  client.modify(`cn=modify, ${ SUFFIX }`, changes, (err, res) => {
     t.ifError(err);
     t.ok(res);
     t.equal(res.status, 0);
@@ -517,7 +509,7 @@ test('modify array success', function (t) {
   });
 });
 
-test('modify change plain object success (GH-31)', function (t) {
+test('modify change plain object success (GH-31)', (t) => {
   const change = {
     type: 'replace',
     modification: {
@@ -525,7 +517,7 @@ test('modify change plain object success (GH-31)', function (t) {
       sn: 'bar'
     }
   };
-  client.modify('cn=modify, ' + SUFFIX, change, function (err, res) {
+  client.modify(`cn=modify, ${ SUFFIX }`, change, (err, res) => {
     t.ifError(err);
     t.ok(res);
     t.equal(res.status, 0);
@@ -533,8 +525,8 @@ test('modify change plain object success (GH-31)', function (t) {
   });
 });
 
-test('modify DN new RDN only', function (t) {
-  client.modifyDN('cn=old, ' + SUFFIX, 'cn=new', function (err, res) {
+test('modify DN new RDN only', (t) => {
+  client.modifyDN(`cn=old, ${ SUFFIX }`, 'cn=new', (err, res) => {
     t.ifError(err);
     t.ok(res);
     t.equal(res.status, 0);
@@ -542,8 +534,8 @@ test('modify DN new RDN only', function (t) {
   });
 });
 
-test('modify DN new superior', function (t) {
-  client.modifyDN('cn=old, ' + SUFFIX, 'cn=new, dc=foo', function (err, res) {
+test('modify DN new superior', (t) => {
+  client.modifyDN(`cn=old, ${ SUFFIX }`, 'cn=new, dc=foo', (err, res) => {
     t.ifError(err);
     t.ok(res);
     t.equal(res.status, 0);
@@ -551,15 +543,15 @@ test('modify DN new superior', function (t) {
   });
 });
 
-test('search basic', function (t) {
-  client.search('cn=test, ' + SUFFIX, '(objectclass=*)', function (err, res) {
+test('search basic', (t) => {
+  client.search(`cn=test, ${ SUFFIX }`, '(objectclass=*)', (err, res) => {
     t.ifError(err);
     t.ok(res);
     let gotEntry = 0;
-    res.on('searchEntry', function (entry) {
+    res.on('searchEntry', (entry) => {
       t.ok(entry);
       t.ok(entry instanceof ldap.SearchEntry);
-      t.equal(entry.dn.toString(), 'cn=test, ' + SUFFIX);
+      t.equal(entry.dn.toString(), `cn=test, ${ SUFFIX }`);
       t.ok(entry.attributes);
       t.ok(entry.attributes.length);
       t.equal(entry.attributes[0].type, 'cn');
@@ -567,10 +559,10 @@ test('search basic', function (t) {
       t.ok(entry.object);
       gotEntry++;
     });
-    res.on('error', function (err) {
+    res.on('error', (err) => {
       t.fail(err);
     });
-    res.on('end', function (res) {
+    res.on('end', (res) => {
       t.ok(res);
       t.ok(res instanceof ldap.SearchResponse);
       t.equal(res.status, 0);
@@ -580,28 +572,26 @@ test('search basic', function (t) {
   });
 });
 
-test('search sizeLimit', function (t) {
-  t.test('over limit', function (t2) {
-    client.search('cn=sizelimit', {}, function (err, res) {
+test('search sizeLimit', (t) => {
+  t.test('over limit', (t2) => {
+    client.search('cn=sizelimit', {}, (err, res) => {
       t2.ifError(err);
-      res.on('error', function (error) {
+      res.on('error', (error) => {
         t2.equal(error.name, 'SizeLimitExceededError');
         t2.end();
       });
     });
   });
 
-  t.test('under limit', function (t2) {
+  t.test('under limit', (t2) => {
     const limit = 100;
-    client.search('cn=sizelimit', {
-      sizeLimit: limit
-    }, function (err, res) {
+    client.search('cn=sizelimit', { sizeLimit: limit }, (err, res) => {
       t2.ifError(err);
       let count = 0;
-      res.on('searchEntry', function (entry) {
+      res.on('searchEntry', (entry) => {
         count++;
       });
-      res.on('end', function () {
+      res.on('end', () => {
         t2.pass();
         t2.equal(count, limit);
         t2.end();
@@ -611,24 +601,20 @@ test('search sizeLimit', function (t) {
   });
 });
 
-test('search paged', function (t) {
-  t.test('paged - no pauses', function (t2) {
+test('search paged', (t) => {
+  t.test('paged - no pauses', (t2) => {
     let countEntries = 0;
     let countPages = 0;
-    client.search('cn=paged', {
-      paged: {
-        pageSize: 100
-      }
-    }, function (err, res) {
+    client.search('cn=paged', { paged: { pageSize: 100 } }, (err, res) => {
       t2.ifError(err);
-      res.on('searchEntry', function () {
+      res.on('searchEntry', () => {
         countEntries++;
       });
-      res.on('page', function () {
+      res.on('page', () => {
         countPages++;
       });
       res.on('error', t2.ifError.bind(t2));
-      res.on('end', function () {
+      res.on('end', () => {
         t2.equal(countEntries, 1000);
         t2.equal(countPages, 10);
         t2.end();
@@ -636,16 +622,14 @@ test('search paged', function (t) {
     });
   });
 
-  t.test('paged - pauses', function (t2) {
+  t.test('paged - pauses', (t2) => {
     let countPages = 0;
-    client.search('cn=paged', {
-      paged: {
-        pageSize: 100,
-        pagePause: true
-      }
-    }, function (err, res) {
+    client.search('cn=paged', { paged: {
+      pageSize: 100,
+      pagePause: true
+    } }, (err, res) => {
       t2.ifError(err);
-      res.on('page', function (result, cb) {
+      res.on('page', (result, cb) => {
         countPages++;
         // cancel after 9 to verify callback usage
         if (countPages === 9) {
@@ -657,80 +641,64 @@ test('search paged', function (t) {
         return cb();
       });
       res.on('error', t2.ifError.bind(t2));
-      res.on('end', function () {
+      res.on('end', () => {
         t2.equal(countPages, 9);
         t2.end();
       });
     });
   });
 
-  t.test('paged - no support (err handled)', function (t2) {
-    client.search(SUFFIX, {
-      paged: {
-        pageSize: 100
-      }
-    }, function (err, res) {
+  t.test('paged - no support (err handled)', (t2) => {
+    client.search(SUFFIX, { paged: { pageSize: 100 } }, (err, res) => {
       t2.ifError(err);
       res.on('pageError', t2.ok.bind(t2));
-      res.on('end', function () {
+      res.on('end', () => {
         t2.pass();
         t2.end();
       });
     });
   });
 
-  t.test('paged - no support (err not handled)', function (t2) {
-    client.search(SUFFIX, {
-      paged: {
-        pageSize: 100
-      }
-    }, function (err, res) {
+  t.test('paged - no support (err not handled)', (t2) => {
+    client.search(SUFFIX, { paged: { pageSize: 100 } }, (err, res) => {
       t2.ifError(err);
       res.on('end', t2.fail.bind(t2));
-      res.on('error', function (error) {
+      res.on('error', (error) => {
         t2.ok(error);
         t2.end();
       });
     });
   });
 
-  t.test('paged - redundant control', function (t2) {
+  t.test('paged - redundant control', (t2) => {
     try {
-      client.search(SUFFIX, {
-        paged: {
-          pageSize: 100
-        }
-      }, new ldap.PagedResultsControl(),
-      function (err, res) {
-        t2.fail();
-      });
+      client.search(SUFFIX, { paged: { pageSize: 100 } }, new ldap.PagedResultsControl(),
+        (err, res) => {
+          t2.fail();
+        });
     } catch (e) {
       t2.ok(e);
       t2.end();
     }
   });
 
-  t.test('paged - handle later error', function (t2) {
+  t.test('paged - handle later error', (t2) => {
     let countEntries = 0;
     let countPages = 0;
-    client.search('cn=pagederr', {
-      paged: {
-        pageSize: 1
-      }
-    }, function (err, res) {
+    client.search('cn=pagederr', { paged: { pageSize: 1 } }, (err, res) => {
       t2.ifError(err);
-      res.on('searchEntry', function () {
+      res.on('searchEntry', () => {
         t2.ok(++countEntries);
       });
-      res.on('page', function () {
+      res.on('page', () => {
         t2.ok(++countPages);
       });
-      res.on('error', function (error) {
+      res.on('error', (error) => {
         t2.equal(countEntries, 1);
         t2.equal(countPages, 1);
         t2.end();
       });
-      res.on('end', function () {
+      res.on('end', () => {
         t2.fail('should not be reached');
       });
     });
@@ -739,26 +707,26 @@ test('search paged', function (t) {
   t.end();
 });
 
-test('search referral', function (t) {
-  client.search('cn=ref, ' + SUFFIX, '(objectclass=*)', function (err, res) {
+test('search referral', (t) => {
+  client.search(`cn=ref, ${ SUFFIX }`, '(objectclass=*)', (err, res) => {
     t.ifError(err);
     t.ok(res);
     let gotEntry = 0;
     let gotReferral = false;
-    res.on('searchEntry', function (entry) {
+    res.on('searchEntry', (entry) => {
       gotEntry++;
     });
-    res.on('searchReference', function (referral) {
+    res.on('searchReference', (referral) => {
       gotReferral = true;
       t.ok(referral);
       t.ok(referral instanceof ldap.SearchReference);
       t.ok(referral.uris);
       t.ok(referral.uris.length);
     });
-    res.on('error', function (err) {
+    res.on('error', (err) => {
       t.fail(err);
     });
-    res.on('end', function (res) {
+    res.on('end', (res) => {
       t.ok(res);
       t.ok(res instanceof ldap.SearchResponse);
       t.equal(res.status, 0);
@@ -769,20 +737,20 @@ test('search referral', function (t) {
   });
 });
 
-test('search rootDSE', function (t) {
-  client.search('', '(objectclass=*)', function (err, res) {
+test('search rootDSE', (t) => {
+  client.search('', '(objectclass=*)', (err, res) => {
     t.ifError(err);
     t.ok(res);
-    res.on('searchEntry', function (entry) {
+    res.on('searchEntry', (entry) => {
       t.ok(entry);
       t.equal(entry.dn.toString(), '');
       t.ok(entry.attributes);
       t.ok(entry.object);
     });
-    res.on('error', function (err) {
+    res.on('error', (err) => {
       t.fail(err);
     });
-    res.on('end', function (res) {
+    res.on('end', (res) => {
       t.ok(res);
       t.ok(res instanceof ldap.SearchResponse);
       t.equal(res.status, 0);
@@ -791,12 +759,12 @@ test('search rootDSE', function (t) {
   });
 });
 
-test('search empty attribute', function (t) {
-  client.search('dc=empty', '(objectclass=*)', function (err, res) {
+test('search empty attribute', (t) => {
+  client.search('dc=empty', '(objectclass=*)', (err, res) => {
     t.ifError(err);
     t.ok(res);
     let gotEntry = 0;
-    res.on('searchEntry', function (entry) {
+    res.on('searchEntry', (entry) => {
       const obj = entry.toObject();
       t.equal('dc=empty', obj.dn);
       t.ok(obj.member);
@@ -805,10 +773,10 @@ test('search empty attribute', function (t) {
       t.ok(obj['member;range=0-1'].length);
       gotEntry++;
     });
-    res.on('error', function (err) {
+    res.on('error', (err) => {
       t.fail(err);
     });
-    res.on('end', function (res) {
+    res.on('end', (res) => {
       t.ok(res);
       t.ok(res instanceof ldap.SearchResponse);
       t.equal(res.status, 0);
@@ -818,17 +786,17 @@ test('search empty attribute', function (t) {
   });
 });
 
-test('GH-21 binary attributes', function (t) {
-  client.search('cn=bin, ' + SUFFIX, '(objectclass=*)', function (err, res) {
+test('GH-21 binary attributes', (t) => {
+  client.search(`cn=bin, ${ SUFFIX }`, '(objectclass=*)', (err, res) => {
     t.ifError(err);
     t.ok(res);
     let gotEntry = 0;
     const expect = new Buffer('\u00bd + \u00bc = \u00be', 'utf8');
     const expect2 = new Buffer([ 0xB5, 0xE7, 0xCA, 0xD3, 0xBB, 0xFA ]);
-    res.on('searchEntry', function (entry) {
+    res.on('searchEntry', (entry) => {
       t.ok(entry);
       t.ok(entry instanceof ldap.SearchEntry);
-      t.equal(entry.dn.toString(), 'cn=bin, ' + SUFFIX);
+      t.equal(entry.dn.toString(), `cn=bin, ${ SUFFIX }`);
       t.ok(entry.attributes);
       t.ok(entry.attributes.length);
       t.equal(entry.attributes[0].type, 'foo;binary');
@@ -844,10 +812,10 @@ test('GH-21 binary attributes', function (t) {
       t.ok(entry.object);
       gotEntry++;
     });
-    res.on('error', function (err) {
+    res.on('error', (err) => {
       t.fail(err);
     });
-    res.on('end', function (res) {
+    res.on('end', (res) => {
       t.ok(res);
       t.ok(res instanceof ldap.SearchResponse);
       t.equal(res.status, 0);
@@ -857,29 +825,29 @@ test('GH-21 binary attributes', function (t) {
   });
 });
 
-test('GH-23 case insensitive attribute filtering', function (t) {
+test('GH-23 case insensitive attribute filtering', (t) => {
   const opts = {
     filter: '(objectclass=*)',
     attributes: [ 'Cn' ]
   };
-  client.search('cn=test, ' + SUFFIX, opts, function (err, res) {
+  client.search(`cn=test, ${ SUFFIX }`, opts, (err, res) => {
     t.ifError(err);
     t.ok(res);
     let gotEntry = 0;
-    res.on('searchEntry', function (entry) {
+    res.on('searchEntry', (entry) => {
       t.ok(entry);
       t.ok(entry instanceof ldap.SearchEntry);
-      t.equal(entry.dn.toString(), 'cn=test, ' + SUFFIX);
+      t.equal(entry.dn.toString(), `cn=test, ${ SUFFIX }`);
       t.ok(entry.attributes);
       t.ok(entry.attributes.length);
       t.equal(entry.attributes[0].type, 'cn');
       t.ok(entry.object);
       gotEntry++;
     });
-    res.on('error', function (err) {
+    res.on('error', (err) => {
       t.fail(err);
     });
-    res.on('end', function (res) {
+    res.on('end', (res) => {
       t.ok(res);
       t.ok(res instanceof ldap.SearchResponse);
       t.equal(res.status, 0);
@@ -889,19 +857,19 @@ test('GH-23 case insensitive attribute filtering', function (t) {
   });
 });
 
-test('GH-24 attribute selection of *', function (t) {
+test('GH-24 attribute selection of *', (t) => {
   const opts = {
     filter: '(objectclass=*)',
     attributes: [ '*' ]
   };
-  client.search('cn=test, ' + SUFFIX, opts, function (err, res) {
+  client.search(`cn=test, ${ SUFFIX }`, opts, (err, res) => {
     t.ifError(err);
     t.ok(res);
     let gotEntry = 0;
-    res.on('searchEntry', function (entry) {
+    res.on('searchEntry', (entry) => {
       t.ok(entry);
       t.ok(entry instanceof ldap.SearchEntry);
-      t.equal(entry.dn.toString(), 'cn=test, ' + SUFFIX);
+      t.equal(entry.dn.toString(), `cn=test, ${ SUFFIX }`);
       t.ok(entry.attributes);
       t.ok(entry.attributes.length);
       t.equal(entry.attributes[0].type, 'cn');
@@ -909,10 +877,10 @@ test('GH-24 attribute selection of *', function (t) {
       t.ok(entry.object);
       gotEntry++;
     });
-    res.on('error', function (err) {
+    res.on('error', (err) => {
       t.fail(err);
     });
-    res.on('end', function (res) {
+    res.on('end', (res) => {
       t.ok(res);
       t.ok(res instanceof ldap.SearchResponse);
       t.equal(res.status, 0);
@@ -922,27 +890,27 @@ test('GH-24 attribute selection of *', function (t) {
   });
 });
 
-test('idle timeout', function (t) {
+test('idle timeout', (t) => {
   client.idleTimeout = 250;
   function premature() {
     t.ifError(true);
   }
   client.on('idle', premature);
-  client.search('dc=slow', 'objectclass=*', function (err, res) {
+  client.search('dc=slow', 'objectclass=*', (err, res) => {
     t.ifError(err);
-    res.on('searchEntry', function (res) {
+    res.on('searchEntry', (res) => {
       t.ok(res);
     });
-    res.on('error', function (err) {
+    res.on('error', (err) => {
       t.ifError(err);
     });
-    res.on('end', function () {
-      const late = setTimeout(function () {
+    res.on('end', () => {
+      const late = setTimeout(() => {
         t.ifError(false, 'too late');
       }, 500);
       // It's ok to go idle now
       client.removeListener('idle', premature);
-      client.on('idle', function () {
+      client.on('idle', () => {
         clearTimeout(late);
         client.removeAllListeners('idle');
         client.idleTimeout = 0;
@@ -952,89 +920,83 @@ test('idle timeout', function (t) {
   });
 });
 
-test('setup action', function (t) {
+test('setup action', (t) => {
   const setupClient = ldap.createClient({
     connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
     socketPath: SOCKET,
     log: LOG
   });
-  setupClient.on('setup', function (clt, cb) {
-    clt.bind(BIND_DN, BIND_PW, function (err, res) {
+  setupClient.on('setup', (clt, cb) => {
+    clt.bind(BIND_DN, BIND_PW, (err, res) => {
       t.ifError(err);
       cb(err);
     });
   });
-  setupClient.search(SUFFIX, {
-    scope: 'base'
-  }, function (err, res) {
+  setupClient.search(SUFFIX, { scope: 'base' }, (err, res) => {
     t.ifError(err);
     t.ok(res);
-    res.on('end', function () {
+    res.on('end', () => {
       setupClient.destroy();
       t.end();
     });
   });
 });
 
-test('setup reconnect', function (t) {
+test('setup reconnect', (t) => {
   const rClient = ldap.createClient({
     connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
     socketPath: SOCKET,
     reconnect: true,
     log: LOG
   });
-  rClient.on('setup', function (clt, cb) {
-    clt.bind(BIND_DN, BIND_PW, function (err, res) {
+  rClient.on('setup', (clt, cb) => {
+    clt.bind(BIND_DN, BIND_PW, (err, res) => {
       t.ifError(err);
       cb(err);
     });
   });
 
   function doSearch(_, cb) {
-    rClient.search(SUFFIX, {
-      scope: 'base'
-    }, function (err, res) {
+    rClient.search(SUFFIX, { scope: 'base' }, (err, res) => {
       t.ifError(err);
-      res.on('end', function () {
+      res.on('end', () => {
         cb();
       });
     });
   }
-  vasync.pipeline({
-    funcs: [
-      doSearch,
-      function cleanDisconnect(_, cb) {
-        t.ok(rClient.connected);
-        rClient.once('close', function (had_err) {
-          t.ifError(had_err);
-          t.equal(rClient.connected, false);
-          cb();
-        });
-        rClient.unbind();
-      },
-      doSearch,
-      function simulateError(_, cb) {
-        const msg = 'fake socket error';
-        rClient.once('error', function (err) {
-          t.equal(err.message, msg);
-          t.ok(err);
-        });
-        rClient.once('close', function (had_err) {
-          // can't test had_err because the socket error is being faked
-          cb();
-        });
-        rClient._socket.emit('error', new Error(msg));
-      },
-      doSearch
-    ]
-  }, function (err, res) {
+  vasync.pipeline({ funcs: [
+    doSearch,
+    function cleanDisconnect(_, cb) {
+      t.ok(rClient.connected);
+      rClient.once('close', (had_err) => {
+        t.ifError(had_err);
+        t.equal(rClient.connected, false);
+        cb();
+      });
+      rClient.unbind();
+    },
+    doSearch,
+    function simulateError(_, cb) {
+      const msg = 'fake socket error';
+      rClient.once('error', (err) => {
+        t.equal(err.message, msg);
+        t.ok(err);
+      });
+      rClient.once('close', (had_err) => {
+        // can't test had_err because the socket error is being faked
+        cb();
+      });
+      rClient._socket.emit('error', new Error(msg));
+    },
+    doSearch
+  ] }, (err, res) => {
     t.ifError(err);
     rClient.destroy();
     t.end();
   });
 });
 
-test('setup abort', function (t) {
+test('setup abort', (t) => {
   const setupClient = ldap.createClient({
     connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
     socketPath: SOCKET,
@@ -1042,12 +1004,12 @@ test('setup abort', function (t) {
     log: LOG
   });
   const message = 'It\'s a trap!';
-  setupClient.on('setup', function (clt, cb) {
+  setupClient.on('setup', (clt, cb) => {
     // simulate failure
     t.ok(clt);
     cb(new Error(message));
   });
-  setupClient.on('setupError', function (err) {
+  setupClient.on('setupError', (err) => {
     t.ok(true);
     t.equal(err.message, message);
     setupClient.destroy();
@@ -1055,7 +1017,7 @@ test('setup abort', function (t) {
   });
 });
 
-test('abort reconnect', function (t) {
+test('abort reconnect', (t) => {
   const abortClient = ldap.createClient({
     connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
     socketPath: '/dev/null',
@@ -1063,12 +1025,12 @@ test('abort reconnect', function (t) {
     log: LOG
   });
   let retryCount = 0;
-  abortClient.on('connectError', function () {
+  abortClient.on('connectError', () => {
     ++retryCount;
   });
-  abortClient.once('connectError', function () {
+  abortClient.once('connectError', () => {
     t.ok(true);
-    abortClient.once('destroy', function () {
+    abortClient.once('destroy', () => {
       t.ok(retryCount < 3);
       t.end();
     });
@@ -1076,7 +1038,7 @@ test('abort reconnect', function (t) {
   });
 });
 
-test('reconnect max retries', function (t) {
+test('reconnect max retries', (t) => {
   const RETRIES = 5;
   const rClient = ldap.createClient({
     connectTimeout: 100,
@@ -1090,31 +1052,31 @@ test('reconnect max retries', function (t) {
     log: LOG
   });
   let count = 0;
-  rClient.on('connectError', function () {
+  rClient.on('connectError', () => {
     count++;
   });
-  rClient.on('error', function (err) {
+  rClient.on('error', (err) => {
     t.equal(count, RETRIES);
     rClient.destroy();
     t.end();
   });
 });
 
-test('reconnect on server close', function (t) {
+test('reconnect on server close', (t) => {
   const clt = ldap.createClient({
     socketPath: SOCKET,
     reconnect: true,
     log: LOG
   });
-  clt.on('setup', function (sclt, cb) {
-    sclt.bind(BIND_DN, BIND_PW, function (err, res) {
+  clt.on('setup', (sclt, cb) => {
+    sclt.bind(BIND_DN, BIND_PW, (err, res) => {
       t.ifError(err);
       cb(err);
     });
   });
-  clt.once('connect', function () {
+  clt.once('connect', () => {
     t.ok(clt._socket);
-    clt.once('connect', function () {
+    clt.once('connect', () => {
       t.ok(true, 'successful reconnect');
       clt.destroy();
       t.end();
@@ -1125,25 +1087,25 @@ test('reconnect on server close', function (t) {
   });
 });
 
-test('no auto-reconnect on unbind', function (t) {
+test('no auto-reconnect on unbind', (t) => {
   const clt = ldap.createClient({
     socketPath: SOCKET,
     reconnect: true,
     log: LOG
   });
-  clt.on('setup', function (sclt, cb) {
-    sclt.bind(BIND_DN, BIND_PW, function (err, res) {
+  clt.on('setup', (sclt, cb) => {
+    sclt.bind(BIND_DN, BIND_PW, (err, res) => {
       t.ifError(err);
       cb(err);
     });
   });
-  clt.once('connect', function () {
-    clt.once('connect', function () {
+  clt.once('connect', () => {
+    clt.once('connect', () => {
       t.ifError(new Error('client should not reconnect'));
     });
-    clt.once('close', function () {
+    clt.once('close', () => {
       t.ok(true, 'initial close');
-      setImmediate(function () {
+      setImmediate(() => {
         t.ok(!clt.connected, 'should not be connected');
         t.ok(!clt.connecting, 'should not be connecting');
         clt.destroy();
@@ -1155,63 +1117,61 @@ test('no auto-reconnect on unbind', function (t) {
   });
 });
 
-test('abandon (GH-27)', function (t) {
+test('abandon (GH-27)', (t) => {
   // FIXME: test abandoning a real request
-  client.abandon(401876543, function (err) {
+  client.abandon(401876543, (err) => {
     t.ifError(err);
     t.end();
   });
 });
 
-test('search timeout (GH-51)', function (t) {
+test('search timeout (GH-51)', (t) => {
   client.timeout = 250;
-  client.search('dc=timeout', 'objectclass=*', function (err, res) {
+  client.search('dc=timeout', 'objectclass=*', (err, res) => {
     t.ifError(err);
-    res.on('error', function () {
+    res.on('error', () => {
       t.end();
     });
   });
 });
 
-test('resultError handling', function (t) {
+test('resultError handling', (t) => {
   t.plan(3);
-  vasync.pipeline({
-    funcs: [
-      function errSearch(_, cb) {
-        client.once('resultError', function (error) {
+  vasync.pipeline({ funcs: [
+    function errSearch(_, cb) {
+      client.once('resultError', (error) => {
+        t.equal(error.name, 'BusyError');
+      });
+      client.search('cn=busy', {}, (err, res) => {
+        res.once('error', (error) => {
           t.equal(error.name, 'BusyError');
+          cb();
         });
-        client.search('cn=busy', {}, function (err, res) {
-          res.once('error', function (error) {
-            t.equal(error.name, 'BusyError');
-            cb();
-          });
+      });
+    },
+    function cleanSearch(_, cb) {
+      client.on('resultError', t.ifError.bind(null));
+      client.search(SUFFIX, {}, (err, res) => {
+        res.once('end', () => {
+          t.ok(true);
+          cb();
         });
-      },
-      function cleanSearch(_, cb) {
-        client.on('resultError', t.ifError.bind(null));
-        client.search(SUFFIX, {}, function (err, res) {
-          res.once('end', function () {
-            t.ok(true);
-            cb();
-          });
-        });
-      }
-    ]
-  }, function (err, res) {
+      });
+    }
+  ] }, (err, res) => {
     client.removeAllListeners('resultError');
   });
 });
 
-test('unbind (GH-30)', function (t) {
-  client.unbind(function (err) {
+test('unbind (GH-30)', (t) => {
+  client.unbind((err) => {
     t.ifError(err);
     t.end();
   });
 });
 
-test('shutdown', function (t) {
-  server.on('close', function () {
+test('shutdown', (t) => {
+  server.on('close', () => {
     t.end();
   });
   server.close();

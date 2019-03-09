@@ -3,18 +3,16 @@
 
 const test = require('tape').test;
 
-const asn1 = require('asn1');
-
-///--- Globals
+////////////////////
+// Globals
 
 let ExtensibleFilter;
-const BerReader = asn1.BerReader;
-const BerWriter = asn1.BerWriter;
 let filters;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   filters = require('../../lib/index').filters;
   t.ok(filters);
   ExtensibleFilter = filters.ExtensibleFilter;
@@ -22,13 +20,13 @@ test('load library', function (t) {
   t.end();
 });
 
-test('Construct no args', function (t) {
+test('Construct no args', (t) => {
   const f = new ExtensibleFilter();
   t.ok(f);
   t.end();
 });
 
-test('Construct args', function (t) {
+test('Construct args', (t) => {
   const f = new ExtensibleFilter({
     matchType: 'foo',
     value: 'bar'
@@ -40,7 +38,7 @@ test('Construct args', function (t) {
   t.end();
 });
 
-test('parse RFC example 1', function (t) {
+test('parse RFC example 1', (t) => {
   const f = filters.parseString('(cn:caseExactMatch:=Fred Flintstone)');
   t.ok(f);
   t.equal(f.matchType, 'cn');
@@ -50,7 +48,7 @@ test('parse RFC example 1', function (t) {
   t.end();
 });
 
-test('parse RFC example 2', function (t) {
+test('parse RFC example 2', (t) => {
   const f = filters.parseString('(cn:=Betty Rubble)');
   t.ok(f);
   t.equal(f.matchType, 'cn');
@@ -60,7 +58,7 @@ test('parse RFC example 2', function (t) {
   t.end();
 });
 
-test('parse RFC example 3', function (t) {
+test('parse RFC example 3', (t) => {
   const f = filters.parseString('(sn:dn:2.4.6.8.10:=Barney Rubble)');
   t.ok(f);
   t.equal(f.matchType, 'sn');
@@ -70,7 +68,7 @@ test('parse RFC example 3', function (t) {
   t.end();
 });
 
-test('parse RFC example 3', function (t) {
+test('parse RFC example 3', (t) => {
   const f = filters.parseString('(o:dn:=Ace Industry)');
   t.ok(f);
   t.equal(f.matchType, 'o');
@@ -80,7 +78,7 @@ test('parse RFC example 3', function (t) {
   t.end();
 });
 
-test('parse RFC example 4', function (t) {
+test('parse RFC example 4', (t) => {
   const f = filters.parseString('(:1.2.3:=Wilma Flintstone)');
   t.ok(f);
   t.notOk(f.matchType);
@@ -90,7 +88,7 @@ test('parse RFC example 4', function (t) {
   t.end();
 });
 
-test('parse RFC example 5', function (t) {
+test('parse RFC example 5', (t) => {
   const f = filters.parseString('(:DN:2.4.6.8.10:=Dino)');
   t.ok(f);
   t.notOk(f.matchType);

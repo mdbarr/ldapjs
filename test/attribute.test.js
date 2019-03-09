@@ -5,26 +5,28 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
 let Attribute;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   Attribute = require('../lib/index').Attribute;
   t.ok(Attribute);
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new Attribute());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   let attr = new Attribute({
     type: 'cn',
     vals: [ 'foo', 'bar' ]
@@ -36,19 +38,17 @@ test('new with args', function (t) {
   t.equal(attr.vals[0], 'foo');
   t.equal(attr.vals[1], 'bar');
   t.equal(attr.vals[2], 'baz');
-  t.throws(function () {
+  t.throws(() => {
     attr = new Attribute('not an object');
   });
-  t.throws(function () {
+  t.throws(() => {
     const typeThatIsNotAString = 1;
-    attr = new Attribute({
-      type: typeThatIsNotAString
-    });
+    attr = new Attribute({ type: typeThatIsNotAString });
   });
   t.end();
 });
 
-test('toBer', function (t) {
+test('toBer', (t) => {
   const attr = new Attribute({
     type: 'cn',
     vals: [ 'foo', 'bar' ]
@@ -65,7 +65,7 @@ test('toBer', function (t) {
   t.end();
 });
 
-test('parse', function (t) {
+test('parse', (t) => {
   const ber = new BerWriter();
   ber.startSequence();
   ber.writeString('cn');
@@ -85,7 +85,7 @@ test('parse', function (t) {
   t.end();
 });
 
-test('parse - without 0x31', function (t) {
+test('parse - without 0x31', (t) => {
   const ber = new BerWriter;
   ber.startSequence();
   ber.writeString('sn');
@@ -101,7 +101,7 @@ test('parse - without 0x31', function (t) {
   t.end();
 });
 
-test('toString', function (t) {
+test('toString', (t) => {
   const attr = new Attribute({
     type: 'foobar',
     vals: [ 'asdf' ]
@@ -112,7 +112,7 @@ test('toString', function (t) {
   t.end();
 });
 
-test('isAttribute', function (t) {
+test('isAttribute', (t) => {
   const isA = Attribute.isAttribute;
   t.notOk(isA(null));
   t.notOk(isA('asdf'));
@@ -124,20 +124,20 @@ test('isAttribute', function (t) {
   t.ok(isA({
     type: 'foo',
     vals: [ 'item', new Buffer(5) ],
-    toBer: function () { /* placeholder */ }
+    toBer () { /* placeholder */ }
   }));
 
   // bad type in vals
   t.notOk(isA({
     type: 'foo',
     vals: [ 'item', null ],
-    toBer: function () { /* placeholder */ }
+    toBer () { /* placeholder */ }
   }));
 
   t.end();
 });
 
-test('compare', function (t) {
+test('compare', (t) => {
   const comp = Attribute.compare;
   const a = new Attribute({
     type: 'foo',
@@ -149,10 +149,10 @@ test('compare', function (t) {
   });
   const notAnAttribute = 'this is not an attribute';
 
-  t.throws(function () {
+  t.throws(() => {
     comp(a, notAnAttribute);
   });
-  t.throws(function () {
+  t.throws(() => {
     comp(notAnAttribute, b);
   });
 

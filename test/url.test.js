@@ -3,21 +3,22 @@
 
 const test = require('tape').test;
 
-///--- Globals
+////////////////////
+// Globals
 
-let url;
 let parseURL;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   parseURL = require('../lib/index').parseURL;
   t.ok(parseURL);
 
   t.end();
 });
 
-test('parse empty', function (t) {
+test('parse empty', (t) => {
   const u = parseURL('ldap:///');
   t.equal(u.hostname, 'localhost');
   t.equal(u.port, 389);
@@ -27,7 +28,7 @@ test('parse empty', function (t) {
   t.end();
 });
 
-test('parse hostname', function (t) {
+test('parse hostname', (t) => {
   const u = parseURL('ldap://example.com/');
   t.equal(u.hostname, 'example.com');
   t.equal(u.port, 389);
@@ -37,7 +38,7 @@ test('parse hostname', function (t) {
   t.end();
 });
 
-test('parse host and port', function (t) {
+test('parse host and port', (t) => {
   const u = parseURL('ldap://example.com:1389/');
   t.equal(u.hostname, 'example.com');
   t.equal(u.port, 1389);
@@ -47,7 +48,7 @@ test('parse host and port', function (t) {
   t.end();
 });
 
-test('parse full', function (t) {
+test('parse full', (t) => {
 
   const u = parseURL('ldaps://ldap.example.com:1389/dc=example%20,dc=com' +
                     '?cn,sn?sub?(cn=Babs%20Jensen)');

@@ -12,7 +12,10 @@ const vasync = require('vasync');
 const ldap = require('../lib/index');
 const Logger = require('bunyan');
 
-///--- Globals
+////////////////////
+// Globals
+
+let parsed;
 
 const opts = [
   {
@@ -21,9 +24,7 @@ const opts = [
     help: 'Input file',
     helpArg: 'FILE'
   },
-  {
-    group: 'General Options'
-  },
+  { group: 'General Options' },
   {
     names: [ 'help', 'h' ],
     type: 'bool',
@@ -35,9 +36,7 @@ const opts = [
     help: 'Set debug level <0-2>',
     helpArg: 'LEVEL'
   },
-  {
-    group: 'Connection Options'
-  },
+  { group: 'Connection Options' },
   {
     names: [ 'url', 'u' ],
     type: 'string',
@@ -67,36 +66,33 @@ const opts = [
     default: false
   }
 ];
-const parser = dashdash.createParser({
-  options: opts
-});
+const parser = dashdash.createParser({ options: opts });
 
-///--- Helpers
+////////////////////
+// Helpers
 
 function usage(code, message) {
-  const msg = (message ? message + '\n' : '') +
-    'Usage: ' + path.basename(process.argv[1]) + ' [OPTIONS] [JSON]\n\n' +
-    parser.help({
-      includeEnv: true
-    });
+  const msg = `${ message ? `${ message }\n` : ''
+  }Usage: ${ path.basename(process.argv[1]) } [OPTIONS] [JSON]\n\n${
+    parser.help({ includeEnv: true }) }`;
 
-  process.stderr.write(msg + '\n');
+  process.stderr.write(`${ msg }\n`);
   process.exit(code);
 }
 
 function perror(err) {
   if (parsed.debug) {
-    process.stderr.write(err.stack + '\n');
+    process.stderr.write(`${ err.stack }\n`);
   } else {
-    process.stderr.write(err.message + '\n');
+    process.stderr.write(`${ err.message }\n`);
   }
   process.exit(1);
 }
 
-///--- Mainline
+////////////////////
+// Mainline
 
 let logLevel = 'info';
-let parsed;
 
 try {
   parsed = parser.parse(process.argv);
@@ -111,11 +107,11 @@ try {
 if (parsed.help) {usage(0);}
 if (!parsed.file) {
   parsed.file = [];
-  parsed._args.forEach(function (a) {
+  parsed._args.forEach((a) => {
     const o = JSON.parse(a);
     if (Array.isArray(o)) {
-      o.forEach(function (i) {
-        parsed.file.push(o);
+      o.forEach((i) => {
+        parsed.file.push(i);
       });
       return;
     }
@@ -126,7 +122,7 @@ if (!parsed.file) {
 
 if (!parsed.file) {usage(1, 'either -f or arguments must be used for adding objects');}
 
-if (parsed.debug) {logLevel = (parsed.debug > 1 ? 'trace' : 'debug');}
+if (parsed.debug) {logLevel = parsed.debug > 1 ? 'trace' : 'debug';}
 
 const log = new Logger({
   name: 'ldapjs',
@@ -137,33 +133,31 @@ const log = new Logger({
 
 const client = ldap.createClient({
   url: parsed.url,
-  log: log,
+  log,
   strictDN: false,
-  tlsOptions: {
-    rejectUnauthorized: !parsed.insecure
-  }
+  tlsOptions: { rejectUnauthorized: !parsed.insecure }
 });
 
-client.on('error', function (err) {
+client.on('error', (err) => {
   perror(err);
 });
 
-client.bind(parsed.binddn, parsed.password, function (err, res) {
+client.bind(parsed.binddn, parsed.password, (err) => {
   if (err) {
     perror(err);
   }
 
   vasync.forEachPipeline({
     inputs: parsed.file,
-    func: function (entry, cb) {
+    func (entry, cb) {
       const dn = entry.dn;
       delete entry.dn;
       client.add(dn, entry, cb);
     }
-  }, function (err2, res2) {
+  }, (err2) => {
     if (err2) {
       perror(err2);
     }
-    client.unbind(function () { });
+    client.unbind(() => { });
   });
 });

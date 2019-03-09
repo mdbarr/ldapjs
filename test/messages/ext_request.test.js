@@ -5,16 +5,18 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
 let ExtendedRequest;
 let dn;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   ExtendedRequest = require('../../lib/index').ExtendedRequest;
   dn = require('../../lib/index').dn;
   t.ok(ExtendedRequest);
@@ -22,12 +24,12 @@ test('load library', function (t) {
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new ExtendedRequest());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const req = new ExtendedRequest({
     requestName: '1.2.3.4',
     requestValue: 'test'
@@ -38,7 +40,7 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('parse', function (t) {
+test('parse', (t) => {
   const ber = new BerWriter();
   ber.writeString('1.2.3.4', 0x80);
   ber.writeString('test', 0x81);
@@ -50,7 +52,7 @@ test('parse', function (t) {
   t.end();
 });
 
-test('toBer', function (t) {
+test('toBer', (t) => {
   const req = new ExtendedRequest({
     messageID: 123,
     requestName: '1.2.3.4',

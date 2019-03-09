@@ -13,9 +13,10 @@ function bufferEqual(t, a, b) {
   t.equal(a.toString('hex'), b.toString('hex'));
 }
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   PagedResultsControl =
     require('../../lib').PagedResultsControl;
   t.ok(PagedResultsControl);
@@ -24,12 +25,12 @@ test('load library', function (t) {
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new PagedResultsControl());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const c = new PagedResultsControl({
     type: '1.2.840.113556.1.4.319',
     criticality: true,
@@ -58,7 +59,7 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('tober', function (t) {
+test('tober', (t) => {
   const psc = new PagedResultsControl({
     type: '1.2.840.113556.1.4.319',
     criticality: true,

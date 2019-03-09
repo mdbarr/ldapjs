@@ -3,16 +3,16 @@
 
 const test = require('tape').test;
 
-const asn1 = require('asn1');
-
-///--- Globals
+////////////////////
+// Globals
 
 let EqualityFilter;
 let AndFilter;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   const filters = require('../../lib/index').filters;
   t.ok(filters);
   EqualityFilter = filters.EqualityFilter;
@@ -22,12 +22,12 @@ test('load library', function (t) {
   t.end();
 });
 
-test('Construct no args', function (t) {
+test('Construct no args', (t) => {
   t.ok(new AndFilter());
   t.end();
 });
 
-test('Construct args', function (t) {
+test('Construct args', (t) => {
   const f = new AndFilter();
   f.addFilter(new EqualityFilter({
     attribute: 'foo',
@@ -42,7 +42,7 @@ test('Construct args', function (t) {
   t.end();
 });
 
-test('match true', function (t) {
+test('match true', (t) => {
   const f = new AndFilter();
   f.addFilter(new EqualityFilter({
     attribute: 'foo',
@@ -60,7 +60,7 @@ test('match true', function (t) {
   t.end();
 });
 
-test('match false', function (t) {
+test('match false', (t) => {
   const f = new AndFilter();
   f.addFilter(new EqualityFilter({
     attribute: 'foo',

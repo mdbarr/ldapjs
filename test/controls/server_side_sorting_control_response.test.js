@@ -11,9 +11,10 @@ let getControl;
 let SSSResponseControl;
 const OID = '1.2.840.113556.1.4.474';
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   ldap = require('../../lib');
   SSSResponseControl = ldap.ServerSideSortingResponseControl;
   t.ok(SSSResponseControl);
@@ -22,7 +23,7 @@ test('load library', function (t) {
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   const c = new SSSResponseControl();
   t.ok(c);
   t.equal(c.type, OID);
@@ -30,7 +31,7 @@ test('new no args', function (t) {
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const c = new SSSResponseControl({
     criticality: true,
     value: {
@@ -47,13 +48,11 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('toBer - success', function (t) {
-  const sssc = new SSSResponseControl({
-    value: {
-      result: ldap.LDAP_SUCCESS,
-      failedAttribute: 'foobar'
-    }
-  });
+test('toBer - success', (t) => {
+  const sssc = new SSSResponseControl({ value: {
+    result: ldap.LDAP_SUCCESS,
+    failedAttribute: 'foobar'
+  } });
 
   const ber = new BerWriter();
   sssc.toBer(ber);
@@ -67,12 +66,8 @@ test('toBer - success', function (t) {
   t.end();
 });
 
-test('toBer - simple failure', function (t) {
-  const sssc = new SSSResponseControl({
-    value: {
-      result: ldap.LDAP_NO_SUCH_ATTRIBUTE
-    }
-  });
+test('toBer - simple failure', (t) => {
+  const sssc = new SSSResponseControl({ value: { result: ldap.LDAP_NO_SUCH_ATTRIBUTE } });
 
   const ber = new BerWriter();
   sssc.toBer(ber);
@@ -86,13 +81,11 @@ test('toBer - simple failure', function (t) {
   t.end();
 });
 
-test('toBer - detailed failure', function (t) {
-  const sssc = new SSSResponseControl({
-    value: {
-      result: ldap.LDAP_NO_SUCH_ATTRIBUTE,
-      failedAttribute: 'foobar'
-    }
-  });
+test('toBer - detailed failure', (t) => {
+  const sssc = new SSSResponseControl({ value: {
+    result: ldap.LDAP_NO_SUCH_ATTRIBUTE,
+    failedAttribute: 'foobar'
+  } });
 
   const ber = new BerWriter();
   sssc.toBer(ber);
@@ -106,7 +99,7 @@ test('toBer - detailed failure', function (t) {
   t.end();
 });
 
-test('toBer - empty', function (t) {
+test('toBer - empty', (t) => {
   const sssc = new SSSResponseControl();
   const ber = new BerWriter();
   sssc.toBer(ber);

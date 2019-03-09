@@ -5,15 +5,17 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 let EqualityFilter;
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   const filters = require('../../lib/index').filters;
   t.ok(filters);
   EqualityFilter = filters.EqualityFilter;
@@ -21,7 +23,7 @@ test('load library', function (t) {
   t.end();
 });
 
-test('Construct no args', function (t) {
+test('Construct no args', (t) => {
   const f = new EqualityFilter();
   t.ok(f);
   t.ok(!f.attribute);
@@ -29,7 +31,7 @@ test('Construct no args', function (t) {
   t.end();
 });
 
-test('Construct args', function (t) {
+test('Construct args', (t) => {
   const f = new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
@@ -41,7 +43,7 @@ test('Construct args', function (t) {
   t.end();
 });
 
-test('GH-109 = escape value only in toString()', function (t) {
+test('GH-109 = escape value only in toString()', (t) => {
   const f = new EqualityFilter({
     attribute: 'foo',
     value: 'ba(r)'
@@ -53,43 +55,37 @@ test('GH-109 = escape value only in toString()', function (t) {
   t.end();
 });
 
-test('match true', function (t) {
+test('match true', (t) => {
   const f = new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
   });
   t.ok(f);
-  t.ok(f.matches({
-    foo: 'bar'
-  }));
+  t.ok(f.matches({ foo: 'bar' }));
   t.end();
 });
 
-test('match multiple', function (t) {
+test('match multiple', (t) => {
   const f = new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
   });
   t.ok(f);
-  t.ok(f.matches({
-    foo: [ 'plop', 'bar' ]
-  }));
+  t.ok(f.matches({ foo: [ 'plop', 'bar' ] }));
   t.end();
 });
 
-test('match false', function (t) {
+test('match false', (t) => {
   const f = new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
   });
   t.ok(f);
-  t.ok(!f.matches({
-    foo: 'baz'
-  }));
+  t.ok(!f.matches({ foo: 'baz' }));
   t.end();
 });
 
-test('parse ok', function (t) {
+test('parse ok', (t) => {
   const writer = new BerWriter();
   writer.writeString('foo');
   writer.writeString('bar');
@@ -97,15 +93,13 @@ test('parse ok', function (t) {
   const f = new EqualityFilter();
   t.ok(f);
   t.ok(f.parse(new BerReader(writer.buffer)));
-  t.ok(f.matches({
-    foo: 'bar'
-  }));
+  t.ok(f.matches({ foo: 'bar' }));
   t.equal(f.attribute, 'foo');
   t.equal(f.value, 'bar');
   t.end();
 });
 
-test('escape EqualityFilter inputs', function (t) {
+test('escape EqualityFilter inputs', (t) => {
   const f = new EqualityFilter({
     attribute: '(|(foo',
     value: 'bar))('
@@ -117,7 +111,7 @@ test('escape EqualityFilter inputs', function (t) {
   t.end();
 });
 
-test('parse bad', function (t) {
+test('parse bad', (t) => {
   const writer = new BerWriter();
   writer.writeString('foo');
   writer.writeInt(20);
@@ -133,7 +127,7 @@ test('parse bad', function (t) {
   t.end();
 });
 
-test('GH-109 = to ber uses plain values', function (t) {
+test('GH-109 = to ber uses plain values', (t) => {
   let f = new EqualityFilter({
     attribute: 'foo',
     value: 'ba(r)'
@@ -154,7 +148,7 @@ test('GH-109 = to ber uses plain values', function (t) {
   t.end();
 });
 
-test('handle values passed via buffer', function (t) {
+test('handle values passed via buffer', (t) => {
   const b = new Buffer([ 32, 64, 128, 254 ]);
   const f = new EqualityFilter({
     attribute: 'foo',
@@ -178,23 +172,15 @@ test('handle values passed via buffer', function (t) {
   t.end();
 });
 
-test('GH-277 objectClass should be case-insensitive', function (t) {
+test('GH-277 objectClass should be case-insensitive', (t) => {
   const f = new EqualityFilter({
     attribute: 'objectClass',
     value: 'CaseInsensitiveObj'
   });
   t.ok(f);
-  t.ok(f.matches({
-    objectClass: 'CaseInsensitiveObj'
-  }));
-  t.ok(f.matches({
-    OBJECTCLASS: 'CASEINSENSITIVEOBJ'
-  }));
-  t.ok(f.matches({
-    objectclass: 'caseinsensitiveobj'
-  }));
-  t.ok(!f.matches({
-    objectclass: 'matchless'
-  }));
+  t.ok(f.matches({ objectClass: 'CaseInsensitiveObj' }));
+  t.ok(f.matches({ OBJECTCLASS: 'CASEINSENSITIVEOBJ' }));
+  t.ok(f.matches({ objectclass: 'caseinsensitiveobj' }));
+  t.ok(!f.matches({ objectclass: 'matchless' }));
   t.end();
 });

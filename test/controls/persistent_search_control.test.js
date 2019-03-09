@@ -10,9 +10,10 @@ const BerWriter = asn1.BerWriter;
 let getControl;
 let PersistentSearchControl;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   PersistentSearchControl = require('../../lib').PersistentSearchControl;
   t.ok(PersistentSearchControl);
   getControl = require('../../lib').getControl;
@@ -20,12 +21,12 @@ test('load library', function (t) {
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new PersistentSearchControl());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const c = new PersistentSearchControl({
     type: '2.16.840.1.113730.3.4.3',
     criticality: true,
@@ -57,7 +58,7 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('getControl with args', function (t) {
+test('getControl with args', (t) => {
   const buf = new Buffer([
     0x30, 0x26, 0x04, 0x17, 0x32, 0x2e, 0x31, 0x36, 0x2e, 0x38, 0x34, 0x30,
     0x2e, 0x31, 0x2e, 0x31, 0x31, 0x33, 0x37, 0x33, 0x30, 0x2e, 0x33, 0x2e,
@@ -75,7 +76,7 @@ test('getControl with args', function (t) {
   t.end();
 });
 
-test('tober', function (t) {
+test('tober', (t) => {
   const psc = new PersistentSearchControl({
     type: '2.16.840.1.113730.3.4.3',
     criticality: true,

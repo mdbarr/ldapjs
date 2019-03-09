@@ -3,61 +3,63 @@
 
 const test = require('tape').test;
 
-///--- Globals
+////////////////////
+// Globals
 
 let dn;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   dn = require('../lib/index').dn;
   t.ok(dn);
   t.end();
 });
 
-test('parse basic', function (t) {
+test('parse basic', (t) => {
   const DN_STR = 'cn=mark, ou=people, o=joyent';
   const name = dn.parse(DN_STR);
   t.ok(name);
   t.ok(name.rdns);
   t.ok(Array.isArray(name.rdns));
   t.equal(3, name.rdns.length);
-  name.rdns.forEach(function (rdn) {
-    t.equal('object', typeof (rdn));
+  name.rdns.forEach((rdn) => {
+    t.equal('object', typeof rdn);
   });
   t.equal(name.toString(), DN_STR);
   t.end();
 });
 
-test('parse escaped', function (t) {
+test('parse escaped', (t) => {
   const DN_STR = 'cn=m\\,ark, ou=people, o=joyent';
   const name = dn.parse(DN_STR);
   t.ok(name);
   t.ok(name.rdns);
   t.ok(Array.isArray(name.rdns));
   t.equal(3, name.rdns.length);
-  name.rdns.forEach(function (rdn) {
-    t.equal('object', typeof (rdn));
+  name.rdns.forEach((rdn) => {
+    t.equal('object', typeof rdn);
   });
   t.equal(name.toString(), DN_STR);
   t.end();
 });
 
-test('parse compound', function (t) {
+test('parse compound', (t) => {
   const DN_STR = 'cn=mark+sn=cavage, ou=people, o=joyent';
   const name = dn.parse(DN_STR);
   t.ok(name);
   t.ok(name.rdns);
   t.ok(Array.isArray(name.rdns));
   t.equal(3, name.rdns.length);
-  name.rdns.forEach(function (rdn) {
-    t.equal('object', typeof (rdn));
+  name.rdns.forEach((rdn) => {
+    t.equal('object', typeof rdn);
   });
   t.equal(name.toString(), DN_STR);
   t.end();
 });
 
-test('parse quoted', function (t) {
+test('parse quoted', (t) => {
   const DN_STR = 'cn="mark+sn=cavage", ou=people, o=joyent';
   const ESCAPE_STR = 'cn=mark\\+sn\\=cavage, ou=people, o=joyent';
   const name = dn.parse(DN_STR);
@@ -65,14 +67,14 @@ test('parse quoted', function (t) {
   t.ok(name.rdns);
   t.ok(Array.isArray(name.rdns));
   t.equal(3, name.rdns.length);
-  name.rdns.forEach(function (rdn) {
-    t.equal('object', typeof (rdn));
+  name.rdns.forEach((rdn) => {
+    t.equal('object', typeof rdn);
   });
   t.equal(name.toString(), ESCAPE_STR);
   t.end();
 });
 
-test('equals', function (t) {
+test('equals', (t) => {
   const dn1 = dn.parse('cn=foo,dc=bar');
   t.ok(dn1.equals('cn=foo,dc=bar'));
   t.ok(!dn1.equals('cn=foo1,dc=bar'));
@@ -81,7 +83,7 @@ test('equals', function (t) {
   t.end();
 });
 
-test('child of', function (t) {
+test('child of', (t) => {
   const dn1 = dn.parse('cn=foo,dc=bar');
   t.ok(dn1.childOf('dc=bar'));
   t.ok(!dn1.childOf('dc=moo'));
@@ -92,7 +94,7 @@ test('child of', function (t) {
   t.end();
 });
 
-test('parent of', function (t) {
+test('parent of', (t) => {
   const dn1 = dn.parse('cn=foo,dc=bar');
   t.ok(dn1.parentOf('cn=moo,cn=foo,dc=bar'));
   t.ok(!dn1.parentOf('cn=moo,cn=bar,dc=foo'));
@@ -102,7 +104,7 @@ test('parent of', function (t) {
   t.end();
 });
 
-test('DN parent', function (t) {
+test('DN parent', (t) => {
   const _dn = dn.parse('cn=foo,ou=bar');
   const parent1 = _dn.parent();
   const parent2 = parent1.parent();
@@ -112,7 +114,7 @@ test('DN parent', function (t) {
   t.end();
 });
 
-test('empty DNs', function (t) {
+test('empty DNs', (t) => {
   const _dn = dn.parse('');
   const _dn2 = dn.parse('cn=foo');
   t.ok(_dn.isEmpty());
@@ -126,14 +128,14 @@ test('empty DNs', function (t) {
   t.end();
 });
 
-test('case insensitive attribute names', function (t) {
+test('case insensitive attribute names', (t) => {
   const dn1 = dn.parse('CN=foo,dc=bar');
   t.ok(dn1.equals('cn=foo,dc=bar'));
   t.ok(dn1.equals(dn.parse('cn=foo,DC=bar')));
   t.end();
 });
 
-test('format', function (t) {
+test('format', (t) => {
   const DN_ORDER = dn.parse('sn=bar+cn=foo,ou=test');
   const DN_QUOTE = dn.parse('cn="foo",ou=test');
   const DN_QUOTE2 = dn.parse('cn=" foo",ou=test');
@@ -141,84 +143,44 @@ test('format', function (t) {
   const DN_SPACE2 = dn.parse('cn=foo ,ou=test');
   const DN_CASE = dn.parse('CN=foo,Ou=test');
 
-  t.equal(DN_ORDER.format({
-    keepOrder: false
-  }), 'cn=foo+sn=bar, ou=test');
-  t.equal(DN_ORDER.format({
-    keepOrder: true
-  }), 'sn=bar+cn=foo, ou=test');
+  t.equal(DN_ORDER.format({ keepOrder: false }), 'cn=foo+sn=bar, ou=test');
+  t.equal(DN_ORDER.format({ keepOrder: true }), 'sn=bar+cn=foo, ou=test');
 
-  t.equal(DN_QUOTE.format({
-    keepQuote: false
-  }), 'cn=foo, ou=test');
-  t.equal(DN_QUOTE.format({
-    keepQuote: true
-  }), 'cn="foo", ou=test');
-  t.equal(DN_QUOTE2.format({
-    keepQuote: false
-  }), 'cn=" foo", ou=test');
-  t.equal(DN_QUOTE2.format({
-    keepQuote: true
-  }), 'cn=" foo", ou=test');
+  t.equal(DN_QUOTE.format({ keepQuote: false }), 'cn=foo, ou=test');
+  t.equal(DN_QUOTE.format({ keepQuote: true }), 'cn="foo", ou=test');
+  t.equal(DN_QUOTE2.format({ keepQuote: false }), 'cn=" foo", ou=test');
+  t.equal(DN_QUOTE2.format({ keepQuote: true }), 'cn=" foo", ou=test');
 
-  t.equal(DN_SPACE.format({
-    keepSpace: false
-  }), 'cn=foo, ou=test');
-  t.equal(DN_SPACE.format({
-    keepSpace: true
-  }), 'cn=foo,ou=test');
-  t.equal(DN_SPACE.format({
-    skipSpace: true
-  }), 'cn=foo,ou=test');
-  t.equal(DN_SPACE2.format({
-    keepSpace: false
-  }), 'cn=foo, ou=test');
-  t.equal(DN_SPACE2.format({
-    keepSpace: true
-  }), 'cn=foo ,ou=test');
-  t.equal(DN_SPACE2.format({
-    skipSpace: true
-  }), 'cn=foo,ou=test');
+  t.equal(DN_SPACE.format({ keepSpace: false }), 'cn=foo, ou=test');
+  t.equal(DN_SPACE.format({ keepSpace: true }), 'cn=foo,ou=test');
+  t.equal(DN_SPACE.format({ skipSpace: true }), 'cn=foo,ou=test');
+  t.equal(DN_SPACE2.format({ keepSpace: false }), 'cn=foo, ou=test');
+  t.equal(DN_SPACE2.format({ keepSpace: true }), 'cn=foo ,ou=test');
+  t.equal(DN_SPACE2.format({ skipSpace: true }), 'cn=foo,ou=test');
 
-  t.equal(DN_CASE.format({
-    keepCase: false
-  }), 'cn=foo, ou=test');
-  t.equal(DN_CASE.format({
-    keepCase: true
-  }), 'CN=foo, Ou=test');
-  t.equal(DN_CASE.format({
-    upperName: true
-  }), 'CN=foo, OU=test');
+  t.equal(DN_CASE.format({ keepCase: false }), 'cn=foo, ou=test');
+  t.equal(DN_CASE.format({ keepCase: true }), 'CN=foo, Ou=test');
+  t.equal(DN_CASE.format({ upperName: true }), 'CN=foo, OU=test');
   t.end();
 });
 
-test('set format', function (t) {
+test('set format', (t) => {
   const _dn = dn.parse('uid="user",  sn=bar+cn=foo, dc=test , DC=com');
   t.equal(_dn.toString(), 'uid=user, cn=foo+sn=bar, dc=test, dc=com');
-  _dn.setFormat({
-    keepOrder: true
-  });
+  _dn.setFormat({ keepOrder: true });
   t.equal(_dn.toString(), 'uid=user, sn=bar+cn=foo, dc=test, dc=com');
-  _dn.setFormat({
-    keepQuote: true
-  });
+  _dn.setFormat({ keepQuote: true });
   t.equal(_dn.toString(), 'uid="user", cn=foo+sn=bar, dc=test, dc=com');
-  _dn.setFormat({
-    keepSpace: true
-  });
+  _dn.setFormat({ keepSpace: true });
   t.equal(_dn.toString(), 'uid=user,  cn=foo+sn=bar, dc=test , dc=com');
-  _dn.setFormat({
-    keepCase: true
-  });
+  _dn.setFormat({ keepCase: true });
   t.equal(_dn.toString(), 'uid=user, cn=foo+sn=bar, dc=test, DC=com');
-  _dn.setFormat({
-    upperName: true
-  });
+  _dn.setFormat({ upperName: true });
   t.equal(_dn.toString(), 'UID=user, CN=foo+SN=bar, DC=test, DC=com');
   t.end();
 });
 
-test('format persists across clone', function (t) {
+test('format persists across clone', (t) => {
   const _dn = dn.parse('uid="user",  sn=bar+cn=foo, dc=test , DC=com');
   const OUT = 'UID="user", CN=foo+SN=bar, DC=test, DC=com';
   _dn.setFormat({
@@ -231,19 +193,15 @@ test('format persists across clone', function (t) {
   t.end();
 });
 
-test('initialization', function (t) {
+test('initialization', (t) => {
   const dn1 = new dn.DN();
   t.ok(dn1);
   t.equals(dn1.toString(), '');
   t.ok(dn1.isEmpty(), 'DN with no initializer defaults to null DN');
 
   const data = [
-    new dn.RDN({
-      foo: 'bar'
-    }),
-    new dn.RDN({
-      o: 'base'
-    })
+    new dn.RDN({ foo: 'bar' }),
+    new dn.RDN({ o: 'base' })
   ];
   const dn2 = new dn.DN(data);
   t.ok(dn2);
@@ -253,7 +211,7 @@ test('initialization', function (t) {
   t.end();
 });
 
-test('array functions', function (t) {
+test('array functions', (t) => {
   const dn1 = dn.parse('a=foo, b=bar, c=baz');
   t.ok(dn1);
   t.equal(dn1.toString(), 'a=foo, b=bar, c=baz');
@@ -278,19 +236,15 @@ test('array functions', function (t) {
   t.end();
 });
 
-test('isDN duck-testing', function (t) {
+test('isDN duck-testing', (t) => {
   const valid = dn.parse('cn=foo');
   const isDN = dn.DN.isDN;
   t.notOk(isDN(null));
   t.notOk(isDN('cn=foo'));
   t.ok(isDN(valid));
   const duck = {
-    rdns: [ {
-      look: 'ma'
-    }, {
-      a: 'dn'
-    } ],
-    toString: function () { return 'look=ma, a=dn'; }
+    rdns: [ { look: 'ma' }, { a: 'dn' } ],
+    toString () { return 'look=ma, a=dn'; }
   };
   t.ok(isDN(duck));
   t.end();

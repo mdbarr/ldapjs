@@ -5,16 +5,18 @@ const test = require('tape').test;
 
 const asn1 = require('asn1');
 
-///--- Globals
+////////////////////
+// Globals
 
 const BerReader = asn1.BerReader;
 const BerWriter = asn1.BerWriter;
 let Control;
 let getControl;
 
-///--- Tests
+////////////////////
+// Tests
 
-test('load library', function (t) {
+test('load library', (t) => {
   Control = require('../../lib/index').Control;
   t.ok(Control);
   getControl = require('../../lib/index').getControl;
@@ -22,12 +24,12 @@ test('load library', function (t) {
   t.end();
 });
 
-test('new no args', function (t) {
+test('new no args', (t) => {
   t.ok(new Control());
   t.end();
 });
 
-test('new with args', function (t) {
+test('new with args', (t) => {
   const c = new Control({
     type: '2.16.840.1.113730.3.4.2',
     criticality: true
@@ -38,7 +40,7 @@ test('new with args', function (t) {
   t.end();
 });
 
-test('parse', function (t) {
+test('parse', (t) => {
   const ber = new BerWriter();
   ber.startSequence();
   ber.writeString('2.16.840.1.113730.3.4.2');
@@ -55,7 +57,7 @@ test('parse', function (t) {
   t.end();
 });
 
-test('parse no value', function (t) {
+test('parse no value', (t) => {
   const ber = new BerWriter();
   ber.startSequence();
   ber.writeString('2.16.840.1.113730.3.4.2');

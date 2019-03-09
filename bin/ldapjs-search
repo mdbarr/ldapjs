@@ -10,13 +10,16 @@ const dashdash = require('dashdash');
 const ldap = require('../lib/index');
 const Logger = require('bunyan');
 
-///--- Globals
+////////////////////
+// Globals
+
+let parsed;
 
 dashdash.addOptionType({
   name: 'ldap.Filter',
   takesArg: true,
   helpArg: 'LDAP_FILTER',
-  parseArg: function (option, optstr, arg) {
+  parseArg (option, optstr, arg) {
     return ldap.parseFilter(arg);
   }
 });
@@ -25,7 +28,7 @@ dashdash.addOptionType({
   name: 'ldap.scope',
   takesArg: true,
   helpArg: 'SCOPE',
-  parseArg: function (option, optstr, arg) {
+  parseArg (option, optstr, arg) {
     if (!/^base|one|sub$/.test(arg)) {
       throw new TypeError('Scope must be <base|one|sub>');
     }
@@ -37,7 +40,7 @@ dashdash.addOptionType({
   name: 'ldap.outputFormat',
   takesArg: true,
   helpArg: 'FORMAT',
-  parseArg: function (option, optstr, arg) {
+  parseArg (option, optstr, arg) {
     const formats = [ 'json', 'jsonl', 'jsona' ];
     if (formats.indexOf(arg) === -1) {
       throw new TypeError('Must be valid format type');
@@ -86,9 +89,7 @@ const opts = [
     helpArg: 'OID',
     default: []
   },
-  {
-    group: 'General Options'
-  },
+  { group: 'General Options' },
   {
     names: [ 'help', 'h' ],
     type: 'bool',
@@ -100,22 +101,18 @@ const opts = [
     help: 'Set debug level <0-2>',
     helpArg: 'LEVEL'
   },
-  {
-    group: 'Output Options'
-  },
+  { group: 'Output Options' },
   {
     names: [ 'format', 'o' ],
     type: 'ldap.outputFormat',
     helpWrap: false,
-    help: ('Specify and output format. One of:\n' +
+    help: 'Specify and output format. One of:\n' +
             '  json:  JSON objects (default)\n' +
             '  jsonl: Line-delimited JSON\n' +
-            '  jsona: Array of JSON objects\n'),
+            '  jsona: Array of JSON objects\n',
     default: 'json'
   },
-  {
-    group: 'Connection Options'
-  },
+  { group: 'Connection Options' },
   {
     names: [ 'url', 'u' ],
     type: 'string',
@@ -145,29 +142,26 @@ const opts = [
     default: false
   }
 ];
-const parser = dashdash.createParser({
-  options: opts
-});
+const parser = dashdash.createParser({ options: opts });
 
-///--- Helpers
+////////////////////
+// Helpers
 
 function usage(code, message) {
-  const msg = (message ? message + '\n' : '') +
-    'Usage: ' + path.basename(process.argv[1]) +
-      ' [OPTIONS] FILTER [ATTRIBUTES...]\n\n' +
-    parser.help({
-      includeEnv: true
-    });
+  const msg = `${ message ? `${ message }\n` : ''
+  }Usage: ${ path.basename(process.argv[1])
+  } [OPTIONS] FILTER [ATTRIBUTES...]\n\n${
+    parser.help({ includeEnv: true }) }`;
 
-  process.stderr.write(msg + '\n');
+  process.stderr.write(`${ msg }\n`);
   process.exit(code);
 }
 
 function perror(err) {
   if (parsed.debug) {
-    process.stderr.write(err.stack + '\n');
+    process.stderr.write(`${ err.stack }\n`);
   } else {
-    process.stderr.write(err.message + '\n');
+    process.stderr.write(`${ err.message }\n`);
   }
   process.exit(1);
 }
@@ -182,19 +176,19 @@ function EntryFormatter(fp, format) {
 EntryFormatter.prototype.write = function write(entry) {
   switch (this.format) {
     case 'json':
-      this.fp.write(JSON.stringify(entry.object, null, 2) + '\n');
+      this.fp.write(`${ JSON.stringify(entry.object, null, 2) }\n`);
       break;
     case 'jsonl':
-      this.fp.write(JSON.stringify(entry.object) + '\n');
+      this.fp.write(`${ JSON.stringify(entry.object) }\n`);
       break;
     case 'jsona':
-      this.fp.write((this.started) ? ',\n' : '[\n');
+      this.fp.write(this.started ? ',\n' : '[\n');
       this.started = true;
       // pretty-print with indent
       this.fp.write(
         JSON.stringify(entry.object, null, 2).
           split('\n').
-          map(function (line) { return '  ' + line; }).
+          map((line) => { return `  ${ line }`; }).
           join('\n'));
       break;
     default:
@@ -212,11 +206,10 @@ EntryFormatter.prototype.end = function end() {
   }
 };
 
-///--- Mainline
+////////////////////
+// Mainline
 
-let parsed;
-
-process.stdout.on('error', function (err) {
+process.stdout.on('error', (err) => {
   if (err.code === 'EPIPE') {
     process.exit(0);
   } else {
@@ -241,7 +234,7 @@ try {
 
 let logLevel = 'info';
 
-if (parsed.debug) {logLevel = (parsed.debug > 1 ? 'trace' : 'debug');}
+if (parsed.debug) {logLevel = parsed.debug > 1 ? 'trace' : 'debug';}
 
 const formatter = new EntryFormatter(process.stdout, parsed.format);
 
@@ -254,28 +247,26 @@ const log = new Logger({
 
 const client = ldap.createClient({
   url: parsed.url,
-  log: log,
+  log,
   strictDN: false,
   timeout: parsed.timeout || false,
-  tlsOptions: {
-    rejectUnauthorized: !parsed.insecure
-  }
+  tlsOptions: { rejectUnauthorized: !parsed.insecure }
 });
 
-client.on('error', function (err) {
+client.on('error', (err) => {
   perror(err);
 });
 
-client.on('timeout', function (req) {
+client.on('timeout', () => {
   process.stderr.write('Timeout reached\n');
   process.exit(1);
 });
 
-client.bind(parsed.binddn, parsed.password, function (err, res) {
+client.bind(parsed.binddn, parsed.password, (err) => {
   if (err) {perror(err);}
 
   const controls = [];
-  parsed.control.forEach(function (c) {
+  parsed.control.forEach((c) => {
     controls.push(new ldap.Control({
       type: c,
       criticality: true
@@ -298,26 +289,24 @@ client.bind(parsed.binddn, parsed.password, function (err, res) {
     attributes: parsed._args.length > 1 ? parsed._args.slice(1) : []
   };
   if (parsed.paged) {
-    req.paged = {
-      pageSize: parsed.paged
-    };
+    req.paged = { pageSize: parsed.paged };
   }
-  client.search(parsed.base, req, controls, function (err, res) {
+  client.search(parsed.base, req, controls, (err, res) => {
     if (err) {perror(err);}
 
-    res.on('searchEntry', function (entry) {
+    res.on('searchEntry', (entry) => {
       formatter.write(entry);
     });
-    res.on('error', function (err) {
+    res.on('error', (err) => {
       formatter.end();
       perror(err);
     });
-    res.on('end', function (res) {
+    res.on('end', (res) => {
       formatter.end();
       if (res.status !== 0) {
-        process.stderr.write(ldap.getMessage(res.status) + '\n');
+        process.stderr.write(`${ ldap.getMessage(res.status) }\n`);
       }
-      client.unbind(function () {
+      client.unbind(() => {
 
       });
     });
