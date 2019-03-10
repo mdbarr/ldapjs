@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const Logger = require('bunyan');
-
 const test = require('tape').test;
 const uuid = require('uuid/v4');
 const vasync = require('vasync');
@@ -10,16 +8,11 @@ const vasync = require('vasync');
 ////////////////////
 // Globals
 
-const BIND_DN = 'cn=root';
-const BIND_PW = 'secret';
-
 const SUFFIX = 'dc=test';
 
 const SERVER_PORT = process.env.SERVER_PORT || 1389;
 
 let ldap;
-let Attribute;
-let Change;
 let client;
 let server;
 let sock;
@@ -29,7 +22,6 @@ function getSock() {
     return `\\\\.\\pipe\\${ uuid() }`;
   }
   return `/tmp/.${ uuid() }`;
-
 }
 
 ////////////////////
@@ -50,7 +42,6 @@ test('basic create', (t) => {
 test('properties', (t) => {
   t.equal(server.name, 'LDAPServer');
 
-  // TODO: better test
   server.maxConnections = 10;
   t.equal(server.maxConnections, 10);
 
@@ -142,7 +133,7 @@ test('route order', (t) => {
     vasync.forEachParallel({
       'func': runSearch,
       'inputs': [ dnShort, dnMed, dnLong ]
-    }, (err, results) => {
+    }, (err) => {
       t.notOk(err);
       client.unbind();
       server.close();
@@ -182,7 +173,7 @@ test('route absent', (t) => {
           cb();
         });
       }
-    ] }, (err, result) => {
+    ] }, (err) => {
       t.notOk(err);
       server.close();
       t.end();
@@ -267,7 +258,9 @@ test('strict routing', (t) => {
         });
       });
     }
-  ] }, (err, res) => {
+  ] }, (err) => {
+    t.ifError(err);
+
     if (clt) {
       clt.destroy();
     }

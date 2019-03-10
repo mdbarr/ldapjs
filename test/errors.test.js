@@ -23,21 +23,21 @@ test('"custom" errors', (t) => {
   const errors = [
     {
       name: 'ConnectionError',
-      func: ldap.ConnectionError
+      Func: ldap.ConnectionError
     },
     {
       name: 'AbandonedError',
-      func: ldap.AbandonedError
+      Func: ldap.AbandonedError
     },
     {
       name: 'TimeoutError',
-      func: ldap.TimeoutError
+      Func: ldap.TimeoutError
     }
   ];
 
   errors.forEach((entry) => {
     const msg = `${ entry.name }msg`;
-    const err = new entry.func(msg);
+    const err = new entry.Func(msg);
     t.ok(err);
     t.equal(err.name, entry.name);
     t.equal(err.code, ldap.LDAP_OTHER);

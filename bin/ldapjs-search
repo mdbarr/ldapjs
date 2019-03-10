@@ -223,8 +223,8 @@ try {
   usage(1, e.toString());
 }
 
-if (parsed.help) {usage(0);}
-if (parsed._args.length < 1) {usage(1, 'filter required');}
+if (parsed.help) { usage(0); }
+if (parsed._args.length < 1) { usage(1, 'filter required'); }
 
 try {
   ldap.parseFilter(parsed._args[0]);
@@ -234,7 +234,7 @@ try {
 
 let logLevel = 'info';
 
-if (parsed.debug) {logLevel = parsed.debug > 1 ? 'trace' : 'debug';}
+if (parsed.debug) { logLevel = parsed.debug > 1 ? 'trace' : 'debug'; }
 
 const formatter = new EntryFormatter(process.stdout, parsed.format);
 
@@ -263,7 +263,7 @@ client.on('timeout', () => {
 });
 
 client.bind(parsed.binddn, parsed.password, (err) => {
-  if (err) {perror(err);}
+  if (err) { perror(err); }
 
   const controls = [];
   parsed.control.forEach((c) => {
@@ -292,7 +292,7 @@ client.bind(parsed.binddn, parsed.password, (err) => {
     req.paged = { pageSize: parsed.paged };
   }
   client.search(parsed.base, req, controls, (err, res) => {
-    if (err) {perror(err);}
+    if (err) { perror(err); }
 
     res.on('searchEntry', (entry) => {
       formatter.write(entry);

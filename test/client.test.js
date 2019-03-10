@@ -49,7 +49,7 @@ test('setup', (t) => {
   t.ok(server);
 
   server.bind(BIND_DN, (req, res, next) => {
-    if (req.credentials !== BIND_PW) {return next(new ldap.InvalidCredentialsError('Invalid password'));}
+    if (req.credentials !== BIND_PW) { return next(new ldap.InvalidCredentialsError('Invalid password')); }
 
     res.end();
     return next();
@@ -102,12 +102,11 @@ test('setup', (t) => {
     }, 250);
   });
 
-  server.search('dc=timeout', (req, res, next) => {
-    // Haha client!
+  server.search('dc=timeout', () => {
+    // intentional timeout
   });
 
   server.search(SUFFIX, (req, res, next) => {
-
     if (req.dn.equals(`cn=ref,${ SUFFIX }`)) {
       res.send(res.createSearchReference('ldap://localhost'));
     } else if (req.dn.equals(`cn=bin,${ SUFFIX }`)) {
@@ -205,11 +204,10 @@ test('setup', (t) => {
         cookie: resultCookie
       } }));
       res.end();
-      next();
-    } else {
-      // don't allow non-paged searches for this test endpoint
-      next(new ldap.UnwillingToPerformError());
+      return next();
     }
+    // don't allow non-paged searches for this test endpoint
+    return next(new ldap.UnwillingToPerformError());
   });
 
   server.search('cn=pagederr', (req, res, next) => {
@@ -238,7 +236,6 @@ test('setup', (t) => {
     // send error instead of second page
     res.end(ldap.LDAP_SIZE_LIMIT_EXCEEDED);
     return next();
-
   });
 
   server.search('dc=empty', (req, res, next) => {
@@ -286,7 +283,6 @@ test('setup', (t) => {
     t.ok(client);
     t.end();
   });
-
 });
 
 test('simple bind failure', (t) => {
@@ -452,7 +448,7 @@ test('exop invalid', (t) => {
 });
 
 test('bogus exop (GH-17)', (t) => {
-  client.exop('cn=root', (err, value) => {
+  client.exop('cn=root', (err) => {
     t.ok(err);
     t.end();
   });
@@ -588,7 +584,7 @@ test('search sizeLimit', (t) => {
     client.search('cn=sizelimit', { sizeLimit: limit }, (err, res) => {
       t2.ifError(err);
       let count = 0;
-      res.on('searchEntry', (entry) => {
+      res.on('searchEntry', () => {
         count++;
       });
       res.on('end', () => {
@@ -672,8 +668,11 @@ test('search paged', (t) => {
 
   t.test('paged - redundant control', (t2) => {
     try {
-      client.search(SUFFIX, { paged: { pageSize: 100 } }, new ldap.PagedResultsControl(),
-        (err, res) => {
+      client.search(SUFFIX,
+        { paged: { pageSize: 100 } },
+        new ldap.PagedResultsControl(),
+        (err) => {
+          t2.ifError(err);
           t2.fail();
         });
     } catch (e) {
@@ -693,7 +692,7 @@ test('search paged', (t) => {
       res.on('page', () => {
         t2.ok(++countPages);
       });
-      res.on('error', (error) => {
+      res.on('error', () => {
         t2.equal(countEntries, 1);
         t2.equal(countPages, 1);
         t2.end();
@@ -713,7 +712,7 @@ test('search referral', (t) => {
     t.ok(res);
     let gotEntry = 0;
     let gotReferral = false;
-    res.on('searchEntry', (entry) => {
+    res.on('searchEntry', () => {
       gotEntry++;
     });
     res.on('searchReference', (referral) => {
@@ -807,7 +806,7 @@ test('GH-21 binary attributes', (t) => {
       t.ok(entry.attributes[1].type, 'gb18030');
       t.equal(entry.attributes[1].buffers.length, 1);
       t.equal(expect2.length, entry.attributes[1].buffers[0].length);
-      for (let i = 0; i < expect2.length; i++) {t.equal(expect2[i], entry.attributes[1].buffers[0][i]);}
+      for (let i = 0; i < expect2.length; i++) { t.equal(expect2[i], entry.attributes[1].buffers[0][i]); }
 
       t.ok(entry.object);
       gotEntry++;
@@ -927,7 +926,7 @@ test('setup action', (t) => {
     log: LOG
   });
   setupClient.on('setup', (clt, cb) => {
-    clt.bind(BIND_DN, BIND_PW, (err, res) => {
+    clt.bind(BIND_DN, BIND_PW, (err) => {
       t.ifError(err);
       cb(err);
     });
@@ -950,7 +949,7 @@ test('setup reconnect', (t) => {
     log: LOG
   });
   rClient.on('setup', (clt, cb) => {
-    clt.bind(BIND_DN, BIND_PW, (err, res) => {
+    clt.bind(BIND_DN, BIND_PW, (err) => {
       t.ifError(err);
       cb(err);
     });
@@ -968,8 +967,8 @@ test('setup reconnect', (t) => {
     doSearch,
     function cleanDisconnect(_, cb) {
       t.ok(rClient.connected);
-      rClient.once('close', (had_err) => {
-        t.ifError(had_err);
+      rClient.once('close', (hadError) => {
+        t.ifError(hadError);
         t.equal(rClient.connected, false);
         cb();
       });
@@ -982,14 +981,13 @@ test('setup reconnect', (t) => {
         t.equal(err.message, msg);
         t.ok(err);
       });
-      rClient.once('close', (had_err) => {
-        // can't test had_err because the socket error is being faked
+      rClient.once('close', () => {
         cb();
       });
       rClient._socket.emit('error', new Error(msg));
     },
     doSearch
-  ] }, (err, res) => {
+  ] }, (err) => {
     t.ifError(err);
     rClient.destroy();
     t.end();
@@ -1055,7 +1053,7 @@ test('reconnect max retries', (t) => {
   rClient.on('connectError', () => {
     count++;
   });
-  rClient.on('error', (err) => {
+  rClient.on('error', () => {
     t.equal(count, RETRIES);
     rClient.destroy();
     t.end();
@@ -1069,7 +1067,7 @@ test('reconnect on server close', (t) => {
     log: LOG
   });
   clt.on('setup', (sclt, cb) => {
-    sclt.bind(BIND_DN, BIND_PW, (err, res) => {
+    sclt.bind(BIND_DN, BIND_PW, (err) => {
       t.ifError(err);
       cb(err);
     });
@@ -1094,7 +1092,7 @@ test('no auto-reconnect on unbind', (t) => {
     log: LOG
   });
   clt.on('setup', (sclt, cb) => {
-    sclt.bind(BIND_DN, BIND_PW, (err, res) => {
+    sclt.bind(BIND_DN, BIND_PW, (err) => {
       t.ifError(err);
       cb(err);
     });
@@ -1118,7 +1116,6 @@ test('no auto-reconnect on unbind', (t) => {
 });
 
 test('abandon (GH-27)', (t) => {
-  // FIXME: test abandoning a real request
   client.abandon(401876543, (err) => {
     t.ifError(err);
     t.end();
@@ -1136,13 +1133,15 @@ test('search timeout (GH-51)', (t) => {
 });
 
 test('resultError handling', (t) => {
-  t.plan(3);
+  t.plan(6);
   vasync.pipeline({ funcs: [
     function errSearch(_, cb) {
       client.once('resultError', (error) => {
         t.equal(error.name, 'BusyError');
       });
       client.search('cn=busy', {}, (err, res) => {
+        t.ifError(err);
+
         res.once('error', (error) => {
           t.equal(error.name, 'BusyError');
           cb();
@@ -1152,13 +1151,16 @@ test('resultError handling', (t) => {
     function cleanSearch(_, cb) {
       client.on('resultError', t.ifError.bind(null));
       client.search(SUFFIX, {}, (err, res) => {
+        t.ifError(err);
+
         res.once('end', () => {
           t.ok(true);
           cb();
         });
       });
     }
-  ] }, (err, res) => {
+  ] }, (err) => {
+    t.ifError(err);
     client.removeAllListeners('resultError');
   });
 });

@@ -29,7 +29,7 @@ function search(t, options, callback) {
     });
     res.on('end', () => {
       t.ok(found);
-      if (callback) {return callback();}
+      if (callback) { return callback(); }
 
       return t.end();
     });
@@ -52,6 +52,7 @@ test('setup', (t) => {
     res.end();
     return next();
   });
+
   server.search(SUFFIX, (req, res, next) => {
     const entry = {
       dn: `cn=foo, ${ SUFFIX }`,
@@ -64,9 +65,11 @@ test('setup', (t) => {
       }
     };
 
-    if (req.filter.matches(entry.attributes)) {res.send(entry);}
-
+    if (req.filter.matches(entry.attributes)) {
+      res.send(entry);
+    }
     res.end();
+    return next();
   });
 });
 
@@ -109,7 +112,7 @@ test('GH-55 Client emits connect multiple times', (t) => {
   c.on('connect', (socket) => {
     t.ok(socket);
     count++;
-    c.bind('cn=root', 'secret', (err, res) => {
+    c.bind('cn=root', 'secret', (err) => {
       t.ifError(err);
       c.unbind(() => {
         t.equal(count, 1);

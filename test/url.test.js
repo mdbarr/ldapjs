@@ -49,7 +49,6 @@ test('parse host and port', (t) => {
 });
 
 test('parse full', (t) => {
-
   const u = parseURL('ldaps://ldap.example.com:1389/dc=example%20,dc=com' +
                     '?cn,sn?sub?(cn=Babs%20Jensen)');
 
