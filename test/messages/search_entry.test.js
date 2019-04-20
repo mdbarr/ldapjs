@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -17,22 +15,20 @@ let dn;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   SearchEntry = require('../../lib/index').SearchEntry;
   Attribute = require('../../lib/index').Attribute;
   dn = require('../../lib/index').dn;
-  t.ok(SearchEntry);
-  t.ok(dn);
-  t.ok(Attribute);
-  t.end();
+  expect(SearchEntry).toBeTruthy();
+  expect(dn).toBeTruthy();
+  expect(Attribute).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new SearchEntry());
-  t.end();
+test('new no args', () => {
+  expect(new SearchEntry()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const res = new SearchEntry({
     messageID: 123,
     objectName: dn.parse('cn=foo, o=test'),
@@ -45,18 +41,17 @@ test('new with args', (t) => {
       vals: [ 'person' ]
     }) ]
   });
-  t.ok(res);
-  t.equal(res.messageID, 123);
-  t.equal(res.dn.toString(), 'cn=foo, o=test');
-  t.equal(res.attributes.length, 2);
-  t.equal(res.attributes[0].type, 'cn');
-  t.equal(res.attributes[0].vals[0], 'foo');
-  t.equal(res.attributes[1].type, 'objectclass');
-  t.equal(res.attributes[1].vals[0], 'person');
-  t.end();
+  expect(res).toBeTruthy();
+  expect(res.messageID).toBe(123);
+  expect(res.dn.toString()).toBe('cn=foo, o=test');
+  expect(res.attributes.length).toBe(2);
+  expect(res.attributes[0].type).toBe('cn');
+  expect(res.attributes[0].vals[0]).toBe('foo');
+  expect(res.attributes[1].type).toBe('objectclass');
+  expect(res.attributes[1].vals[0]).toBe('person');
 });
 
-test('parse', (t) => {
+test('parse', () => {
   const ber = new BerWriter();
   ber.writeString('cn=foo, o=test');
 
@@ -79,17 +74,16 @@ test('parse', (t) => {
   ber.endSequence();
 
   const res = new SearchEntry();
-  t.ok(res._parse(new BerReader(ber.buffer)));
-  t.equal(res.dn, 'cn=foo, o=test');
-  t.equal(res.attributes.length, 2);
-  t.equal(res.attributes[0].type, 'cn');
-  t.equal(res.attributes[0].vals[0], 'foo');
-  t.equal(res.attributes[1].type, 'objectclass');
-  t.equal(res.attributes[1].vals[0], 'person');
-  t.end();
+  expect(res._parse(new BerReader(ber.buffer))).toBeTruthy();
+  expect(res.dn).toBe('cn=foo, o=test');
+  expect(res.attributes.length).toBe(2);
+  expect(res.attributes[0].type).toBe('cn');
+  expect(res.attributes[0].vals[0]).toBe('foo');
+  expect(res.attributes[1].type).toBe('objectclass');
+  expect(res.attributes[1].vals[0]).toBe('person');
 });
 
-test('toBer', (t) => {
+test('toBer', () => {
   const res = new SearchEntry({
     messageID: 123,
     objectName: dn.parse('cn=foo, o=test'),
@@ -102,25 +96,23 @@ test('toBer', (t) => {
       vals: [ 'person' ]
     }) ]
   });
-  t.ok(res);
+  expect(res).toBeTruthy();
 
   const ber = new BerReader(res.toBer());
-  t.ok(ber);
-  t.equal(ber.readSequence(), 0x30);
-  t.equal(ber.readInt(), 123);
-  t.equal(ber.readSequence(), 0x64);
-  t.equal(ber.readString(), 'cn=foo, o=test');
-  t.ok(ber.readSequence());
+  expect(ber).toBeTruthy();
+  expect(ber.readSequence()).toBe(0x30);
+  expect(ber.readInt()).toBe(123);
+  expect(ber.readSequence()).toBe(0x64);
+  expect(ber.readString()).toBe('cn=foo, o=test');
+  expect(ber.readSequence()).toBeTruthy();
 
-  t.ok(ber.readSequence());
-  t.equal(ber.readString(), 'cn');
-  t.equal(ber.readSequence(), 0x31);
-  t.equal(ber.readString(), 'foo');
+  expect(ber.readSequence()).toBeTruthy();
+  expect(ber.readString()).toBe('cn');
+  expect(ber.readSequence()).toBe(0x31);
+  expect(ber.readString()).toBe('foo');
 
-  t.ok(ber.readSequence());
-  t.equal(ber.readString(), 'objectclass');
-  t.equal(ber.readSequence(), 0x31);
-  t.equal(ber.readString(), 'person');
-
-  t.end();
+  expect(ber.readSequence()).toBeTruthy();
+  expect(ber.readString()).toBe('objectclass');
+  expect(ber.readSequence()).toBe(0x31);
+  expect(ber.readString()).toBe('person');
 });

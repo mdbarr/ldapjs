@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -15,57 +13,53 @@ let Attribute;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   Attribute = require('../lib/index').Attribute;
-  t.ok(Attribute);
-  t.end();
+  expect(Attribute).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new Attribute());
-  t.end();
+test('new no args', () => {
+  expect(new Attribute()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   let attr = new Attribute({
     type: 'cn',
     vals: [ 'foo', 'bar' ]
   });
-  t.ok(attr);
+  expect(attr).toBeTruthy();
   attr.addValue('baz');
-  t.equal(attr.type, 'cn');
-  t.equal(attr.vals.length, 3);
-  t.equal(attr.vals[0], 'foo');
-  t.equal(attr.vals[1], 'bar');
-  t.equal(attr.vals[2], 'baz');
-  t.throws(() => {
+  expect(attr.type).toBe('cn');
+  expect(attr.vals.length).toBe(3);
+  expect(attr.vals[0]).toBe('foo');
+  expect(attr.vals[1]).toBe('bar');
+  expect(attr.vals[2]).toBe('baz');
+  expect(() => {
     attr = new Attribute('not an object');
-  });
-  t.throws(() => {
+  }).toThrow();
+  expect(() => {
     const typeThatIsNotAString = 1;
     attr = new Attribute({ type: typeThatIsNotAString });
-  });
-  t.end();
+  }).toThrow();
 });
 
-test('toBer', (t) => {
+test('toBer', () => {
   const attr = new Attribute({
     type: 'cn',
     vals: [ 'foo', 'bar' ]
   });
-  t.ok(attr);
+  expect(attr).toBeTruthy();
   const ber = new BerWriter();
   attr.toBer(ber);
   const reader = new BerReader(ber.buffer);
-  t.ok(reader.readSequence());
-  t.equal(reader.readString(), 'cn');
-  t.equal(reader.readSequence(), 0x31); // lber set
-  t.equal(reader.readString(), 'foo');
-  t.equal(reader.readString(), 'bar');
-  t.end();
+  expect(reader.readSequence()).toBeTruthy();
+  expect(reader.readString()).toBe('cn');
+  expect(reader.readSequence()).toBe(0x31); // lber set
+  expect(reader.readString()).toBe('foo');
+  expect(reader.readString()).toBe('bar');
 });
 
-test('parse', (t) => {
+test('parse', () => {
   const ber = new BerWriter();
   ber.startSequence();
   ber.writeString('cn');
@@ -75,69 +69,63 @@ test('parse', (t) => {
   ber.endSequence();
 
   const attr = new Attribute();
-  t.ok(attr);
-  t.ok(attr.parse(new BerReader(ber.buffer)));
+  expect(attr).toBeTruthy();
+  expect(attr.parse(new BerReader(ber.buffer))).toBeTruthy();
 
-  t.equal(attr.type, 'cn');
-  t.equal(attr.vals.length, 2);
-  t.equal(attr.vals[0], 'foo');
-  t.equal(attr.vals[1], 'bar');
-  t.end();
+  expect(attr.type).toBe('cn');
+  expect(attr.vals.length).toBe(2);
+  expect(attr.vals[0]).toBe('foo');
+  expect(attr.vals[1]).toBe('bar');
 });
 
-test('parse - without 0x31', (t) => {
+test('parse - without 0x31', () => {
   const ber = new BerWriter;
   ber.startSequence();
   ber.writeString('sn');
   ber.endSequence();
 
   const attr = new Attribute;
-  t.ok(attr);
-  t.ok(attr.parse(new BerReader(ber.buffer)));
+  expect(attr).toBeTruthy();
+  expect(attr.parse(new BerReader(ber.buffer))).toBeTruthy();
 
-  t.equal(attr.type, 'sn');
-  t.equal(attr.vals.length, 0);
-
-  t.end();
+  expect(attr.type).toBe('sn');
+  expect(attr.vals.length).toBe(0);
 });
 
-test('toString', (t) => {
+test('toString', () => {
   const attr = new Attribute({
     type: 'foobar',
     vals: [ 'asdf' ]
   });
   const expected = attr.toString();
   const actual = JSON.stringify(attr.json);
-  t.equal(actual, expected);
-  t.end();
+  expect(actual).toBe(expected);
 });
 
-test('isAttribute', (t) => {
+test('isAttribute', () => {
   const isA = Attribute.isAttribute;
-  t.notOk(isA(null));
-  t.notOk(isA('asdf'));
-  t.ok(isA(new Attribute({
+  expect(isA(null)).toBeFalsy();
+  expect(isA('asdf')).toBeFalsy();
+  expect(isA(new Attribute({
     type: 'foobar',
     vals: [ 'asdf' ]
-  })));
+  }))).toBeTruthy();
 
-  t.ok(isA({
+  expect(isA({
     type: 'foo',
     vals: [ 'item', new Buffer(5) ],
     toBer () { /* placeholder */ }
-  }));
+  })).toBeTruthy();
 
   // bad type in vals
-  t.notOk(isA({
+  expect(isA({
     type: 'foo',
     vals: [ 'item', null ],
     toBer () { /* placeholder */ }
-  }));
-
-  t.end();
+  })).toBeFalsy();
 });
 
-test('compare', (t) => {
+test('compare', () => {
   const comp = Attribute.compare;
   const a = new Attribute({
     type: 'foo',
@@ -149,30 +137,28 @@ test('compare', (t) => {
   });
   const notAnAttribute = 'this is not an attribute';
 
-  t.throws(() => {
+  expect(() => {
     comp(a, notAnAttribute);
-  });
-  t.throws(() => {
+  }).toThrow();
+  expect(() => {
     comp(notAnAttribute, b);
-  });
+  }).toThrow();
 
-  t.equal(comp(a, b), 0);
+  expect(comp(a, b)).toBe(0);
 
   // Different types
   a.type = 'boo';
-  t.equal(comp(a, b), -1);
-  t.equal(comp(b, a), 1);
+  expect(comp(a, b)).toBe(-1);
+  expect(comp(b, a)).toBe(1);
   a.type = 'foo';
 
   // Different value counts
   a.vals = [ 'bar', 'baz' ];
-  t.equal(comp(a, b), 1);
-  t.equal(comp(b, a), -1);
+  expect(comp(a, b)).toBe(1);
+  expect(comp(b, a)).toBe(-1);
 
   // Different value contents (same count)
   a.vals = [ 'baz' ];
-  t.equal(comp(a, b), 1);
-  t.equal(comp(b, a), -1);
-
-  t.end();
+  expect(comp(a, b)).toBe(1);
+  expect(comp(b, a)).toBe(-1);
 });

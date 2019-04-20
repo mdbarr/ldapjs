@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 const BerReader = asn1.BerReader;
@@ -13,20 +11,18 @@ let PersistentSearchControl;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   PersistentSearchControl = require('../../lib').PersistentSearchControl;
-  t.ok(PersistentSearchControl);
+  expect(PersistentSearchControl).toBeTruthy();
   getControl = require('../../lib').getControl;
-  t.ok(getControl);
-  t.end();
+  expect(getControl).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new PersistentSearchControl());
-  t.end();
+test('new no args', () => {
+  expect(new PersistentSearchControl()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const c = new PersistentSearchControl({
     type: '2.16.840.1.113730.3.4.3',
     criticality: true,
@@ -36,29 +32,27 @@ test('new with args', (t) => {
       returnECs: false
     }
   });
-  t.ok(c);
-  t.equal(c.type, '2.16.840.1.113730.3.4.3');
-  t.ok(c.criticality);
+  expect(c).toBeTruthy();
+  expect(c.type).toBe('2.16.840.1.113730.3.4.3');
+  expect(c.criticality).toBeTruthy();
 
-  t.equal(c.value.changeTypes, 15);
-  t.equal(c.value.changesOnly, false);
-  t.equal(c.value.returnECs, false);
+  expect(c.value.changeTypes).toBe(15);
+  expect(c.value.changesOnly).toBe(false);
+  expect(c.value.returnECs).toBe(false);
 
   const writer = new BerWriter();
   c.toBer(writer);
   const reader = new BerReader(writer.buffer);
   const psc = getControl(reader);
-  t.ok(psc);
-  t.equal(psc.type, '2.16.840.1.113730.3.4.3');
-  t.ok(psc.criticality);
-  t.equal(psc.value.changeTypes, 15);
-  t.equal(psc.value.changesOnly, false);
-  t.equal(psc.value.returnECs, false);
-
-  t.end();
+  expect(psc).toBeTruthy();
+  expect(psc.type).toBe('2.16.840.1.113730.3.4.3');
+  expect(psc.criticality).toBeTruthy();
+  expect(psc.value.changeTypes).toBe(15);
+  expect(psc.value.changesOnly).toBe(false);
+  expect(psc.value.returnECs).toBe(false);
 });
 
-test('getControl with args', (t) => {
+test('getControl with args', () => {
   const buf = new Buffer([
     0x30, 0x26, 0x04, 0x17, 0x32, 0x2e, 0x31, 0x36, 0x2e, 0x38, 0x34, 0x30,
     0x2e, 0x31, 0x2e, 0x31, 0x31, 0x33, 0x37, 0x33, 0x30, 0x2e, 0x33, 0x2e,
@@ -67,16 +61,15 @@ test('getControl with args', (t) => {
 
   const ber = new BerReader(buf);
   const psc = getControl(ber);
-  t.ok(psc);
-  t.equal(psc.type, '2.16.840.1.113730.3.4.3');
-  t.equal(psc.criticality, false);
-  t.equal(psc.value.changeTypes, 15);
-  t.equal(psc.value.changesOnly, true);
-  t.equal(psc.value.returnECs, true);
-  t.end();
+  expect(psc).toBeTruthy();
+  expect(psc.type).toBe('2.16.840.1.113730.3.4.3');
+  expect(psc.criticality).toBe(false);
+  expect(psc.value.changeTypes).toBe(15);
+  expect(psc.value.changesOnly).toBe(true);
+  expect(psc.value.returnECs).toBe(true);
 });
 
-test('tober', (t) => {
+test('tober', () => {
   const psc = new PersistentSearchControl({
     type: '2.16.840.1.113730.3.4.3',
     criticality: true,
@@ -91,11 +84,10 @@ test('tober', (t) => {
   psc.toBer(ber);
 
   const c = getControl(new BerReader(ber.buffer));
-  t.ok(c);
-  t.equal(c.type, '2.16.840.1.113730.3.4.3');
-  t.ok(c.criticality);
-  t.equal(c.value.changeTypes, 15);
-  t.equal(c.value.changesOnly, false);
-  t.equal(c.value.returnECs, false);
-  t.end();
+  expect(c).toBeTruthy();
+  expect(c.type).toBe('2.16.840.1.113730.3.4.3');
+  expect(c.criticality).toBeTruthy();
+  expect(c.value.changeTypes).toBe(15);
+  expect(c.value.changesOnly).toBe(false);
+  expect(c.value.returnECs).toBe(false);
 });

@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -15,146 +13,135 @@ const BerWriter = asn1.BerWriter;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   const filters = require('../../lib/index').filters;
-  t.ok(filters);
+  expect(filters).toBeTruthy();
   EqualityFilter = filters.EqualityFilter;
-  t.ok(EqualityFilter);
-  t.end();
+  expect(EqualityFilter).toBeTruthy();
 });
 
-test('Construct no args', (t) => {
+test('Construct no args', () => {
   const f = new EqualityFilter();
-  t.ok(f);
-  t.ok(!f.attribute);
-  t.ok(!f.value);
-  t.end();
+  expect(f).toBeTruthy();
+  expect(!f.attribute).toBeTruthy();
+  expect(!f.value).toBeTruthy();
 });
 
-test('Construct args', (t) => {
+test('Construct args', () => {
   const f = new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
   });
-  t.ok(f);
-  t.equal(f.attribute, 'foo');
-  t.equal(f.value, 'bar');
-  t.equal(f.toString(), '(foo=bar)');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.attribute).toBe('foo');
+  expect(f.value).toBe('bar');
+  expect(f.toString()).toBe('(foo=bar)');
 });
 
-test('GH-109 = escape value only in toString()', (t) => {
+test('GH-109 = escape value only in toString()', () => {
   const f = new EqualityFilter({
     attribute: 'foo',
     value: 'ba(r)'
   });
-  t.ok(f);
-  t.equal(f.attribute, 'foo');
-  t.equal(f.value, 'ba(r)');
-  t.equal(f.toString(), '(foo=ba\\28r\\29)');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.attribute).toBe('foo');
+  expect(f.value).toBe('ba(r)');
+  expect(f.toString()).toBe('(foo=ba\\28r\\29)');
 });
 
-test('match true', (t) => {
+test('match true', () => {
   const f = new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
   });
-  t.ok(f);
-  t.ok(f.matches({ foo: 'bar' }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.matches({ foo: 'bar' })).toBeTruthy();
 });
 
-test('match multiple', (t) => {
+test('match multiple', () => {
   const f = new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
   });
-  t.ok(f);
-  t.ok(f.matches({ foo: [ 'plop', 'bar' ] }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.matches({ foo: [ 'plop', 'bar' ] })).toBeTruthy();
 });
 
-test('match false', (t) => {
+test('match false', () => {
   const f = new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
   });
-  t.ok(f);
-  t.ok(!f.matches({ foo: 'baz' }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(!f.matches({ foo: 'baz' })).toBeTruthy();
 });
 
-test('parse ok', (t) => {
+test('parse ok', () => {
   const writer = new BerWriter();
   writer.writeString('foo');
   writer.writeString('bar');
 
   const f = new EqualityFilter();
-  t.ok(f);
-  t.ok(f.parse(new BerReader(writer.buffer)));
-  t.ok(f.matches({ foo: 'bar' }));
-  t.equal(f.attribute, 'foo');
-  t.equal(f.value, 'bar');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.parse(new BerReader(writer.buffer))).toBeTruthy();
+  expect(f.matches({ foo: 'bar' })).toBeTruthy();
+  expect(f.attribute).toBe('foo');
+  expect(f.value).toBe('bar');
 });
 
-test('escape EqualityFilter inputs', (t) => {
+test('escape EqualityFilter inputs', () => {
   const f = new EqualityFilter({
     attribute: '(|(foo',
     value: 'bar))('
   });
 
-  t.equal(f.attribute, '(|(foo');
-  t.equal(f.value, 'bar))(');
-  t.equal(f.toString(), '(\\28|\\28foo=bar\\29\\29\\28)');
-  t.end();
+  expect(f.attribute).toBe('(|(foo');
+  expect(f.value).toBe('bar))(');
+  expect(f.toString()).toBe('(\\28|\\28foo=bar\\29\\29\\28)');
 });
 
-test('parse bad', (t) => {
+test('parse bad', done => {
   const writer = new BerWriter();
   writer.writeString('foo');
   writer.writeInt(20);
 
   const f = new EqualityFilter();
-  t.ok(f);
+  expect(f).toBeTruthy();
   try {
     f.parse(new BerReader(writer.buffer));
-    t.fail('Should have thrown InvalidAsn1Error');
+    done.fail('Should have thrown InvalidAsn1Error');
   } catch (e) {
-    t.equal(e.name, 'InvalidAsn1Error');
+    expect(e.name).toBe('InvalidAsn1Error');
   }
-  t.end();
 });
 
-test('GH-109 = to ber uses plain values', (t) => {
+test('GH-109 = to ber uses plain values', () => {
   let f = new EqualityFilter({
     attribute: 'foo',
     value: 'ba(r)'
   });
-  t.ok(f);
+  expect(f).toBeTruthy();
   const writer = new BerWriter();
   f.toBer(writer);
 
   f = new EqualityFilter();
-  t.ok(f);
+  expect(f).toBeTruthy();
 
   const reader = new BerReader(writer.buffer);
   reader.readSequence();
-  t.ok(f.parse(reader));
+  expect(f.parse(reader)).toBeTruthy();
 
-  t.equal(f.attribute, 'foo');
-  t.equal(f.value, 'ba(r)');
-  t.end();
+  expect(f.attribute).toBe('foo');
+  expect(f.value).toBe('ba(r)');
 });
 
-test('handle values passed via buffer', (t) => {
+test('handle values passed via buffer', () => {
   const b = new Buffer([ 32, 64, 128, 254 ]);
   const f = new EqualityFilter({
     attribute: 'foo',
     value: b
   });
-  t.ok(f);
+  expect(f).toBeTruthy();
 
   const writer = new BerWriter();
   f.toBer(writer);
@@ -162,25 +149,23 @@ test('handle values passed via buffer', (t) => {
   reader.readSequence();
 
   const f2 = new EqualityFilter();
-  t.ok(f2.parse(reader));
+  expect(f2.parse(reader)).toBeTruthy();
 
-  t.equal(f2.value, b.toString());
-  t.equal(f2.raw.length, b.length);
+  expect(f2.value).toBe(b.toString());
+  expect(f2.raw.length).toBe(b.length);
   for (let i = 0; i < b.length; i++) {
-    t.equal(f2.raw[i], b[i]);
+    expect(f2.raw[i]).toBe(b[i]);
   }
-  t.end();
 });
 
-test('GH-277 objectClass should be case-insensitive', (t) => {
+test('GH-277 objectClass should be case-insensitive', () => {
   const f = new EqualityFilter({
     attribute: 'objectClass',
     value: 'CaseInsensitiveObj'
   });
-  t.ok(f);
-  t.ok(f.matches({ objectClass: 'CaseInsensitiveObj' }));
-  t.ok(f.matches({ OBJECTCLASS: 'CASEINSENSITIVEOBJ' }));
-  t.ok(f.matches({ objectclass: 'caseinsensitiveobj' }));
-  t.ok(!f.matches({ objectclass: 'matchless' }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.matches({ objectClass: 'CaseInsensitiveObj' })).toBeTruthy();
+  expect(f.matches({ OBJECTCLASS: 'CASEINSENSITIVEOBJ' })).toBeTruthy();
+  expect(f.matches({ objectclass: 'caseinsensitiveobj' })).toBeTruthy();
+  expect(!f.matches({ objectclass: 'matchless' })).toBeTruthy();
 });

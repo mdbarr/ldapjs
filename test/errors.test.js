@@ -1,25 +1,22 @@
 // Copyright 2015 Joyent, Inc.
 'use strict';
 
-const test = require('tape').test;
-
 const ldap = require('../lib/index');
 
 ////////////////////
 // Tests
 
-test('basic error', (t) => {
+test('basic error', () => {
   const msg = 'mymsg';
   const err = new ldap.LDAPError(msg, null, null);
-  t.ok(err);
-  t.equal(err.name, 'LDAPError');
-  t.equal(err.code, ldap.LDAP_OTHER);
-  t.equal(err.dn, '');
-  t.equal(err.message, msg);
-  t.end();
+  expect(err).toBeTruthy();
+  expect(err.name).toBe('LDAPError');
+  expect(err.code).toBe(ldap.LDAP_OTHER);
+  expect(err.dn).toBe('');
+  expect(err.message).toBe(msg);
 });
 
-test('"custom" errors', (t) => {
+test('"custom" errors', () => {
   const errors = [
     {
       name: 'ConnectionError',
@@ -38,12 +35,10 @@ test('"custom" errors', (t) => {
   errors.forEach((entry) => {
     const msg = `${ entry.name }msg`;
     const err = new entry.Func(msg);
-    t.ok(err);
-    t.equal(err.name, entry.name);
-    t.equal(err.code, ldap.LDAP_OTHER);
-    t.equal(err.dn, '');
-    t.equal(err.message, msg);
+    expect(err).toBeTruthy();
+    expect(err.name).toBe(entry.name);
+    expect(err.code).toBe(ldap.LDAP_OTHER);
+    expect(err.dn).toBe('');
+    expect(err.message).toBe(msg);
   });
-
-  t.end();
 });

@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -15,33 +13,30 @@ let ExtendedResponse;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   ExtendedResponse = require('../../lib/index').ExtendedResponse;
-  t.ok(ExtendedResponse);
-  t.end();
+  expect(ExtendedResponse).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new ExtendedResponse());
-  t.end();
+test('new no args', () => {
+  expect(new ExtendedResponse()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const res = new ExtendedResponse({
     messageID: 123,
     status: 0,
     responseName: '1.2.3.4',
     responseValue: 'test'
   });
-  t.ok(res);
-  t.equal(res.messageID, 123);
-  t.equal(res.status, 0);
-  t.equal(res.responseName, '1.2.3.4');
-  t.equal(res.responseValue, 'test');
-  t.end();
+  expect(res).toBeTruthy();
+  expect(res.messageID).toBe(123);
+  expect(res.status).toBe(0);
+  expect(res.responseName).toBe('1.2.3.4');
+  expect(res.responseValue).toBe('test');
 });
 
-test('parse', (t) => {
+test('parse', () => {
   const ber = new BerWriter();
   ber.writeEnumeration(0);
   ber.writeString('cn=root');
@@ -50,16 +45,15 @@ test('parse', (t) => {
   ber.writeString('test', 0x8b);
 
   const res = new ExtendedResponse();
-  t.ok(res._parse(new BerReader(ber.buffer)));
-  t.equal(res.status, 0);
-  t.equal(res.matchedDN, 'cn=root');
-  t.equal(res.errorMessage, 'foo');
-  t.equal(res.responseName, '1.2.3.4');
-  t.equal(res.responseValue, 'test');
-  t.end();
+  expect(res._parse(new BerReader(ber.buffer))).toBeTruthy();
+  expect(res.status).toBe(0);
+  expect(res.matchedDN).toBe('cn=root');
+  expect(res.errorMessage).toBe('foo');
+  expect(res.responseName).toBe('1.2.3.4');
+  expect(res.responseValue).toBe('test');
 });
 
-test('toBer', (t) => {
+test('toBer', () => {
   const res = new ExtendedResponse({
     messageID: 123,
     status: 3,
@@ -68,18 +62,16 @@ test('toBer', (t) => {
     responseName: '1.2.3.4',
     responseValue: 'test'
   });
-  t.ok(res);
+  expect(res).toBeTruthy();
 
   const ber = new BerReader(res.toBer());
-  t.ok(ber);
-  t.equal(ber.readSequence(), 0x30);
-  t.equal(ber.readInt(), 123);
-  t.equal(ber.readSequence(), 0x78);
-  t.equal(ber.readEnumeration(), 3);
-  t.equal(ber.readString(), 'cn=root');
-  t.equal(ber.readString(), 'foo');
-  t.equal(ber.readString(0x8a), '1.2.3.4');
-  t.equal(ber.readString(0x8b), 'test');
-
-  t.end();
+  expect(ber).toBeTruthy();
+  expect(ber.readSequence()).toBe(0x30);
+  expect(ber.readInt()).toBe(123);
+  expect(ber.readSequence()).toBe(0x78);
+  expect(ber.readEnumeration()).toBe(3);
+  expect(ber.readString()).toBe('cn=root');
+  expect(ber.readString()).toBe('foo');
+  expect(ber.readString(0x8a)).toBe('1.2.3.4');
+  expect(ber.readString(0x8b)).toBe('test');
 });

@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -16,58 +14,52 @@ let dn;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   ExtendedRequest = require('../../lib/index').ExtendedRequest;
   dn = require('../../lib/index').dn;
-  t.ok(ExtendedRequest);
-  t.ok(dn);
-  t.end();
+  expect(ExtendedRequest).toBeTruthy();
+  expect(dn).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new ExtendedRequest());
-  t.end();
+test('new no args', () => {
+  expect(new ExtendedRequest()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const req = new ExtendedRequest({
     requestName: '1.2.3.4',
     requestValue: 'test'
   });
-  t.ok(req);
-  t.equal(req.requestName, '1.2.3.4');
-  t.equal(req.requestValue, 'test');
-  t.end();
+  expect(req).toBeTruthy();
+  expect(req.requestName).toBe('1.2.3.4');
+  expect(req.requestValue).toBe('test');
 });
 
-test('parse', (t) => {
+test('parse', () => {
   const ber = new BerWriter();
   ber.writeString('1.2.3.4', 0x80);
   ber.writeString('test', 0x81);
 
   const req = new ExtendedRequest();
-  t.ok(req._parse(new BerReader(ber.buffer)));
-  t.equal(req.requestName, '1.2.3.4');
-  t.equal(req.requestValue, 'test');
-  t.end();
+  expect(req._parse(new BerReader(ber.buffer))).toBeTruthy();
+  expect(req.requestName).toBe('1.2.3.4');
+  expect(req.requestValue).toBe('test');
 });
 
-test('toBer', (t) => {
+test('toBer', () => {
   const req = new ExtendedRequest({
     messageID: 123,
     requestName: '1.2.3.4',
     requestValue: 'test'
   });
 
-  t.ok(req);
+  expect(req).toBeTruthy();
 
   const ber = new BerReader(req.toBer());
-  t.ok(ber);
-  t.equal(ber.readSequence(), 0x30);
-  t.equal(ber.readInt(), 123);
-  t.equal(ber.readSequence(), 0x77);
-  t.equal(ber.readString(0x80), '1.2.3.4');
-  t.equal(ber.readString(0x81), 'test');
-
-  t.end();
+  expect(ber).toBeTruthy();
+  expect(ber.readSequence()).toBe(0x30);
+  expect(ber.readInt()).toBe(123);
+  expect(ber.readSequence()).toBe(0x77);
+  expect(ber.readString(0x80)).toBe('1.2.3.4');
+  expect(ber.readString(0x81)).toBe('test');
 });

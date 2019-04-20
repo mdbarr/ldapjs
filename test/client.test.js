@@ -3,7 +3,6 @@
 
 const Logger = require('bunyan');
 
-const test = require('tape').test;
 const uuid = require('uuid/v4');
 const vasync = require('vasync');
 const util = require('util');
@@ -34,19 +33,19 @@ let server;
 ////////////////////
 // Tests
 
-test('setup', (t) => {
+test('setup', done => {
   ldap = require('../lib/index');
-  t.ok(ldap);
-  t.ok(ldap.createClient);
-  t.ok(ldap.createServer);
-  t.ok(ldap.Attribute);
-  t.ok(ldap.Change);
+  expect(ldap).toBeTruthy();
+  expect(ldap.createClient).toBeTruthy();
+  expect(ldap.createServer).toBeTruthy();
+  expect(ldap.Attribute).toBeTruthy();
+  expect(ldap.Change).toBeTruthy();
 
   Attribute = ldap.Attribute;
   Change = ldap.Change;
 
   server = ldap.createServer();
-  t.ok(server);
+  expect(server).toBeTruthy();
 
   server.bind(BIND_DN, (req, res, next) => {
     if (req.credentials !== BIND_PW) { return next(new ldap.InvalidCredentialsError('Invalid password')); }
@@ -280,45 +279,45 @@ test('setup', (t) => {
       socketPath: SOCKET,
       log: LOG
     });
-    t.ok(client);
-    t.end();
+    expect(client).toBeTruthy();
+    done();
   });
 });
 
-test('simple bind failure', (t) => {
+test('simple bind failure', done => {
   client.bind(BIND_DN, uuid(), (err, res) => {
-    t.ok(err);
-    t.notOk(res);
+    expect(err).toBeTruthy();
+    expect(res).toBeFalsy();
 
-    t.ok(err instanceof ldap.InvalidCredentialsError);
-    t.ok(err instanceof Error);
-    t.ok(err.dn);
-    t.ok(err.message);
-    t.ok(err.stack);
+    expect(err instanceof ldap.InvalidCredentialsError).toBeTruthy();
+    expect(err instanceof Error).toBeTruthy();
+    expect(err.dn).toBeTruthy();
+    expect(err.message).toBeTruthy();
+    expect(err.stack).toBeTruthy();
 
-    t.end();
+    done();
   });
 });
 
-test('simple bind success', (t) => {
+test('simple bind success', done => {
   client.bind(BIND_DN, BIND_PW, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
-    t.equal(res.status, 0);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
+    expect(res.status).toBe(0);
+    done();
   });
 });
 
-test('simple anonymous bind (empty credentials)', (t) => {
+test('simple anonymous bind (empty credentials)', done => {
   client.bind('', '', (err, res) => {
-    t.ifError(err);
-    t.ok(res);
-    t.equal(res.status, 0);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
+    expect(res.status).toBe(0);
+    done();
   });
 });
 
-test('auto-bind bad credentials', (t) => {
+test('auto-bind bad credentials', done => {
   const clt = ldap.createClient({
     socketPath: SOCKET,
     bindDN: BIND_DN,
@@ -326,13 +325,13 @@ test('auto-bind bad credentials', (t) => {
     log: LOG
   });
   clt.once('error', (err) => {
-    t.equal(err.code, ldap.LDAP_INVALID_CREDENTIALS);
+    expect(err.code).toBe(ldap.LDAP_INVALID_CREDENTIALS);
     clt.destroy();
-    t.end();
+    done();
   });
 });
 
-test('auto-bind success', (t) => {
+test('auto-bind success', done => {
   const clt = ldap.createClient({
     socketPath: SOCKET,
     bindDN: BIND_DN,
@@ -340,13 +339,13 @@ test('auto-bind success', (t) => {
     log: LOG
   });
   clt.once('connect', () => {
-    t.ok(clt);
+    expect(clt).toBeTruthy();
     clt.destroy();
-    t.end();
+    done();
   });
 });
 
-test('add success', (t) => {
+test('add success', done => {
   const attrs = [
     new Attribute({
       type: 'cn',
@@ -354,107 +353,107 @@ test('add success', (t) => {
     })
   ];
   client.add(`cn=add, ${ SUFFIX }`, attrs, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
-    t.equal(res.status, 0);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
+    expect(res.status).toBe(0);
+    done();
   });
 });
 
-test('add success with object', (t) => {
+test('add success with object', done => {
   const entry = {
     cn: [ 'unit', 'add' ],
     sn: 'test'
   };
   client.add(`cn=add, ${ SUFFIX }`, entry, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
-    t.equal(res.status, 0);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
+    expect(res.status).toBe(0);
+    done();
   });
 });
 
-test('compare success', (t) => {
+test('compare success', done => {
   client.compare(`cn=compare, ${ SUFFIX }`, 'cn', 'test', (err,
     matched,
     res) => {
-    t.ifError(err);
-    t.ok(matched);
-    t.ok(res);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(matched).toBeTruthy();
+    expect(res).toBeTruthy();
+    done();
   });
 });
 
-test('compare false', (t) => {
+test('compare false', done => {
   client.compare(`cn=compare, ${ SUFFIX }`, 'cn', 'foo', (err,
     matched,
     res) => {
-    t.ifError(err);
-    t.notOk(matched);
-    t.ok(res);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(matched).toBeFalsy();
+    expect(res).toBeTruthy();
+    done();
   });
 });
 
-test('compare bad suffix', (t) => {
+test('compare bad suffix', done => {
   client.compare(`cn=${ uuid() }`, 'cn', 'foo', (err,
     matched,
     res) => {
-    t.ok(err);
-    t.ok(err instanceof ldap.NoSuchObjectError);
-    t.notOk(matched);
-    t.notOk(res);
-    t.end();
+    expect(err).toBeTruthy();
+    expect(err instanceof ldap.NoSuchObjectError).toBeTruthy();
+    expect(matched).toBeFalsy();
+    expect(res).toBeFalsy();
+    done();
   });
 });
 
-test('delete success', (t) => {
+test('delete success', done => {
   client.del(`cn=delete, ${ SUFFIX }`, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
+    done();
   });
 });
 
-test('delete with control (GH-212)', (t) => {
+test('delete with control (GH-212)', done => {
   const control = new ldap.Control({
     type: '1.2.3.4',
     criticality: false
   });
   client.del(`cn=delete, ${ SUFFIX }`, control, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
+    done();
   });
 });
 
-test('exop success', (t) => {
+test('exop success', done => {
   client.exop('1.3.6.1.4.1.4203.1.11.3', (err, value, res) => {
-    t.ifError(err);
-    t.ok(value);
-    t.ok(res);
-    t.equal(value, 'u:xxyyz@EXAMPLE.NET');
-    t.end();
+    expect(err).toBeFalsy();
+    expect(value).toBeTruthy();
+    expect(res).toBeTruthy();
+    expect(value).toBe('u:xxyyz@EXAMPLE.NET');
+    done();
   });
 });
 
-test('exop invalid', (t) => {
+test('exop invalid', done => {
   client.exop('1.2.3.4', (err, res) => {
-    t.ok(err);
-    t.ok(err instanceof ldap.ProtocolError);
-    t.notOk(res);
-    t.end();
+    expect(err).toBeTruthy();
+    expect(err instanceof ldap.ProtocolError).toBeTruthy();
+    expect(res).toBeFalsy();
+    done();
   });
 });
 
-test('bogus exop (GH-17)', (t) => {
+test('bogus exop (GH-17)', done => {
   client.exop('cn=root', (err) => {
-    t.ok(err);
-    t.end();
+    expect(err).toBeTruthy();
+    done();
   });
 });
 
-test('modify success', (t) => {
+test('modify success', done => {
   const change = new Change({
     type: 'Replace',
     modification: new Attribute({
@@ -463,27 +462,27 @@ test('modify success', (t) => {
     })
   });
   client.modify(`cn=modify, ${ SUFFIX }`, change, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
-    t.equal(res.status, 0);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
+    expect(res.status).toBe(0);
+    done();
   });
 });
 
-test('modify change plain object success', (t) => {
+test('modify change plain object success', done => {
   const change = new Change({
     type: 'Replace',
     modification: { cn: 'test' }
   });
   client.modify(`cn=modify, ${ SUFFIX }`, change, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
-    t.equal(res.status, 0);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
+    expect(res.status).toBe(0);
+    done();
   });
 });
 
-test('modify array success', (t) => {
+test('modify array success', done => {
   const changes = [
     new Change({
       operation: 'Replace',
@@ -498,14 +497,14 @@ test('modify array success', (t) => {
     })
   ];
   client.modify(`cn=modify, ${ SUFFIX }`, changes, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
-    t.equal(res.status, 0);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
+    expect(res.status).toBe(0);
+    done();
   });
 });
 
-test('modify change plain object success (GH-31)', (t) => {
+test('modify change plain object success (GH-31)', done => {
   const change = {
     type: 'replace',
     modification: {
@@ -514,62 +513,62 @@ test('modify change plain object success (GH-31)', (t) => {
     }
   };
   client.modify(`cn=modify, ${ SUFFIX }`, change, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
-    t.equal(res.status, 0);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
+    expect(res.status).toBe(0);
+    done();
   });
 });
 
-test('modify DN new RDN only', (t) => {
+test('modify DN new RDN only', done => {
   client.modifyDN(`cn=old, ${ SUFFIX }`, 'cn=new', (err, res) => {
-    t.ifError(err);
-    t.ok(res);
-    t.equal(res.status, 0);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
+    expect(res.status).toBe(0);
+    done();
   });
 });
 
-test('modify DN new superior', (t) => {
+test('modify DN new superior', done => {
   client.modifyDN(`cn=old, ${ SUFFIX }`, 'cn=new, dc=foo', (err, res) => {
-    t.ifError(err);
-    t.ok(res);
-    t.equal(res.status, 0);
-    t.end();
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
+    expect(res.status).toBe(0);
+    done();
   });
 });
 
-test('search basic', (t) => {
+test('search basic', done => {
   client.search(`cn=test, ${ SUFFIX }`, '(objectclass=*)', (err, res) => {
-    t.ifError(err);
-    t.ok(res);
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
     let gotEntry = 0;
     res.on('searchEntry', (entry) => {
-      t.ok(entry);
-      t.ok(entry instanceof ldap.SearchEntry);
-      t.equal(entry.dn.toString(), `cn=test, ${ SUFFIX }`);
-      t.ok(entry.attributes);
-      t.ok(entry.attributes.length);
-      t.equal(entry.attributes[0].type, 'cn');
-      t.equal(entry.attributes[1].type, 'SN');
-      t.ok(entry.object);
+      expect(entry).toBeTruthy();
+      expect(entry instanceof ldap.SearchEntry).toBeTruthy();
+      expect(entry.dn.toString()).toBe(`cn=test, ${ SUFFIX }`);
+      expect(entry.attributes).toBeTruthy();
+      expect(entry.attributes.length).toBeTruthy();
+      expect(entry.attributes[0].type).toBe('cn');
+      expect(entry.attributes[1].type).toBe('SN');
+      expect(entry.object).toBeTruthy();
       gotEntry++;
     });
     res.on('error', (err) => {
-      t.fail(err);
+      done.fail(err);
     });
     res.on('end', (res) => {
-      t.ok(res);
-      t.ok(res instanceof ldap.SearchResponse);
-      t.equal(res.status, 0);
-      t.equal(gotEntry, 2);
-      t.end();
+      expect(res).toBeTruthy();
+      expect(res instanceof ldap.SearchResponse).toBeTruthy();
+      expect(res.status).toBe(0);
+      expect(gotEntry).toBe(2);
+      done();
     });
   });
 });
 
-test('search sizeLimit', (t) => {
-  t.test('over limit', (t2) => {
+describe('search sizeLimit', () => {
+  test('over limit', (t2) => {
     client.search('cn=sizelimit', {}, (err, res) => {
       t2.ifError(err);
       res.on('error', (error) => {
@@ -579,7 +578,7 @@ test('search sizeLimit', (t) => {
     });
   });
 
-  t.test('under limit', (t2) => {
+  test('under limit', (t2) => {
     const limit = 100;
     client.search('cn=sizelimit', { sizeLimit: limit }, (err, res) => {
       t2.ifError(err);
@@ -597,8 +596,8 @@ test('search sizeLimit', (t) => {
   });
 });
 
-test('search paged', (t) => {
-  t.test('paged - no pauses', (t2) => {
+describe('search paged', () => {
+  test('paged - no pauses', (t2) => {
     let countEntries = 0;
     let countPages = 0;
     client.search('cn=paged', { paged: { pageSize: 100 } }, (err, res) => {
@@ -618,7 +617,7 @@ test('search paged', (t) => {
     });
   });
 
-  t.test('paged - pauses', (t2) => {
+  test('paged - pauses', (t2) => {
     let countPages = 0;
     client.search('cn=paged', { paged: {
       pageSize: 100,
@@ -644,7 +643,7 @@ test('search paged', (t) => {
     });
   });
 
-  t.test('paged - no support (err handled)', (t2) => {
+  test('paged - no support (err handled)', (t2) => {
     client.search(SUFFIX, { paged: { pageSize: 100 } }, (err, res) => {
       t2.ifError(err);
       res.on('pageError', t2.ok.bind(t2));
@@ -655,7 +654,7 @@ test('search paged', (t) => {
     });
   });
 
-  t.test('paged - no support (err not handled)', (t2) => {
+  test('paged - no support (err not handled)', (t2) => {
     client.search(SUFFIX, { paged: { pageSize: 100 } }, (err, res) => {
       t2.ifError(err);
       res.on('end', t2.fail.bind(t2));
@@ -666,7 +665,7 @@ test('search paged', (t) => {
     });
   });
 
-  t.test('paged - redundant control', (t2) => {
+  test('paged - redundant control', (t2) => {
     try {
       client.search(SUFFIX,
         { paged: { pageSize: 100 } },
@@ -681,7 +680,7 @@ test('search paged', (t) => {
     }
   });
 
-  t.test('paged - handle later error', (t2) => {
+  test('paged - handle later error', (t2) => {
     let countEntries = 0;
     let countPages = 0;
     client.search('cn=pagederr', { paged: { pageSize: 1 } }, (err, res) => {
@@ -702,14 +701,12 @@ test('search paged', (t) => {
       });
     });
   });
-
-  t.end();
 });
 
-test('search referral', (t) => {
+test('search referral', done => {
   client.search(`cn=ref, ${ SUFFIX }`, '(objectclass=*)', (err, res) => {
-    t.ifError(err);
-    t.ok(res);
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
     let gotEntry = 0;
     let gotReferral = false;
     res.on('searchEntry', () => {
@@ -717,195 +714,194 @@ test('search referral', (t) => {
     });
     res.on('searchReference', (referral) => {
       gotReferral = true;
-      t.ok(referral);
-      t.ok(referral instanceof ldap.SearchReference);
-      t.ok(referral.uris);
-      t.ok(referral.uris.length);
+      expect(referral).toBeTruthy();
+      expect(referral instanceof ldap.SearchReference).toBeTruthy();
+      expect(referral.uris).toBeTruthy();
+      expect(referral.uris.length).toBeTruthy();
     });
     res.on('error', (err) => {
-      t.fail(err);
+      done.fail(err);
     });
     res.on('end', (res) => {
-      t.ok(res);
-      t.ok(res instanceof ldap.SearchResponse);
-      t.equal(res.status, 0);
-      t.equal(gotEntry, 0);
-      t.ok(gotReferral);
-      t.end();
+      expect(res).toBeTruthy();
+      expect(res instanceof ldap.SearchResponse).toBeTruthy();
+      expect(res.status).toBe(0);
+      expect(gotEntry).toBe(0);
+      expect(gotReferral).toBeTruthy();
+      done();
     });
   });
 });
 
-test('search rootDSE', (t) => {
+test('search rootDSE', done => {
   client.search('', '(objectclass=*)', (err, res) => {
-    t.ifError(err);
-    t.ok(res);
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
     res.on('searchEntry', (entry) => {
-      t.ok(entry);
-      t.equal(entry.dn.toString(), '');
-      t.ok(entry.attributes);
-      t.ok(entry.object);
+      expect(entry).toBeTruthy();
+      expect(entry.dn.toString()).toBe('');
+      expect(entry.attributes).toBeTruthy();
+      expect(entry.object).toBeTruthy();
     });
     res.on('error', (err) => {
-      t.fail(err);
+      done.fail(err);
     });
     res.on('end', (res) => {
-      t.ok(res);
-      t.ok(res instanceof ldap.SearchResponse);
-      t.equal(res.status, 0);
-      t.end();
+      expect(res).toBeTruthy();
+      expect(res instanceof ldap.SearchResponse).toBeTruthy();
+      expect(res.status).toBe(0);
+      done();
     });
   });
 });
 
-test('search empty attribute', (t) => {
+test('search empty attribute', done => {
   client.search('dc=empty', '(objectclass=*)', (err, res) => {
-    t.ifError(err);
-    t.ok(res);
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
     let gotEntry = 0;
     res.on('searchEntry', (entry) => {
       const obj = entry.toObject();
-      t.equal('dc=empty', obj.dn);
-      t.ok(obj.member);
-      t.equal(obj.member.length, 0);
-      t.ok(obj['member;range=0-1']);
-      t.ok(obj['member;range=0-1'].length);
+      expect('dc=empty').toBe(obj.dn);
+      expect(obj.member).toBeTruthy();
+      expect(obj.member.length).toBe(0);
+      expect(obj['member;range=0-1']).toBeTruthy();
+      expect(obj['member;range=0-1'].length).toBeTruthy();
       gotEntry++;
     });
     res.on('error', (err) => {
-      t.fail(err);
+      done.fail(err);
     });
     res.on('end', (res) => {
-      t.ok(res);
-      t.ok(res instanceof ldap.SearchResponse);
-      t.equal(res.status, 0);
-      t.equal(gotEntry, 1);
-      t.end();
+      expect(res).toBeTruthy();
+      expect(res instanceof ldap.SearchResponse).toBeTruthy();
+      expect(res.status).toBe(0);
+      expect(gotEntry).toBe(1);
+      done();
     });
   });
 });
 
-test('GH-21 binary attributes', (t) => {
+test('GH-21 binary attributes', done => {
   client.search(`cn=bin, ${ SUFFIX }`, '(objectclass=*)', (err, res) => {
-    t.ifError(err);
-    t.ok(res);
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
     let gotEntry = 0;
     const expect = new Buffer('\u00bd + \u00bc = \u00be', 'utf8');
     const expect2 = new Buffer([ 0xB5, 0xE7, 0xCA, 0xD3, 0xBB, 0xFA ]);
     res.on('searchEntry', (entry) => {
-      t.ok(entry);
-      t.ok(entry instanceof ldap.SearchEntry);
-      t.equal(entry.dn.toString(), `cn=bin, ${ SUFFIX }`);
-      t.ok(entry.attributes);
-      t.ok(entry.attributes.length);
-      t.equal(entry.attributes[0].type, 'foo;binary');
-      t.equal(entry.attributes[0].vals[0], expect.toString('base64'));
-      t.equal(entry.attributes[0].buffers[0].toString('base64'),
-        expect.toString('base64'));
+      expect(entry).toBeTruthy();
+      expect(entry instanceof ldap.SearchEntry).toBeTruthy();
+      expect(entry.dn.toString()).toBe(`cn=bin, ${ SUFFIX }`);
+      expect(entry.attributes).toBeTruthy();
+      expect(entry.attributes.length).toBeTruthy();
+      expect(entry.attributes[0].type).toBe('foo;binary');
+      expect(entry.attributes[0].vals[0]).toBe(expect.toString('base64'));
+      expect(entry.attributes[0].buffers[0].toString('base64')).toBe(expect.toString('base64'));
 
-      t.ok(entry.attributes[1].type, 'gb18030');
-      t.equal(entry.attributes[1].buffers.length, 1);
-      t.equal(expect2.length, entry.attributes[1].buffers[0].length);
-      for (let i = 0; i < expect2.length; i++) { t.equal(expect2[i], entry.attributes[1].buffers[0][i]); }
+      expect(entry.attributes[1].type).toBeTruthy();
+      expect(entry.attributes[1].buffers.length).toBe(1);
+      expect(expect2.length).toBe(entry.attributes[1].buffers[0].length);
+      for (let i = 0; i < expect2.length; i++) { expect(expect2[i]).toBe(entry.attributes[1].buffers[0][i]); }
 
-      t.ok(entry.object);
+      expect(entry.object).toBeTruthy();
       gotEntry++;
     });
     res.on('error', (err) => {
-      t.fail(err);
+      done.fail(err);
     });
     res.on('end', (res) => {
-      t.ok(res);
-      t.ok(res instanceof ldap.SearchResponse);
-      t.equal(res.status, 0);
-      t.equal(gotEntry, 1);
-      t.end();
+      expect(res).toBeTruthy();
+      expect(res instanceof ldap.SearchResponse).toBeTruthy();
+      expect(res.status).toBe(0);
+      expect(gotEntry).toBe(1);
+      done();
     });
   });
 });
 
-test('GH-23 case insensitive attribute filtering', (t) => {
+test('GH-23 case insensitive attribute filtering', done => {
   const opts = {
     filter: '(objectclass=*)',
     attributes: [ 'Cn' ]
   };
   client.search(`cn=test, ${ SUFFIX }`, opts, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
     let gotEntry = 0;
     res.on('searchEntry', (entry) => {
-      t.ok(entry);
-      t.ok(entry instanceof ldap.SearchEntry);
-      t.equal(entry.dn.toString(), `cn=test, ${ SUFFIX }`);
-      t.ok(entry.attributes);
-      t.ok(entry.attributes.length);
-      t.equal(entry.attributes[0].type, 'cn');
-      t.ok(entry.object);
+      expect(entry).toBeTruthy();
+      expect(entry instanceof ldap.SearchEntry).toBeTruthy();
+      expect(entry.dn.toString()).toBe(`cn=test, ${ SUFFIX }`);
+      expect(entry.attributes).toBeTruthy();
+      expect(entry.attributes.length).toBeTruthy();
+      expect(entry.attributes[0].type).toBe('cn');
+      expect(entry.object).toBeTruthy();
       gotEntry++;
     });
     res.on('error', (err) => {
-      t.fail(err);
+      done.fail(err);
     });
     res.on('end', (res) => {
-      t.ok(res);
-      t.ok(res instanceof ldap.SearchResponse);
-      t.equal(res.status, 0);
-      t.equal(gotEntry, 2);
-      t.end();
+      expect(res).toBeTruthy();
+      expect(res instanceof ldap.SearchResponse).toBeTruthy();
+      expect(res.status).toBe(0);
+      expect(gotEntry).toBe(2);
+      done();
     });
   });
 });
 
-test('GH-24 attribute selection of *', (t) => {
+test('GH-24 attribute selection of *', done => {
   const opts = {
     filter: '(objectclass=*)',
     attributes: [ '*' ]
   };
   client.search(`cn=test, ${ SUFFIX }`, opts, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
     let gotEntry = 0;
     res.on('searchEntry', (entry) => {
-      t.ok(entry);
-      t.ok(entry instanceof ldap.SearchEntry);
-      t.equal(entry.dn.toString(), `cn=test, ${ SUFFIX }`);
-      t.ok(entry.attributes);
-      t.ok(entry.attributes.length);
-      t.equal(entry.attributes[0].type, 'cn');
-      t.equal(entry.attributes[1].type, 'SN');
-      t.ok(entry.object);
+      expect(entry).toBeTruthy();
+      expect(entry instanceof ldap.SearchEntry).toBeTruthy();
+      expect(entry.dn.toString()).toBe(`cn=test, ${ SUFFIX }`);
+      expect(entry.attributes).toBeTruthy();
+      expect(entry.attributes.length).toBeTruthy();
+      expect(entry.attributes[0].type).toBe('cn');
+      expect(entry.attributes[1].type).toBe('SN');
+      expect(entry.object).toBeTruthy();
       gotEntry++;
     });
     res.on('error', (err) => {
-      t.fail(err);
+      done.fail(err);
     });
     res.on('end', (res) => {
-      t.ok(res);
-      t.ok(res instanceof ldap.SearchResponse);
-      t.equal(res.status, 0);
-      t.equal(gotEntry, 2);
-      t.end();
+      expect(res).toBeTruthy();
+      expect(res instanceof ldap.SearchResponse).toBeTruthy();
+      expect(res.status).toBe(0);
+      expect(gotEntry).toBe(2);
+      done();
     });
   });
 });
 
-test('idle timeout', (t) => {
+test('idle timeout', done => {
   client.idleTimeout = 250;
   function premature() {
-    t.ifError(true);
+    expect(true).toBeFalsy();
   }
   client.on('idle', premature);
   client.search('dc=slow', 'objectclass=*', (err, res) => {
-    t.ifError(err);
+    expect(err).toBeFalsy();
     res.on('searchEntry', (res) => {
-      t.ok(res);
+      expect(res).toBeTruthy();
     });
     res.on('error', (err) => {
-      t.ifError(err);
+      expect(err).toBeFalsy();
     });
     res.on('end', () => {
       const late = setTimeout(() => {
-        t.ifError(false, 'too late');
+        expect(false).toBeFalsy();
       }, 500);
       // It's ok to go idle now
       client.removeListener('idle', premature);
@@ -913,13 +909,13 @@ test('idle timeout', (t) => {
         clearTimeout(late);
         client.removeAllListeners('idle');
         client.idleTimeout = 0;
-        t.end();
+        done();
       });
     });
   });
 });
 
-test('setup action', (t) => {
+test('setup action', done => {
   const setupClient = ldap.createClient({
     connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
     socketPath: SOCKET,
@@ -927,21 +923,21 @@ test('setup action', (t) => {
   });
   setupClient.on('setup', (clt, cb) => {
     clt.bind(BIND_DN, BIND_PW, (err) => {
-      t.ifError(err);
+      expect(err).toBeFalsy();
       cb(err);
     });
   });
   setupClient.search(SUFFIX, { scope: 'base' }, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
     res.on('end', () => {
       setupClient.destroy();
-      t.end();
+      done();
     });
   });
 });
 
-test('setup reconnect', (t) => {
+test('setup reconnect', done => {
   const rClient = ldap.createClient({
     connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
     socketPath: SOCKET,
@@ -950,14 +946,14 @@ test('setup reconnect', (t) => {
   });
   rClient.on('setup', (clt, cb) => {
     clt.bind(BIND_DN, BIND_PW, (err) => {
-      t.ifError(err);
+      expect(err).toBeFalsy();
       cb(err);
     });
   });
 
   function doSearch(_, cb) {
     rClient.search(SUFFIX, { scope: 'base' }, (err, res) => {
-      t.ifError(err);
+      expect(err).toBeFalsy();
       res.on('end', () => {
         cb();
       });
@@ -966,10 +962,10 @@ test('setup reconnect', (t) => {
   vasync.pipeline({ funcs: [
     doSearch,
     function cleanDisconnect(_, cb) {
-      t.ok(rClient.connected);
+      expect(rClient.connected).toBeTruthy();
       rClient.once('close', (hadError) => {
-        t.ifError(hadError);
-        t.equal(rClient.connected, false);
+        expect(hadError).toBeFalsy();
+        expect(rClient.connected).toBe(false);
         cb();
       });
       rClient.unbind();
@@ -978,8 +974,8 @@ test('setup reconnect', (t) => {
     function simulateError(_, cb) {
       const msg = 'fake socket error';
       rClient.once('error', (err) => {
-        t.equal(err.message, msg);
-        t.ok(err);
+        expect(err.message).toBe(msg);
+        expect(err).toBeTruthy();
       });
       rClient.once('close', () => {
         cb();
@@ -988,13 +984,13 @@ test('setup reconnect', (t) => {
     },
     doSearch
   ] }, (err) => {
-    t.ifError(err);
+    expect(err).toBeFalsy();
     rClient.destroy();
-    t.end();
+    done();
   });
 });
 
-test('setup abort', (t) => {
+test('setup abort', done => {
   const setupClient = ldap.createClient({
     connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
     socketPath: SOCKET,
@@ -1004,18 +1000,18 @@ test('setup abort', (t) => {
   const message = 'It\'s a trap!';
   setupClient.on('setup', (clt, cb) => {
     // simulate failure
-    t.ok(clt);
+    expect(clt).toBeTruthy();
     cb(new Error(message));
   });
   setupClient.on('setupError', (err) => {
-    t.ok(true);
-    t.equal(err.message, message);
+    expect(true).toBeTruthy();
+    expect(err.message).toBe(message);
     setupClient.destroy();
-    t.end();
+    done();
   });
 });
 
-test('abort reconnect', (t) => {
+test('abort reconnect', done => {
   const abortClient = ldap.createClient({
     connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
     socketPath: '/dev/null',
@@ -1027,16 +1023,16 @@ test('abort reconnect', (t) => {
     ++retryCount;
   });
   abortClient.once('connectError', () => {
-    t.ok(true);
+    expect(true).toBeTruthy();
     abortClient.once('destroy', () => {
-      t.ok(retryCount < 3);
-      t.end();
+      expect(retryCount < 3).toBeTruthy();
+      done();
     });
     abortClient.destroy();
   });
 });
 
-test('reconnect max retries', (t) => {
+test('reconnect max retries', done => {
   const RETRIES = 5;
   const rClient = ldap.createClient({
     connectTimeout: 100,
@@ -1054,13 +1050,13 @@ test('reconnect max retries', (t) => {
     count++;
   });
   rClient.on('error', () => {
-    t.equal(count, RETRIES);
+    expect(count).toBe(RETRIES);
     rClient.destroy();
-    t.end();
+    done();
   });
 });
 
-test('reconnect on server close', (t) => {
+test('reconnect on server close', done => {
   const clt = ldap.createClient({
     socketPath: SOCKET,
     reconnect: true,
@@ -1068,16 +1064,16 @@ test('reconnect on server close', (t) => {
   });
   clt.on('setup', (sclt, cb) => {
     sclt.bind(BIND_DN, BIND_PW, (err) => {
-      t.ifError(err);
+      expect(err).toBeFalsy();
       cb(err);
     });
   });
   clt.once('connect', () => {
-    t.ok(clt._socket);
+    expect(clt._socket).toBeTruthy();
     clt.once('connect', () => {
-      t.ok(true, 'successful reconnect');
+      expect(true).toBeTruthy();
       clt.destroy();
-      t.end();
+      done();
     });
 
     // Simulate server-side close
@@ -1085,7 +1081,7 @@ test('reconnect on server close', (t) => {
   });
 });
 
-test('no auto-reconnect on unbind', (t) => {
+test('no auto-reconnect on unbind', done => {
   const clt = ldap.createClient({
     socketPath: SOCKET,
     reconnect: true,
@@ -1093,21 +1089,21 @@ test('no auto-reconnect on unbind', (t) => {
   });
   clt.on('setup', (sclt, cb) => {
     sclt.bind(BIND_DN, BIND_PW, (err) => {
-      t.ifError(err);
+      expect(err).toBeFalsy();
       cb(err);
     });
   });
   clt.once('connect', () => {
     clt.once('connect', () => {
-      t.ifError(new Error('client should not reconnect'));
+      expect(new Error('client should not reconnect')).toBeFalsy();
     });
     clt.once('close', () => {
-      t.ok(true, 'initial close');
+      expect(true).toBeTruthy();
       setImmediate(() => {
-        t.ok(!clt.connected, 'should not be connected');
-        t.ok(!clt.connecting, 'should not be connecting');
+        expect(!clt.connected).toBeTruthy();
+        expect(!clt.connecting).toBeTruthy();
         clt.destroy();
-        t.end();
+        done();
       });
     });
 
@@ -1115,35 +1111,35 @@ test('no auto-reconnect on unbind', (t) => {
   });
 });
 
-test('abandon (GH-27)', (t) => {
+test('abandon (GH-27)', done => {
   client.abandon(401876543, (err) => {
-    t.ifError(err);
-    t.end();
+    expect(err).toBeFalsy();
+    done();
   });
 });
 
-test('search timeout (GH-51)', (t) => {
+test('search timeout (GH-51)', done => {
   client.timeout = 250;
   client.search('dc=timeout', 'objectclass=*', (err, res) => {
-    t.ifError(err);
+    expect(err).toBeFalsy();
     res.on('error', () => {
-      t.end();
+      done();
     });
   });
 });
 
-test('resultError handling', (t) => {
-  t.plan(6);
+test('resultError handling', () => {
+  expect.assertions(6);
   vasync.pipeline({ funcs: [
     function errSearch(_, cb) {
       client.once('resultError', (error) => {
-        t.equal(error.name, 'BusyError');
+        expect(error.name).toBe('BusyError');
       });
       client.search('cn=busy', {}, (err, res) => {
-        t.ifError(err);
+        expect(err).toBeFalsy();
 
         res.once('error', (error) => {
-          t.equal(error.name, 'BusyError');
+          expect(error.name).toBe('BusyError');
           cb();
         });
       });
@@ -1151,30 +1147,30 @@ test('resultError handling', (t) => {
     function cleanSearch(_, cb) {
       client.on('resultError', t.ifError.bind(null));
       client.search(SUFFIX, {}, (err, res) => {
-        t.ifError(err);
+        expect(err).toBeFalsy();
 
         res.once('end', () => {
-          t.ok(true);
+          expect(true).toBeTruthy();
           cb();
         });
       });
     }
   ] }, (err) => {
-    t.ifError(err);
+    expect(err).toBeFalsy();
     client.removeAllListeners('resultError');
   });
 });
 
-test('unbind (GH-30)', (t) => {
+test('unbind (GH-30)', done => {
   client.unbind((err) => {
-    t.ifError(err);
-    t.end();
+    expect(err).toBeFalsy();
+    done();
   });
 });
 
-test('shutdown', (t) => {
+test('shutdown', done => {
   server.on('close', () => {
-    t.end();
+    done();
   });
   server.close();
 });

@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -16,48 +14,43 @@ let dn;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   ModifyDNRequest = require('../../lib/index').ModifyDNRequest;
   dn = require('../../lib/index').dn;
-  t.ok(ModifyDNRequest);
-  t.ok(dn);
-  t.end();
+  expect(ModifyDNRequest).toBeTruthy();
+  expect(dn).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new ModifyDNRequest());
-  t.end();
+test('new no args', () => {
+  expect(new ModifyDNRequest()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const req = new ModifyDNRequest({
     entry: dn.parse('cn=foo, o=test'),
     newRdn: dn.parse('cn=foo2'),
     deleteOldRdn: true
   });
-  t.ok(req);
-  t.equal(req.dn.toString(), 'cn=foo, o=test');
-  t.equal(req.newRdn.toString(), 'cn=foo2');
-  t.equal(req.deleteOldRdn, true);
-  t.end();
+  expect(req).toBeTruthy();
+  expect(req.dn.toString()).toBe('cn=foo, o=test');
+  expect(req.newRdn.toString()).toBe('cn=foo2');
+  expect(req.deleteOldRdn).toBe(true);
 });
 
-test('parse', (t) => {
+test('parse', () => {
   const ber = new BerWriter();
   ber.writeString('cn=foo, o=test');
   ber.writeString('cn=foo2');
   ber.writeBoolean(true);
 
   const req = new ModifyDNRequest();
-  t.ok(req._parse(new BerReader(ber.buffer)));
-  t.equal(req.dn.toString(), 'cn=foo, o=test');
-  t.equal(req.newRdn.toString(), 'cn=foo2');
-  t.equal(req.deleteOldRdn, true);
-
-  t.end();
+  expect(req._parse(new BerReader(ber.buffer))).toBeTruthy();
+  expect(req.dn.toString()).toBe('cn=foo, o=test');
+  expect(req.newRdn.toString()).toBe('cn=foo2');
+  expect(req.deleteOldRdn).toBe(true);
 });
 
-test('toBer', (t) => {
+test('toBer', () => {
   const req = new ModifyDNRequest({
     messageID: 123,
     entry: dn.parse('cn=foo, o=test'),
@@ -65,16 +58,14 @@ test('toBer', (t) => {
     deleteOldRdn: true
   });
 
-  t.ok(req);
+  expect(req).toBeTruthy();
 
   const ber = new BerReader(req.toBer());
-  t.ok(ber);
-  t.equal(ber.readSequence(), 0x30);
-  t.equal(ber.readInt(), 123);
-  t.equal(ber.readSequence(), 0x6c);
-  t.equal(ber.readString(), 'cn=foo, o=test');
-  t.equal(ber.readString(), 'cn=foo2');
-  t.equal(ber.readBoolean(), true);
-
-  t.end();
+  expect(ber).toBeTruthy();
+  expect(ber.readSequence()).toBe(0x30);
+  expect(ber.readInt()).toBe(123);
+  expect(ber.readSequence()).toBe(0x6c);
+  expect(ber.readString()).toBe('cn=foo, o=test');
+  expect(ber.readString()).toBe('cn=foo2');
+  expect(ber.readBoolean()).toBe(true);
 });

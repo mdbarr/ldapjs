@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 ////////////////////
 // Globals
 
@@ -11,57 +9,50 @@ let parseURL;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   parseURL = require('../lib/index').parseURL;
-  t.ok(parseURL);
-
-  t.end();
+  expect(parseURL).toBeTruthy();
 });
 
-test('parse empty', (t) => {
+test('parse empty', () => {
   const u = parseURL('ldap:///');
-  t.equal(u.hostname, 'localhost');
-  t.equal(u.port, 389);
-  t.ok(!u.DN);
-  t.ok(!u.attributes);
-  t.equal(u.secure, false);
-  t.end();
+  expect(u.hostname).toBe('localhost');
+  expect(u.port).toBe(389);
+  expect(!u.DN).toBeTruthy();
+  expect(!u.attributes).toBeTruthy();
+  expect(u.secure).toBe(false);
 });
 
-test('parse hostname', (t) => {
+test('parse hostname', () => {
   const u = parseURL('ldap://example.com/');
-  t.equal(u.hostname, 'example.com');
-  t.equal(u.port, 389);
-  t.ok(!u.DN);
-  t.ok(!u.attributes);
-  t.equal(u.secure, false);
-  t.end();
+  expect(u.hostname).toBe('example.com');
+  expect(u.port).toBe(389);
+  expect(!u.DN).toBeTruthy();
+  expect(!u.attributes).toBeTruthy();
+  expect(u.secure).toBe(false);
 });
 
-test('parse host and port', (t) => {
+test('parse host and port', () => {
   const u = parseURL('ldap://example.com:1389/');
-  t.equal(u.hostname, 'example.com');
-  t.equal(u.port, 1389);
-  t.ok(!u.DN);
-  t.ok(!u.attributes);
-  t.equal(u.secure, false);
-  t.end();
+  expect(u.hostname).toBe('example.com');
+  expect(u.port).toBe(1389);
+  expect(!u.DN).toBeTruthy();
+  expect(!u.attributes).toBeTruthy();
+  expect(u.secure).toBe(false);
 });
 
-test('parse full', (t) => {
+test('parse full', () => {
   const u = parseURL('ldaps://ldap.example.com:1389/dc=example%20,dc=com' +
                     '?cn,sn?sub?(cn=Babs%20Jensen)');
 
-  t.equal(u.secure, true);
-  t.equal(u.hostname, 'ldap.example.com');
-  t.equal(u.port, 1389);
-  t.equal(u.DN, 'dc=example ,dc=com');
-  t.ok(u.attributes);
-  t.equal(u.attributes.length, 2);
-  t.equal(u.attributes[0], 'cn');
-  t.equal(u.attributes[1], 'sn');
-  t.equal(u.scope, 'sub');
-  t.equal(u.filter.toString(), '(cn=Babs Jensen)');
-
-  t.end();
+  expect(u.secure).toBe(true);
+  expect(u.hostname).toBe('ldap.example.com');
+  expect(u.port).toBe(1389);
+  expect(u.DN).toBe('dc=example ,dc=com');
+  expect(u.attributes).toBeTruthy();
+  expect(u.attributes.length).toBe(2);
+  expect(u.attributes[0]).toBe('cn');
+  expect(u.attributes[1]).toBe('sn');
+  expect(u.scope).toBe('sub');
+  expect(u.filter.toString()).toBe('(cn=Babs Jensen)');
 });

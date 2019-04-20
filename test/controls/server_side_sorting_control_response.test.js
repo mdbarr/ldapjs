@@ -1,7 +1,5 @@
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 const BerReader = asn1.BerReader;
@@ -14,24 +12,22 @@ const OID = '1.2.840.113556.1.4.474';
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   ldap = require('../../lib');
   SSSResponseControl = ldap.ServerSideSortingResponseControl;
-  t.ok(SSSResponseControl);
+  expect(SSSResponseControl).toBeTruthy();
   getControl = ldap.getControl;
-  t.ok(getControl);
-  t.end();
+  expect(getControl).toBeTruthy();
 });
 
-test('new no args', (t) => {
+test('new no args', () => {
   const c = new SSSResponseControl();
-  t.ok(c);
-  t.equal(c.type, OID);
-  t.equal(c.criticality, false);
-  t.end();
+  expect(c).toBeTruthy();
+  expect(c.type).toBe(OID);
+  expect(c.criticality).toBe(false);
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const c = new SSSResponseControl({
     criticality: true,
     value: {
@@ -39,16 +35,14 @@ test('new with args', (t) => {
       failedAttribute: 'cn'
     }
   });
-  t.ok(c);
-  t.equal(c.type, OID);
-  t.equal(c.criticality, false);
-  t.equal(c.value.result, ldap.LDAP_SUCCESS);
-  t.equal(c.value.failedAttribute, 'cn');
-
-  t.end();
+  expect(c).toBeTruthy();
+  expect(c.type).toBe(OID);
+  expect(c.criticality).toBe(false);
+  expect(c.value.result).toBe(ldap.LDAP_SUCCESS);
+  expect(c.value.failedAttribute).toBe('cn');
 });
 
-test('toBer - success', (t) => {
+test('toBer - success', () => {
   const sssc = new SSSResponseControl({ value: {
     result: ldap.LDAP_SUCCESS,
     failedAttribute: 'foobar'
@@ -58,30 +52,28 @@ test('toBer - success', (t) => {
   sssc.toBer(ber);
 
   const c = getControl(new BerReader(ber.buffer));
-  t.ok(c);
-  t.equal(c.type, '1.2.840.113556.1.4.474');
-  t.equal(c.criticality, false);
-  t.equal(c.value.result, ldap.LDAP_SUCCESS);
-  t.notOk(c.value.failedAttribute);
-  t.end();
+  expect(c).toBeTruthy();
+  expect(c.type).toBe('1.2.840.113556.1.4.474');
+  expect(c.criticality).toBe(false);
+  expect(c.value.result).toBe(ldap.LDAP_SUCCESS);
+  expect(c.value.failedAttribute).toBeFalsy();
 });
 
-test('toBer - simple failure', (t) => {
+test('toBer - simple failure', () => {
   const sssc = new SSSResponseControl({ value: { result: ldap.LDAP_NO_SUCH_ATTRIBUTE } });
 
   const ber = new BerWriter();
   sssc.toBer(ber);
 
   const c = getControl(new BerReader(ber.buffer));
-  t.ok(c);
-  t.equal(c.type, OID);
-  t.equal(c.criticality, false);
-  t.equal(c.value.result, ldap.LDAP_NO_SUCH_ATTRIBUTE);
-  t.notOk(c.value.failedAttribute);
-  t.end();
+  expect(c).toBeTruthy();
+  expect(c.type).toBe(OID);
+  expect(c.criticality).toBe(false);
+  expect(c.value.result).toBe(ldap.LDAP_NO_SUCH_ATTRIBUTE);
+  expect(c.value.failedAttribute).toBeFalsy();
 });
 
-test('toBer - detailed failure', (t) => {
+test('toBer - detailed failure', () => {
   const sssc = new SSSResponseControl({ value: {
     result: ldap.LDAP_NO_SUCH_ATTRIBUTE,
     failedAttribute: 'foobar'
@@ -91,24 +83,22 @@ test('toBer - detailed failure', (t) => {
   sssc.toBer(ber);
 
   const c = getControl(new BerReader(ber.buffer));
-  t.ok(c);
-  t.equal(c.type, OID);
-  t.equal(c.criticality, false);
-  t.equal(c.value.result, ldap.LDAP_NO_SUCH_ATTRIBUTE);
-  t.equal(c.value.failedAttribute, 'foobar');
-  t.end();
+  expect(c).toBeTruthy();
+  expect(c.type).toBe(OID);
+  expect(c.criticality).toBe(false);
+  expect(c.value.result).toBe(ldap.LDAP_NO_SUCH_ATTRIBUTE);
+  expect(c.value.failedAttribute).toBe('foobar');
 });
 
-test('toBer - empty', (t) => {
+test('toBer - empty', () => {
   const sssc = new SSSResponseControl();
   const ber = new BerWriter();
   sssc.toBer(ber);
 
   const c = getControl(new BerReader(ber.buffer));
-  t.ok(c);
-  t.equal(c.type, OID);
-  t.equal(c.criticality, false);
-  t.notOk(c.value.result);
-  t.notOk(c.value.failedAttribute);
-  t.end();
+  expect(c).toBeTruthy();
+  expect(c.type).toBe(OID);
+  expect(c.criticality).toBe(false);
+  expect(c.value.result).toBeFalsy();
+  expect(c.value.failedAttribute).toBeFalsy();
 });

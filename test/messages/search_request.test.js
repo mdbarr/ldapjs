@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -17,22 +15,20 @@ let dn;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   SearchRequest = require('../../lib/index').SearchRequest;
   EqualityFilter = require('../../lib/index').EqualityFilter;
   dn = require('../../lib/index').dn;
-  t.ok(SearchRequest);
-  t.ok(EqualityFilter);
-  t.ok(dn);
-  t.end();
+  expect(SearchRequest).toBeTruthy();
+  expect(EqualityFilter).toBeTruthy();
+  expect(dn).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new SearchRequest());
-  t.end();
+test('new no args', () => {
+  expect(new SearchRequest()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const req = new SearchRequest({
     baseObject: dn.parse('cn=foo, o=test'),
     filter: new EqualityFilter({
@@ -41,16 +37,15 @@ test('new with args', (t) => {
     }),
     attributes: [ 'cn', 'sn' ]
   });
-  t.ok(req);
-  t.equal(req.dn.toString(), 'cn=foo, o=test');
-  t.equal(req.filter.toString(), '(email=foo@bar.com)');
-  t.equal(req.attributes.length, 2);
-  t.equal(req.attributes[0], 'cn');
-  t.equal(req.attributes[1], 'sn');
-  t.end();
+  expect(req).toBeTruthy();
+  expect(req.dn.toString()).toBe('cn=foo, o=test');
+  expect(req.filter.toString()).toBe('(email=foo@bar.com)');
+  expect(req.attributes.length).toBe(2);
+  expect(req.attributes[0]).toBe('cn');
+  expect(req.attributes[1]).toBe('sn');
 });
 
-test('parse', (t) => {
+test('parse', () => {
   const f = new EqualityFilter({
     attribute: 'email',
     value: 'foo@bar.com'
@@ -66,19 +61,18 @@ test('parse', (t) => {
   ber = f.toBer(ber);
 
   const req = new SearchRequest();
-  t.ok(req._parse(new BerReader(ber.buffer)));
-  t.equal(req.dn.toString(), 'cn=foo, o=test');
-  t.equal(req.scope, 'base');
-  t.equal(req.derefAliases, 0);
-  t.equal(req.sizeLimit, 1);
-  t.equal(req.timeLimit, 2);
-  t.equal(req.typesOnly, false);
-  t.equal(req.filter.toString(), '(email=foo@bar.com)');
-  t.equal(req.attributes.length, 0);
-  t.end();
+  expect(req._parse(new BerReader(ber.buffer))).toBeTruthy();
+  expect(req.dn.toString()).toBe('cn=foo, o=test');
+  expect(req.scope).toBe('base');
+  expect(req.derefAliases).toBe(0);
+  expect(req.sizeLimit).toBe(1);
+  expect(req.timeLimit).toBe(2);
+  expect(req.typesOnly).toBe(false);
+  expect(req.filter.toString()).toBe('(email=foo@bar.com)');
+  expect(req.attributes.length).toBe(0);
 });
 
-test('toBer', (t) => {
+test('toBer', () => {
   const req = new SearchRequest({
     messageID: 123,
     baseObject: dn.parse('cn=foo, o=test'),
@@ -94,25 +88,23 @@ test('toBer', (t) => {
     attributes: [ 'cn', 'sn' ]
   });
 
-  t.ok(req);
+  expect(req).toBeTruthy();
 
   const ber = new BerReader(req.toBer());
-  t.ok(ber);
-  t.equal(ber.readSequence(), 0x30);
-  t.equal(ber.readInt(), 123);
-  t.equal(ber.readSequence(), 0x63);
-  t.equal(ber.readString(), 'cn=foo, o=test');
-  t.equal(ber.readEnumeration(), 1);
-  t.equal(ber.readEnumeration(), 2);
-  t.equal(ber.readInt(), 10);
-  t.equal(ber.readInt(), 20);
-  t.ok(ber.readBoolean());
-  t.equal(ber.readSequence(), 0xa3);
-  t.equal(ber.readString(), 'email');
-  t.equal(ber.readString(), 'foo@bar.com');
-  t.ok(ber.readSequence());
-  t.equal(ber.readString(), 'cn');
-  t.equal(ber.readString(), 'sn');
-
-  t.end();
+  expect(ber).toBeTruthy();
+  expect(ber.readSequence()).toBe(0x30);
+  expect(ber.readInt()).toBe(123);
+  expect(ber.readSequence()).toBe(0x63);
+  expect(ber.readString()).toBe('cn=foo, o=test');
+  expect(ber.readEnumeration()).toBe(1);
+  expect(ber.readEnumeration()).toBe(2);
+  expect(ber.readInt()).toBe(10);
+  expect(ber.readInt()).toBe(20);
+  expect(ber.readBoolean()).toBeTruthy();
+  expect(ber.readSequence()).toBe(0xa3);
+  expect(ber.readString()).toBe('email');
+  expect(ber.readString()).toBe('foo@bar.com');
+  expect(ber.readSequence()).toBeTruthy();
+  expect(ber.readString()).toBe('cn');
+  expect(ber.readString()).toBe('sn');
 });

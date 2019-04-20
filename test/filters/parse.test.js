@@ -1,83 +1,72 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const parse = require('../../lib/index').parseFilter;
 
-test('GH-48 XML Strings in filter', (t) => {
+test('GH-48 XML Strings in filter', () => {
   const str = '(&(CentralUIEnrollments=<mydoc>*)(objectClass=User))';
   const f = parse(str);
-  t.ok(f);
-  t.ok(f.filters);
-  t.equal(f.filters.length, 2);
+  expect(f).toBeTruthy();
+  expect(f.filters).toBeTruthy();
+  expect(f.filters.length).toBe(2);
   f.filters.forEach((filter) => {
-    t.ok(filter.attribute);
+    expect(filter.attribute).toBeTruthy();
   });
-  t.end();
 });
 
-test('GH-50 = in filter', (t) => {
+test('GH-50 = in filter', () => {
   const str = '(uniquemember=uuid=930896af-bf8c-48d4-885c-6573a94b1853, ' +
     'ou=users, o=smartdc)';
   const f = parse(str);
-  t.ok(f);
-  t.equal(f.attribute, 'uniquemember');
-  t.equal(f.value,
-    'uuid=930896af-bf8c-48d4-885c-6573a94b1853, ou=users, o=smartdc');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.attribute).toBe('uniquemember');
+  expect(f.value).toBe('uuid=930896af-bf8c-48d4-885c-6573a94b1853, ou=users, o=smartdc');
 });
 
-test('* substr filter (prefix)', (t) => {
+test('* substr filter (prefix)', () => {
   const str = '(foo=bar*)';
   const f = parse(str);
-  t.ok(f);
-  t.equal(f.attribute, 'foo');
-  t.equal(f.initial, 'bar');
-  t.equal(f.toString(), '(foo=bar*)');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.attribute).toBe('foo');
+  expect(f.initial).toBe('bar');
+  expect(f.toString()).toBe('(foo=bar*)');
 });
 
-test('GH-53 NotFilter', (t) => {
+test('GH-53 NotFilter', () => {
   const str = '(&(objectClass=person)(!(objectClass=shadowAccount)))';
   const f = parse(str);
-  t.ok(f);
-  t.equal(f.type, 'and');
-  t.equal(f.filters.length, 2);
-  t.equal(f.filters[0].type, 'equal');
-  t.equal(f.filters[1].type, 'not');
-  t.equal(f.filters[1].filter.type, 'equal');
-  t.equal(f.filters[1].filter.attribute, 'objectClass');
-  t.equal(f.filters[1].filter.value, 'shadowAccount');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.type).toBe('and');
+  expect(f.filters.length).toBe(2);
+  expect(f.filters[0].type).toBe('equal');
+  expect(f.filters[1].type).toBe('not');
+  expect(f.filters[1].filter.type).toBe('equal');
+  expect(f.filters[1].filter.attribute).toBe('objectClass');
+  expect(f.filters[1].filter.value).toBe('shadowAccount');
 });
 
-test('presence filter', (t) => {
+test('presence filter', () => {
   const f = parse('(foo=*)');
-  t.ok(f);
-  t.equal(f.type, 'present');
-  t.equal(f.attribute, 'foo');
-  t.equal(f.toString(), '(foo=*)');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.type).toBe('present');
+  expect(f.attribute).toBe('foo');
+  expect(f.toString()).toBe('(foo=*)');
 });
 
-test('bogus filter', (t) => {
-  t.throws(() => {
+test('bogus filter', () => {
+  expect(() => {
     parse('foo>1');
-  });
-  t.end();
+  }).toThrow();
 });
 
-test('bogus filter !=', (t) => {
-  t.throws(() => {
+test('bogus filter !=', () => {
+  expect(() => {
     parse('foo!=1');
-  });
-  t.end();
+  }).toThrow();
 });
 
-test('mismatched parens', (t) => {
-  t.throws(() => {
+test('mismatched parens', () => {
+  expect(() => {
     parse('(&(foo=bar)(!(state=done))');
-  });
-  t.end();
+  }).toThrow();
 });

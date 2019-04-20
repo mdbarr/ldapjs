@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 ////////////////////
 // Globals
 
@@ -11,131 +9,120 @@ let dn;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   dn = require('../lib/index').dn;
-  t.ok(dn);
-  t.end();
+  expect(dn).toBeTruthy();
 });
 
-test('parse basic', (t) => {
+test('parse basic', () => {
   const DN_STR = 'cn=mark, ou=people, o=joyent';
   const name = dn.parse(DN_STR);
-  t.ok(name);
-  t.ok(name.rdns);
-  t.ok(Array.isArray(name.rdns));
-  t.equal(3, name.rdns.length);
+  expect(name).toBeTruthy();
+  expect(name.rdns).toBeTruthy();
+  expect(Array.isArray(name.rdns)).toBeTruthy();
+  expect(3).toBe(name.rdns.length);
   name.rdns.forEach((rdn) => {
-    t.equal('object', typeof rdn);
+    expect('object').toBe(typeof rdn);
   });
-  t.equal(name.toString(), DN_STR);
-  t.end();
+  expect(name.toString()).toBe(DN_STR);
 });
 
-test('parse escaped', (t) => {
+test('parse escaped', () => {
   const DN_STR = 'cn=m\\,ark, ou=people, o=joyent';
   const name = dn.parse(DN_STR);
-  t.ok(name);
-  t.ok(name.rdns);
-  t.ok(Array.isArray(name.rdns));
-  t.equal(3, name.rdns.length);
+  expect(name).toBeTruthy();
+  expect(name.rdns).toBeTruthy();
+  expect(Array.isArray(name.rdns)).toBeTruthy();
+  expect(3).toBe(name.rdns.length);
   name.rdns.forEach((rdn) => {
-    t.equal('object', typeof rdn);
+    expect('object').toBe(typeof rdn);
   });
-  t.equal(name.toString(), DN_STR);
-  t.end();
+  expect(name.toString()).toBe(DN_STR);
 });
 
-test('parse compound', (t) => {
+test('parse compound', () => {
   const DN_STR = 'cn=mark+sn=cavage, ou=people, o=joyent';
   const name = dn.parse(DN_STR);
-  t.ok(name);
-  t.ok(name.rdns);
-  t.ok(Array.isArray(name.rdns));
-  t.equal(3, name.rdns.length);
+  expect(name).toBeTruthy();
+  expect(name.rdns).toBeTruthy();
+  expect(Array.isArray(name.rdns)).toBeTruthy();
+  expect(3).toBe(name.rdns.length);
   name.rdns.forEach((rdn) => {
-    t.equal('object', typeof rdn);
+    expect('object').toBe(typeof rdn);
   });
-  t.equal(name.toString(), DN_STR);
-  t.end();
+  expect(name.toString()).toBe(DN_STR);
 });
 
-test('parse quoted', (t) => {
+test('parse quoted', () => {
   const DN_STR = 'cn="mark+sn=cavage", ou=people, o=joyent';
   const ESCAPE_STR = 'cn=mark\\+sn\\=cavage, ou=people, o=joyent';
   const name = dn.parse(DN_STR);
-  t.ok(name);
-  t.ok(name.rdns);
-  t.ok(Array.isArray(name.rdns));
-  t.equal(3, name.rdns.length);
+  expect(name).toBeTruthy();
+  expect(name.rdns).toBeTruthy();
+  expect(Array.isArray(name.rdns)).toBeTruthy();
+  expect(3).toBe(name.rdns.length);
   name.rdns.forEach((rdn) => {
-    t.equal('object', typeof rdn);
+    expect('object').toBe(typeof rdn);
   });
-  t.equal(name.toString(), ESCAPE_STR);
-  t.end();
+  expect(name.toString()).toBe(ESCAPE_STR);
 });
 
-test('equals', (t) => {
+test('equals', () => {
   const dn1 = dn.parse('cn=foo,dc=bar');
-  t.ok(dn1.equals('cn=foo,dc=bar'));
-  t.ok(!dn1.equals('cn=foo1,dc=bar'));
-  t.ok(dn1.equals(dn.parse('cn=foo,dc=bar')));
-  t.ok(!dn1.equals(dn.parse('cn=foo2,dc=bar')));
-  t.end();
+  expect(dn1.equals('cn=foo,dc=bar')).toBeTruthy();
+  expect(!dn1.equals('cn=foo1,dc=bar')).toBeTruthy();
+  expect(dn1.equals(dn.parse('cn=foo,dc=bar'))).toBeTruthy();
+  expect(!dn1.equals(dn.parse('cn=foo2,dc=bar'))).toBeTruthy();
 });
 
-test('child of', (t) => {
+test('child of', () => {
   const dn1 = dn.parse('cn=foo,dc=bar');
-  t.ok(dn1.childOf('dc=bar'));
-  t.ok(!dn1.childOf('dc=moo'));
-  t.ok(!dn1.childOf('dc=foo'));
-  t.ok(!dn1.childOf('cn=foo,dc=bar'));
+  expect(dn1.childOf('dc=bar')).toBeTruthy();
+  expect(!dn1.childOf('dc=moo')).toBeTruthy();
+  expect(!dn1.childOf('dc=foo')).toBeTruthy();
+  expect(!dn1.childOf('cn=foo,dc=bar')).toBeTruthy();
 
-  t.ok(dn1.childOf(dn.parse('dc=bar')));
-  t.end();
+  expect(dn1.childOf(dn.parse('dc=bar'))).toBeTruthy();
 });
 
-test('parent of', (t) => {
+test('parent of', () => {
   const dn1 = dn.parse('cn=foo,dc=bar');
-  t.ok(dn1.parentOf('cn=moo,cn=foo,dc=bar'));
-  t.ok(!dn1.parentOf('cn=moo,cn=bar,dc=foo'));
-  t.ok(!dn1.parentOf('cn=foo,dc=bar'));
+  expect(dn1.parentOf('cn=moo,cn=foo,dc=bar')).toBeTruthy();
+  expect(!dn1.parentOf('cn=moo,cn=bar,dc=foo')).toBeTruthy();
+  expect(!dn1.parentOf('cn=foo,dc=bar')).toBeTruthy();
 
-  t.ok(dn1.parentOf(dn.parse('cn=moo,cn=foo,dc=bar')));
-  t.end();
+  expect(dn1.parentOf(dn.parse('cn=moo,cn=foo,dc=bar'))).toBeTruthy();
 });
 
-test('DN parent', (t) => {
+test('DN parent', () => {
   const _dn = dn.parse('cn=foo,ou=bar');
   const parent1 = _dn.parent();
   const parent2 = parent1.parent();
-  t.ok(parent1.equals('ou=bar'));
-  t.ok(parent2.equals(''));
-  t.equal(parent2.parent(), null);
-  t.end();
+  expect(parent1.equals('ou=bar')).toBeTruthy();
+  expect(parent2.equals('')).toBeTruthy();
+  expect(parent2.parent()).toBe(null);
 });
 
-test('empty DNs', (t) => {
+test('empty DNs', () => {
   const _dn = dn.parse('');
   const _dn2 = dn.parse('cn=foo');
-  t.ok(_dn.isEmpty());
-  t.notOk(_dn2.isEmpty());
-  t.notOk(_dn.equals('cn=foo'));
-  t.notOk(_dn2.equals(''));
-  t.ok(_dn.parentOf('cn=foo'));
-  t.notOk(_dn.childOf('cn=foo'));
-  t.notOk(_dn2.parentOf(''));
-  t.ok(_dn2.childOf(''));
-  t.end();
+  expect(_dn.isEmpty()).toBeTruthy();
+  expect(_dn2.isEmpty()).toBeFalsy();
+  expect(_dn.equals('cn=foo')).toBeFalsy();
+  expect(_dn2.equals('')).toBeFalsy();
+  expect(_dn.parentOf('cn=foo')).toBeTruthy();
+  expect(_dn.childOf('cn=foo')).toBeFalsy();
+  expect(_dn2.parentOf('')).toBeFalsy();
+  expect(_dn2.childOf('')).toBeTruthy();
 });
 
-test('case insensitive attribute names', (t) => {
+test('case insensitive attribute names', () => {
   const dn1 = dn.parse('CN=foo,dc=bar');
-  t.ok(dn1.equals('cn=foo,dc=bar'));
-  t.ok(dn1.equals(dn.parse('cn=foo,DC=bar')));
-  t.end();
+  expect(dn1.equals('cn=foo,dc=bar')).toBeTruthy();
+  expect(dn1.equals(dn.parse('cn=foo,DC=bar'))).toBeTruthy();
 });
 
-test('format', (t) => {
+test('format', () => {
   const DN_ORDER = dn.parse('sn=bar+cn=foo,ou=test');
   const DN_QUOTE = dn.parse('cn="foo",ou=test');
   const DN_QUOTE2 = dn.parse('cn=" foo",ou=test');
@@ -143,44 +130,42 @@ test('format', (t) => {
   const DN_SPACE2 = dn.parse('cn=foo ,ou=test');
   const DN_CASE = dn.parse('CN=foo,Ou=test');
 
-  t.equal(DN_ORDER.format({ keepOrder: false }), 'cn=foo+sn=bar, ou=test');
-  t.equal(DN_ORDER.format({ keepOrder: true }), 'sn=bar+cn=foo, ou=test');
+  expect(DN_ORDER.format({ keepOrder: false })).toBe('cn=foo+sn=bar, ou=test');
+  expect(DN_ORDER.format({ keepOrder: true })).toBe('sn=bar+cn=foo, ou=test');
 
-  t.equal(DN_QUOTE.format({ keepQuote: false }), 'cn=foo, ou=test');
-  t.equal(DN_QUOTE.format({ keepQuote: true }), 'cn="foo", ou=test');
-  t.equal(DN_QUOTE2.format({ keepQuote: false }), 'cn=" foo", ou=test');
-  t.equal(DN_QUOTE2.format({ keepQuote: true }), 'cn=" foo", ou=test');
+  expect(DN_QUOTE.format({ keepQuote: false })).toBe('cn=foo, ou=test');
+  expect(DN_QUOTE.format({ keepQuote: true })).toBe('cn="foo", ou=test');
+  expect(DN_QUOTE2.format({ keepQuote: false })).toBe('cn=" foo", ou=test');
+  expect(DN_QUOTE2.format({ keepQuote: true })).toBe('cn=" foo", ou=test');
 
-  t.equal(DN_SPACE.format({ keepSpace: false }), 'cn=foo, ou=test');
-  t.equal(DN_SPACE.format({ keepSpace: true }), 'cn=foo,ou=test');
-  t.equal(DN_SPACE.format({ skipSpace: true }), 'cn=foo,ou=test');
-  t.equal(DN_SPACE2.format({ keepSpace: false }), 'cn=foo, ou=test');
-  t.equal(DN_SPACE2.format({ keepSpace: true }), 'cn=foo ,ou=test');
-  t.equal(DN_SPACE2.format({ skipSpace: true }), 'cn=foo,ou=test');
+  expect(DN_SPACE.format({ keepSpace: false })).toBe('cn=foo, ou=test');
+  expect(DN_SPACE.format({ keepSpace: true })).toBe('cn=foo,ou=test');
+  expect(DN_SPACE.format({ skipSpace: true })).toBe('cn=foo,ou=test');
+  expect(DN_SPACE2.format({ keepSpace: false })).toBe('cn=foo, ou=test');
+  expect(DN_SPACE2.format({ keepSpace: true })).toBe('cn=foo ,ou=test');
+  expect(DN_SPACE2.format({ skipSpace: true })).toBe('cn=foo,ou=test');
 
-  t.equal(DN_CASE.format({ keepCase: false }), 'cn=foo, ou=test');
-  t.equal(DN_CASE.format({ keepCase: true }), 'CN=foo, Ou=test');
-  t.equal(DN_CASE.format({ upperName: true }), 'CN=foo, OU=test');
-  t.end();
+  expect(DN_CASE.format({ keepCase: false })).toBe('cn=foo, ou=test');
+  expect(DN_CASE.format({ keepCase: true })).toBe('CN=foo, Ou=test');
+  expect(DN_CASE.format({ upperName: true })).toBe('CN=foo, OU=test');
 });
 
-test('set format', (t) => {
+test('set format', () => {
   const _dn = dn.parse('uid="user",  sn=bar+cn=foo, dc=test , DC=com');
-  t.equal(_dn.toString(), 'uid=user, cn=foo+sn=bar, dc=test, dc=com');
+  expect(_dn.toString()).toBe('uid=user, cn=foo+sn=bar, dc=test, dc=com');
   _dn.setFormat({ keepOrder: true });
-  t.equal(_dn.toString(), 'uid=user, sn=bar+cn=foo, dc=test, dc=com');
+  expect(_dn.toString()).toBe('uid=user, sn=bar+cn=foo, dc=test, dc=com');
   _dn.setFormat({ keepQuote: true });
-  t.equal(_dn.toString(), 'uid="user", cn=foo+sn=bar, dc=test, dc=com');
+  expect(_dn.toString()).toBe('uid="user", cn=foo+sn=bar, dc=test, dc=com');
   _dn.setFormat({ keepSpace: true });
-  t.equal(_dn.toString(), 'uid=user,  cn=foo+sn=bar, dc=test , dc=com');
+  expect(_dn.toString()).toBe('uid=user,  cn=foo+sn=bar, dc=test , dc=com');
   _dn.setFormat({ keepCase: true });
-  t.equal(_dn.toString(), 'uid=user, cn=foo+sn=bar, dc=test, DC=com');
+  expect(_dn.toString()).toBe('uid=user, cn=foo+sn=bar, dc=test, DC=com');
   _dn.setFormat({ upperName: true });
-  t.equal(_dn.toString(), 'UID=user, CN=foo+SN=bar, DC=test, DC=com');
-  t.end();
+  expect(_dn.toString()).toBe('UID=user, CN=foo+SN=bar, DC=test, DC=com');
 });
 
-test('format persists across clone', (t) => {
+test('format persists across clone', () => {
   const _dn = dn.parse('uid="user",  sn=bar+cn=foo, dc=test , DC=com');
   const OUT = 'UID="user", CN=foo+SN=bar, DC=test, DC=com';
   _dn.setFormat({
@@ -188,64 +173,58 @@ test('format persists across clone', (t) => {
     upperName: true
   });
   const clone = _dn.clone();
-  t.equals(_dn.toString(), OUT);
-  t.equals(clone.toString(), OUT);
-  t.end();
+  expect(_dn.toString()).toBe(OUT);
+  expect(clone.toString()).toBe(OUT);
 });
 
-test('initialization', (t) => {
+test('initialization', () => {
   const dn1 = new dn.DN();
-  t.ok(dn1);
-  t.equals(dn1.toString(), '');
-  t.ok(dn1.isEmpty(), 'DN with no initializer defaults to null DN');
+  expect(dn1).toBeTruthy();
+  expect(dn1.toString()).toBe('');
+  expect(dn1.isEmpty()).toBeTruthy();
 
   const data = [
     new dn.RDN({ foo: 'bar' }),
     new dn.RDN({ o: 'base' })
   ];
   const dn2 = new dn.DN(data);
-  t.ok(dn2);
-  t.equals(dn2.toString(), 'foo=bar, o=base');
-  t.ok(!dn2.isEmpty());
-
-  t.end();
+  expect(dn2).toBeTruthy();
+  expect(dn2.toString()).toBe('foo=bar, o=base');
+  expect(!dn2.isEmpty()).toBeTruthy();
 });
 
-test('array functions', (t) => {
+test('array functions', () => {
   const dn1 = dn.parse('a=foo, b=bar, c=baz');
-  t.ok(dn1);
-  t.equal(dn1.toString(), 'a=foo, b=bar, c=baz');
+  expect(dn1).toBeTruthy();
+  expect(dn1.toString()).toBe('a=foo, b=bar, c=baz');
 
-  t.ok(dn1.reverse());
-  t.equal(dn1.toString(), 'c=baz, b=bar, a=foo');
+  expect(dn1.reverse()).toBeTruthy();
+  expect(dn1.toString()).toBe('c=baz, b=bar, a=foo');
 
   let rdn = dn1.pop();
-  t.ok(rdn);
-  t.equal(dn1.toString(), 'c=baz, b=bar');
+  expect(rdn).toBeTruthy();
+  expect(dn1.toString()).toBe('c=baz, b=bar');
 
-  t.ok(dn1.push(rdn));
-  t.equal(dn1.toString(), 'c=baz, b=bar, a=foo');
+  expect(dn1.push(rdn)).toBeTruthy();
+  expect(dn1.toString()).toBe('c=baz, b=bar, a=foo');
 
   rdn = dn1.shift();
-  t.ok(rdn);
-  t.equal(dn1.toString(), 'b=bar, a=foo');
+  expect(rdn).toBeTruthy();
+  expect(dn1.toString()).toBe('b=bar, a=foo');
 
-  t.ok(dn1.unshift(rdn));
-  t.equal(dn1.toString(), 'c=baz, b=bar, a=foo');
-
-  t.end();
+  expect(dn1.unshift(rdn)).toBeTruthy();
+  expect(dn1.toString()).toBe('c=baz, b=bar, a=foo');
 });
 
-test('isDN duck-testing', (t) => {
+test('isDN duck-testing', () => {
   const valid = dn.parse('cn=foo');
   const isDN = dn.DN.isDN;
-  t.notOk(isDN(null));
-  t.notOk(isDN('cn=foo'));
-  t.ok(isDN(valid));
+  expect(isDN(null)).toBeFalsy();
+  expect(isDN('cn=foo')).toBeFalsy();
+  expect(isDN(valid)).toBeTruthy();
   const duck = {
     rdns: [ { look: 'ma' }, { a: 'dn' } ],
     toString () { return 'look=ma, a=dn'; }
   };
-  t.ok(isDN(duck));
-  t.end();
+  expect(isDN(duck)).toBeTruthy();
 });

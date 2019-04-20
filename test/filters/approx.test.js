@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -15,90 +13,83 @@ const BerWriter = asn1.BerWriter;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   const filters = require('../../lib/index').filters;
-  t.ok(filters);
+  expect(filters).toBeTruthy();
   ApproximateFilter = filters.ApproximateFilter;
-  t.ok(ApproximateFilter);
-  t.end();
+  expect(ApproximateFilter).toBeTruthy();
 });
 
-test('Construct no args', (t) => {
+test('Construct no args', () => {
   const f = new ApproximateFilter();
-  t.ok(f);
-  t.ok(!f.attribute);
-  t.ok(!f.value);
-  t.end();
+  expect(f).toBeTruthy();
+  expect(!f.attribute).toBeTruthy();
+  expect(!f.value).toBeTruthy();
 });
 
-test('Construct args', (t) => {
+test('Construct args', () => {
   const f = new ApproximateFilter({
     attribute: 'foo',
     value: 'bar'
   });
-  t.ok(f);
-  t.equal(f.attribute, 'foo');
-  t.equal(f.value, 'bar');
-  t.equal(f.toString(), '(foo~=bar)');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.attribute).toBe('foo');
+  expect(f.value).toBe('bar');
+  expect(f.toString()).toBe('(foo~=bar)');
 });
 
-test('GH-109 = escape value only in toString()', (t) => {
+test('GH-109 = escape value only in toString()', () => {
   const f = new ApproximateFilter({
     attribute: 'foo',
     value: 'ba(r)'
   });
-  t.ok(f);
-  t.equal(f.attribute, 'foo');
-  t.equal(f.value, 'ba(r)');
-  t.equal(f.toString(), '(foo~=ba\\28r\\29)');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.attribute).toBe('foo');
+  expect(f.value).toBe('ba(r)');
+  expect(f.toString()).toBe('(foo~=ba\\28r\\29)');
 });
 
-test('parse ok', (t) => {
+test('parse ok', () => {
   const writer = new BerWriter();
   writer.writeString('foo');
   writer.writeString('bar');
 
   const f = new ApproximateFilter();
-  t.ok(f);
-  t.ok(f.parse(new BerReader(writer.buffer)));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.parse(new BerReader(writer.buffer))).toBeTruthy();
 });
 
-test('parse bad', (t) => {
+test('parse bad', done => {
   const writer = new BerWriter();
   writer.writeString('foo');
   writer.writeInt(20);
 
   const f = new ApproximateFilter();
-  t.ok(f);
+  expect(f).toBeTruthy();
   try {
     f.parse(new BerReader(writer.buffer));
-    t.fail('Should have thrown InvalidAsn1Error');
+    done.fail('Should have thrown InvalidAsn1Error');
   } catch (e) {
-    t.equal(e.name, 'InvalidAsn1Error');
+    expect(e.name).toBe('InvalidAsn1Error');
   }
-  t.end();
 });
 
-test('GH-109 = to ber uses plain values', (t) => {
+test('GH-109 = to ber uses plain values', () => {
   let f = new ApproximateFilter({
     attribute: 'foo',
     value: 'ba(r)'
   });
-  t.ok(f);
+  expect(f).toBeTruthy();
   const writer = new BerWriter();
   f.toBer(writer);
 
   f = new ApproximateFilter();
-  t.ok(f);
+  expect(f).toBeTruthy();
 
   const reader = new BerReader(writer.buffer);
   reader.readSequence();
-  t.ok(f.parse(reader));
+  expect(f.parse(reader)).toBeTruthy();
 
-  t.equal(f.attribute, 'foo');
-  t.equal(f.value, 'ba(r)');
-  t.end();
+  expect(f.attribute).toBe('foo');
+  expect(f.value).toBe('ba(r)');
 });

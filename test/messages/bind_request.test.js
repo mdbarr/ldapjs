@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -16,63 +14,57 @@ let dn;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   BindRequest = require('../../lib/index').BindRequest;
   dn = require('../../lib/index').dn;
-  t.ok(BindRequest);
-  t.ok(dn);
-  t.end();
+  expect(BindRequest).toBeTruthy();
+  expect(dn).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new BindRequest());
-  t.end();
+test('new no args', () => {
+  expect(new BindRequest()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const req = new BindRequest({
     version: 3,
     name: dn.parse('cn=root'),
     credentials: 'secret'
   });
-  t.ok(req);
-  t.equal(req.version, 3);
-  t.equal(req.name.toString(), 'cn=root');
-  t.equal(req.credentials, 'secret');
-  t.end();
+  expect(req).toBeTruthy();
+  expect(req.version).toBe(3);
+  expect(req.name.toString()).toBe('cn=root');
+  expect(req.credentials).toBe('secret');
 });
 
-test('parse', (t) => {
+test('parse', () => {
   const ber = new BerWriter();
   ber.writeInt(3);
   ber.writeString('cn=root');
   ber.writeString('secret', 0x80);
 
   const req = new BindRequest();
-  t.ok(req._parse(new BerReader(ber.buffer)));
-  t.equal(req.version, 3);
-  t.equal(req.dn.toString(), 'cn=root');
-  t.equal(req.credentials, 'secret');
-  t.end();
+  expect(req._parse(new BerReader(ber.buffer))).toBeTruthy();
+  expect(req.version).toBe(3);
+  expect(req.dn.toString()).toBe('cn=root');
+  expect(req.credentials).toBe('secret');
 });
 
-test('toBer', (t) => {
+test('toBer', () => {
   const req = new BindRequest({
     messageID: 123,
     version: 3,
     name: dn.parse('cn=root'),
     credentials: 'secret'
   });
-  t.ok(req);
+  expect(req).toBeTruthy();
 
   const ber = new BerReader(req.toBer());
-  t.ok(ber);
-  t.equal(ber.readSequence(), 0x30);
-  t.equal(ber.readInt(), 123);
-  t.equal(ber.readSequence(), 0x60);
-  t.equal(ber.readInt(), 0x03);
-  t.equal(ber.readString(), 'cn=root');
-  t.equal(ber.readString(0x80), 'secret');
-
-  t.end();
+  expect(ber).toBeTruthy();
+  expect(ber.readSequence()).toBe(0x30);
+  expect(ber.readInt()).toBe(123);
+  expect(ber.readSequence()).toBe(0x60);
+  expect(ber.readInt()).toBe(0x03);
+  expect(ber.readString()).toBe('cn=root');
+  expect(ber.readString(0x80)).toBe('secret');
 });

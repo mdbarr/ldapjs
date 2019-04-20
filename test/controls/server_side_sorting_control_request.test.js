@@ -1,7 +1,5 @@
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 const BerReader = asn1.BerReader;
@@ -12,34 +10,30 @@ let SSSRControl;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   SSSRControl = require('../../lib').ServerSideSortingRequestControl;
-  t.ok(SSSRControl);
+  expect(SSSRControl).toBeTruthy();
   getControl = require('../../lib').getControl;
-  t.ok(getControl);
-  t.end();
+  expect(getControl).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new SSSRControl());
-  t.end();
+test('new no args', () => {
+  expect(new SSSRControl()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const c = new SSSRControl({
     criticality: true,
     value: { attributeType: 'sn' }
   });
-  t.ok(c);
-  t.equal(c.type, '1.2.840.113556.1.4.473');
-  t.ok(c.criticality);
-  t.equal(c.value.length, 1);
-  t.equal(c.value[0].attributeType, 'sn');
-
-  t.end();
+  expect(c).toBeTruthy();
+  expect(c.type).toBe('1.2.840.113556.1.4.473');
+  expect(c.criticality).toBeTruthy();
+  expect(c.value.length).toBe(1);
+  expect(c.value[0].attributeType).toBe('sn');
 });
 
-test('toBer - object', (t) => {
+test('toBer - object', () => {
   const sssc = new SSSRControl({
     criticality: true,
     value: {
@@ -53,17 +47,15 @@ test('toBer - object', (t) => {
   sssc.toBer(ber);
 
   const c = getControl(new BerReader(ber.buffer));
-  t.ok(c);
-  t.equal(c.type, '1.2.840.113556.1.4.473');
-  t.ok(c.criticality);
-  t.equal(c.value[0].attributeType, 'sn');
-  t.equal(c.value[0].orderingRule, 'caseIgnoreOrderingMatch');
-  t.equal(c.value[0].reverseOrder, true);
-
-  t.end();
+  expect(c).toBeTruthy();
+  expect(c.type).toBe('1.2.840.113556.1.4.473');
+  expect(c.criticality).toBeTruthy();
+  expect(c.value[0].attributeType).toBe('sn');
+  expect(c.value[0].orderingRule).toBe('caseIgnoreOrderingMatch');
+  expect(c.value[0].reverseOrder).toBe(true);
 });
 
-test('toBer - array', (t) => {
+test('toBer - array', () => {
   const sssc = new SSSRControl({
     criticality: true,
     value: [
@@ -83,27 +75,24 @@ test('toBer - array', (t) => {
   sssc.toBer(ber);
 
   const c = getControl(new BerReader(ber.buffer));
-  t.ok(c);
-  t.equal(c.type, '1.2.840.113556.1.4.473');
-  t.ok(c.criticality);
-  t.equal(c.value.length, 2);
-  t.equal(c.value[0].attributeType, 'sn');
-  t.equal(c.value[0].orderingRule, 'caseIgnoreOrderingMatch');
-  t.equal(c.value[0].reverseOrder, true);
-  t.equal(c.value[1].attributeType, 'givenName');
-  t.equal(c.value[1].orderingRule, 'caseIgnoreOrderingMatch');
-
-  t.end();
+  expect(c).toBeTruthy();
+  expect(c.type).toBe('1.2.840.113556.1.4.473');
+  expect(c.criticality).toBeTruthy();
+  expect(c.value.length).toBe(2);
+  expect(c.value[0].attributeType).toBe('sn');
+  expect(c.value[0].orderingRule).toBe('caseIgnoreOrderingMatch');
+  expect(c.value[0].reverseOrder).toBe(true);
+  expect(c.value[1].attributeType).toBe('givenName');
+  expect(c.value[1].orderingRule).toBe('caseIgnoreOrderingMatch');
 });
 
-test('toBer - empty', (t) => {
+test('toBer - empty', () => {
   const sssc = new SSSRControl();
   const ber = new BerWriter();
   sssc.toBer(ber);
 
   const c = getControl(new BerReader(ber.buffer));
-  t.ok(c);
-  t.equal(c.type, '1.2.840.113556.1.4.473');
-  t.equal(c.value.length, 0);
-  t.end();
+  expect(c).toBeTruthy();
+  expect(c.type).toBe('1.2.840.113556.1.4.473');
+  expect(c.value.length).toBe(0);
 });

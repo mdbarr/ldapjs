@@ -1,7 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
 const uuid = require('uuid/v4');
 
 const ldap = require('../lib/index');
@@ -20,15 +19,15 @@ let server;
 
 function search(t, options, callback) {
   client.search(SUFFIX, options, (err, res) => {
-    t.ifError(err);
-    t.ok(res);
+    expect(err).toBeFalsy();
+    expect(res).toBeTruthy();
     let found = false;
     res.on('searchEntry', (entry) => {
-      t.ok(entry);
+      expect(entry).toBeTruthy();
       found = true;
     });
     res.on('end', () => {
-      t.ok(found);
+      expect(found).toBeTruthy();
       if (callback) { return callback(); }
 
       return t.end();
@@ -39,13 +38,13 @@ function search(t, options, callback) {
 ////////////////////
 // Tests
 
-test('setup', (t) => {
+test('setup', done => {
   server = ldap.createServer();
-  t.ok(server);
+  expect(server).toBeTruthy();
   server.listen(SOCKET, () => {
     client = ldap.createClient({ socketPath: SOCKET });
-    t.ok(client);
-    t.end();
+    expect(client).toBeTruthy();
+    done();
   });
 
   server.bind('cn=root', (req, res, next) => {
@@ -73,7 +72,7 @@ test('setup', (t) => {
   });
 });
 
-test('Evolution search filter (GH-3)', (t) => {
+test('Evolution search filter (GH-3)', () => {
   // This is what Evolution sends, when searching for a contact 'ogo'. Wow.
   const filter =
     '(|(cn=ogo*)(givenname=ogo*)(sn=ogo*)(mail=ogo*)(member=ogo*)' +
@@ -96,7 +95,7 @@ test('Evolution search filter (GH-3)', (t) => {
   return search(t, filter);
 });
 
-test('GH-49 Client errors on bad attributes', (t) => {
+test('GH-49 Client errors on bad attributes', () => {
   const searchOpts = {
     filter: 'cn=*ogo*',
     scope: 'one',
@@ -105,27 +104,27 @@ test('GH-49 Client errors on bad attributes', (t) => {
   return search(t, searchOpts);
 });
 
-test('GH-55 Client emits connect multiple times', (t) => {
+test('GH-55 Client emits connect multiple times', done => {
   const c = ldap.createClient({ socketPath: SOCKET });
 
   let count = 0;
   c.on('connect', (socket) => {
-    t.ok(socket);
+    expect(socket).toBeTruthy();
     count++;
     c.bind('cn=root', 'secret', (err) => {
-      t.ifError(err);
+      expect(err).toBeFalsy();
       c.unbind(() => {
-        t.equal(count, 1);
-        t.end();
+        expect(count).toBe(1);
+        done();
       });
     });
   });
 });
 
-test('shutdown', (t) => {
+test('shutdown', done => {
   client.unbind(() => {
     server.on('close', () => {
-      t.end();
+      done();
     });
     server.close();
   });

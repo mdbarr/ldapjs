@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -16,20 +14,18 @@ let Change;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   Attribute = require('../lib/index').Attribute;
   Change = require('../lib/index').Change;
-  t.ok(Attribute);
-  t.ok(Change);
-  t.end();
+  expect(Attribute).toBeTruthy();
+  expect(Change).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new Change());
-  t.end();
+test('new no args', () => {
+  expect(new Change()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const change = new Change({
     operation: 'add',
     modification: new Attribute({
@@ -37,36 +33,33 @@ test('new with args', (t) => {
       vals: [ 'foo', 'bar' ]
     })
   });
-  t.ok(change);
+  expect(change).toBeTruthy();
 
-  t.equal(change.operation, 'add');
-  t.equal(change.modification.type, 'cn');
-  t.equal(change.modification.vals.length, 2);
-  t.equal(change.modification.vals[0], 'foo');
-  t.equal(change.modification.vals[1], 'bar');
-
-  t.end();
+  expect(change.operation).toBe('add');
+  expect(change.modification.type).toBe('cn');
+  expect(change.modification.vals.length).toBe(2);
+  expect(change.modification.vals[0]).toBe('foo');
+  expect(change.modification.vals[1]).toBe('bar');
 });
 
-test('validate fields', (t) => {
+test('validate fields', () => {
   const c = new Change();
-  t.ok(c);
-  t.throws(() => {
+  expect(c).toBeTruthy();
+  expect(() => {
     c.operation = 'bogus';
-  });
-  t.throws(() => {
+  }).toThrow();
+  expect(() => {
     c.modification = {
       too: 'many',
       fields: 'here'
     };
-  });
+  }).toThrow();
   c.modification = { foo: [ 'bar', 'baz' ] };
-  t.ok(c.modification);
-  t.end();
+  expect(c.modification).toBeTruthy();
 });
 
-test('GH-31 (multiple attributes per Change)', (t) => {
-  t.throws(() => {
+test('GH-31 (multiple attributes per Change)', () => {
+  expect(() => {
     const c = new Change({
       operation: 'replace',
       modification: {
@@ -74,12 +67,11 @@ test('GH-31 (multiple attributes per Change)', (t) => {
         sn: 'bar'
       }
     });
-    t.notOk(c);
-  });
-  t.end();
+    expect(c).toBeFalsy();
+  }).toThrow();
 });
 
-test('toBer', (t) => {
+test('toBer', () => {
   const change = new Change({
     operation: 'Add',
     modification: new Attribute({
@@ -87,22 +79,21 @@ test('toBer', (t) => {
       vals: [ 'foo', 'bar' ]
     })
   });
-  t.ok(change);
+  expect(change).toBeTruthy();
 
   const ber = new BerWriter();
   change.toBer(ber);
   const reader = new BerReader(ber.buffer);
-  t.ok(reader.readSequence());
-  t.equal(reader.readEnumeration(), 0x00);
-  t.ok(reader.readSequence());
-  t.equal(reader.readString(), 'cn');
-  t.equal(reader.readSequence(), 0x31); // lber set
-  t.equal(reader.readString(), 'foo');
-  t.equal(reader.readString(), 'bar');
-  t.end();
+  expect(reader.readSequence()).toBeTruthy();
+  expect(reader.readEnumeration()).toBe(0x00);
+  expect(reader.readSequence()).toBeTruthy();
+  expect(reader.readString()).toBe('cn');
+  expect(reader.readSequence()).toBe(0x31); // lber set
+  expect(reader.readString()).toBe('foo');
+  expect(reader.readString()).toBe('bar');
 });
 
-test('parse', (t) => {
+test('parse', () => {
   const ber = new BerWriter();
   ber.startSequence();
   ber.writeEnumeration(0x00);
@@ -115,19 +106,17 @@ test('parse', (t) => {
   ber.endSequence();
 
   const change = new Change();
-  t.ok(change);
-  t.ok(change.parse(new BerReader(ber.buffer)));
+  expect(change).toBeTruthy();
+  expect(change.parse(new BerReader(ber.buffer))).toBeTruthy();
 
-  t.equal(change.operation, 'add');
-  t.equal(change.modification.type, 'cn');
-  t.equal(change.modification.vals.length, 2);
-  t.equal(change.modification.vals[0], 'foo');
-  t.equal(change.modification.vals[1], 'bar');
-
-  t.end();
+  expect(change.operation).toBe('add');
+  expect(change.modification.type).toBe('cn');
+  expect(change.modification.vals.length).toBe(2);
+  expect(change.modification.vals[0]).toBe('foo');
+  expect(change.modification.vals[1]).toBe('bar');
 });
 
-test('apply - replace', (t) => {
+test('apply - replace', () => {
   let res;
   const single = new Change({
     operation: 'replace',
@@ -153,33 +142,31 @@ test('apply - replace', (t) => {
 
   // plain
   res = Change.apply(single, { cn: [ 'old' ] });
-  t.deepEqual(res.cn, [ 'new' ]);
+  expect(res.cn).toEqual([ 'new' ]);
 
   // multiple
   res = Change.apply(single, { cn: [ 'old', 'also' ] });
-  t.deepEqual(res.cn, [ 'new' ]);
+  expect(res.cn).toEqual([ 'new' ]);
 
   // empty
   res = Change.apply(empty, { cn: [ 'existing' ] });
-  t.equal(res.cn, undefined);
-  t.ok(Object.keys(res).indexOf('cn') === -1);
+  expect(res.cn).toBe(undefined);
+  expect(Object.keys(res).indexOf('cn') === -1).toBeTruthy();
 
   //absent
   res = Change.apply(single, { dn: [ 'otherjunk' ] });
-  t.deepEqual(res.cn, [ 'new' ]);
+  expect(res.cn).toEqual([ 'new' ]);
 
   // scalar formatting "success"
   res = Change.apply(single, { cn: 'old' }, true);
-  t.equal(res.cn, 'new');
+  expect(res.cn).toBe('new');
 
   // scalar formatting "failure"
   res = Change.apply(twin, { cn: 'old' }, true);
-  t.deepEqual(res.cn, [ 'new', 'two' ]);
-
-  t.end();
+  expect(res.cn).toEqual([ 'new', 'two' ]);
 });
 
-test('apply - add', (t) => {
+test('apply - add', () => {
   let res;
   const single = new Change({
     operation: 'add',
@@ -191,32 +178,30 @@ test('apply - add', (t) => {
 
   // plain
   res = Change.apply(single, { cn: [ 'old' ] });
-  t.deepEqual(res.cn, [ 'old', 'new' ]);
+  expect(res.cn).toEqual([ 'old', 'new' ]);
 
   // multiple
   res = Change.apply(single, { cn: [ 'old', 'also' ] });
-  t.deepEqual(res.cn, [ 'old', 'also', 'new' ]);
+  expect(res.cn).toEqual([ 'old', 'also', 'new' ]);
 
   //absent
   res = Change.apply(single, { dn: [ 'otherjunk' ] });
-  t.deepEqual(res.cn, [ 'new' ]);
+  expect(res.cn).toEqual([ 'new' ]);
 
   // scalar formatting "success"
   res = Change.apply(single, { }, true);
-  t.equal(res.cn, 'new');
+  expect(res.cn).toBe('new');
 
   // scalar formatting "failure"
   res = Change.apply(single, { cn: 'old' }, true);
-  t.deepEqual(res.cn, [ 'old', 'new' ]);
+  expect(res.cn).toEqual([ 'old', 'new' ]);
 
   // duplicate add
   res = Change.apply(single, { cn: 'new' });
-  t.deepEqual(res.cn, [ 'new' ]);
-
-  t.end();
+  expect(res.cn).toEqual([ 'new' ]);
 });
 
-test('apply - delete', (t) => {
+test('apply - delete', () => {
   let res;
   const single = new Change({
     operation: 'delete',
@@ -228,25 +213,23 @@ test('apply - delete', (t) => {
 
   // plain
   res = Change.apply(single, { cn: [ 'old', 'new' ] });
-  t.deepEqual(res.cn, [ 'new' ]);
+  expect(res.cn).toEqual([ 'new' ]);
 
   // empty
   res = Change.apply(single, { cn: [ 'old' ] });
-  t.equal(res.cn, undefined);
-  t.ok(Object.keys(res).indexOf('cn') === -1);
+  expect(res.cn).toBe(undefined);
+  expect(Object.keys(res).indexOf('cn') === -1).toBeTruthy();
 
   // scalar formatting "success"
   res = Change.apply(single, { cn: [ 'old', 'one' ] }, true);
-  t.equal(res.cn, 'one');
+  expect(res.cn).toBe('one');
 
   // scalar formatting "failure"
   res = Change.apply(single, { cn: [ 'old', 'several', 'items' ] }, true);
-  t.deepEqual(res.cn, [ 'several', 'items' ]);
+  expect(res.cn).toEqual([ 'several', 'items' ]);
 
   //absent
   res = Change.apply(single, { dn: [ 'otherjunk' ] });
-  t.ok(res);
-  t.equal(res.cn, undefined);
-
-  t.end();
+  expect(res).toBeTruthy();
+  expect(res.cn).toBe(undefined);
 });

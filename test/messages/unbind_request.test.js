@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -15,38 +13,33 @@ let UnbindRequest;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   UnbindRequest = require('../../lib/index').UnbindRequest;
-  t.ok(UnbindRequest);
-  t.end();
+  expect(UnbindRequest).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new UnbindRequest());
-  t.end();
+test('new no args', () => {
+  expect(new UnbindRequest()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const req = new UnbindRequest({});
-  t.ok(req);
-  t.end();
+  expect(req).toBeTruthy();
 });
 
-test('parse', (t) => {
+test('parse', () => {
   const ber = new BerWriter();
 
   const req = new UnbindRequest();
-  t.ok(req._parse(new BerReader(ber.buffer)));
-  t.end();
+  expect(req._parse(new BerReader(ber.buffer))).toBeTruthy();
 });
 
-test('toBer', (t) => {
+test('toBer', () => {
   const req = new UnbindRequest({ messageID: 123 });
-  t.ok(req);
+  expect(req).toBeTruthy();
 
   const ber = new BerReader(req.toBer());
-  t.ok(ber);
-  t.equal(ber.readSequence(), 0x30);
-  t.equal(ber.readInt(), 123);
-  t.end();
+  expect(ber).toBeTruthy();
+  expect(ber.readSequence()).toBe(0x30);
+  expect(ber.readInt()).toBe(123);
 });

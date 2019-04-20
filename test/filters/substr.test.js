@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -15,105 +13,97 @@ const BerWriter = asn1.BerWriter;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   const filters = require('../../lib/index').filters;
-  t.ok(filters);
+  expect(filters).toBeTruthy();
   SubstringFilter = filters.SubstringFilter;
-  t.ok(SubstringFilter);
-  t.end();
+  expect(SubstringFilter).toBeTruthy();
 });
 
-test('Construct no args', (t) => {
+test('Construct no args', () => {
   const f = new SubstringFilter();
-  t.ok(f);
-  t.ok(!f.attribute);
-  t.ok(!f.value);
-  t.end();
+  expect(f).toBeTruthy();
+  expect(!f.attribute).toBeTruthy();
+  expect(!f.value).toBeTruthy();
 });
 
-test('Construct args', (t) => {
+test('Construct args', () => {
   const f = new SubstringFilter({
     attribute: 'foo',
     initial: 'bar',
     any: [ 'zig', 'zag' ],
     'final': 'baz'
   });
-  t.ok(f);
-  t.equal(f.attribute, 'foo');
-  t.equal(f.initial, 'bar');
-  t.equal(f.any.length, 2);
-  t.equal(f.any[0], 'zig');
-  t.equal(f.any[1], 'zag');
-  t.equal(f.final, 'baz');
-  t.equal(f.toString(), '(foo=bar*zig*zag*baz)');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.attribute).toBe('foo');
+  expect(f.initial).toBe('bar');
+  expect(f.any.length).toBe(2);
+  expect(f.any[0]).toBe('zig');
+  expect(f.any[1]).toBe('zag');
+  expect(f.final).toBe('baz');
+  expect(f.toString()).toBe('(foo=bar*zig*zag*baz)');
 });
 
-test('GH-109 = escape value only in toString()', (t) => {
+test('GH-109 = escape value only in toString()', () => {
   const f = new SubstringFilter({
     attribute: 'fo(o',
     initial: 'ba(r)',
     any: [ 'zi)g', 'z(ag' ],
     'final': '(baz)'
   });
-  t.ok(f);
-  t.equal(f.attribute, 'fo(o');
-  t.equal(f.initial, 'ba(r)');
-  t.equal(f.any.length, 2);
-  t.equal(f.any[0], 'zi)g');
-  t.equal(f.any[1], 'z(ag');
-  t.equal(f.final, '(baz)');
-  t.equal(f.toString(), '(fo\\28o=ba\\28r\\29*zi\\29g*z\\28ag*\\28baz\\29)');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.attribute).toBe('fo(o');
+  expect(f.initial).toBe('ba(r)');
+  expect(f.any.length).toBe(2);
+  expect(f.any[0]).toBe('zi)g');
+  expect(f.any[1]).toBe('z(ag');
+  expect(f.final).toBe('(baz)');
+  expect(f.toString()).toBe('(fo\\28o=ba\\28r\\29*zi\\29g*z\\28ag*\\28baz\\29)');
 });
 
-test('match true', (t) => {
+test('match true', () => {
   const f = new SubstringFilter({
     attribute: 'foo',
     initial: 'bar',
     any: [ 'zig', 'zag' ],
     'final': 'baz'
   });
-  t.ok(f);
-  t.ok(f.matches({ foo: 'barmoozigbarzagblahbaz' }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.matches({ foo: 'barmoozigbarzagblahbaz' })).toBeTruthy();
 });
 
-test('match false', (t) => {
+test('match false', () => {
   const f = new SubstringFilter({
     attribute: 'foo',
     initial: 'bar',
     foo: [ 'zig', 'zag' ],
     'final': 'baz'
   });
-  t.ok(f);
-  t.ok(!f.matches({ foo: 'bafmoozigbarzagblahbaz' }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(!f.matches({ foo: 'bafmoozigbarzagblahbaz' })).toBeTruthy();
 });
 
-test('match any', (t) => {
+test('match any', () => {
   const f = new SubstringFilter({
     attribute: 'foo',
     initial: 'bar'
   });
-  t.ok(f);
-  t.ok(f.matches({ foo: [ 'beuha', 'barista' ] }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.matches({ foo: [ 'beuha', 'barista' ] })).toBeTruthy();
 });
 
-test('GH-109 = escape for regex in matches', (t) => {
+test('GH-109 = escape for regex in matches', () => {
   const f = new SubstringFilter({
     attribute: 'fo(o',
     initial: 'ba(r)',
     any: [ 'zi)g', 'z(ag' ],
     'final': '(baz)'
   });
-  t.ok(f);
-  t.ok(f.matches({ 'fo(o': [ 'ba(r)_zi)g-z(ag~(baz)' ] }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.matches({ 'fo(o': [ 'ba(r)_zi)g-z(ag~(baz)' ] })).toBeTruthy();
 });
 
-test('parse ok', (t) => {
+test('parse ok', () => {
   const writer = new BerWriter();
   writer.writeString('foo');
   writer.startSequence();
@@ -122,50 +112,47 @@ test('parse ok', (t) => {
   writer.writeString('baz', 0x82);
   writer.endSequence();
   const f = new SubstringFilter();
-  t.ok(f);
-  t.ok(f.parse(new BerReader(writer.buffer)));
-  t.ok(f.matches({ foo: 'bargoobadgoobaz' }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.parse(new BerReader(writer.buffer))).toBeTruthy();
+  expect(f.matches({ foo: 'bargoobadgoobaz' })).toBeTruthy();
 });
 
-test('parse bad', (t) => {
+test('parse bad', done => {
   const writer = new BerWriter();
   writer.writeString('foo');
   writer.writeInt(20);
 
   const f = new SubstringFilter();
-  t.ok(f);
+  expect(f).toBeTruthy();
   try {
     f.parse(new BerReader(writer.buffer));
-    t.fail('Should have thrown InvalidAsn1Error');
+    done.fail('Should have thrown InvalidAsn1Error');
   } catch (e) {
   }
-  t.end();
 });
 
-test('GH-109 = to ber uses plain values', (t) => {
+test('GH-109 = to ber uses plain values', () => {
   let f = new SubstringFilter({
     attribute: 'fo(o',
     initial: 'ba(r)',
     any: [ 'zi)g', 'z(ag' ],
     'final': '(baz)'
   });
-  t.ok(f);
+  expect(f).toBeTruthy();
   const writer = new BerWriter();
   f.toBer(writer);
 
   f = new SubstringFilter();
-  t.ok(f);
+  expect(f).toBeTruthy();
 
   const reader = new BerReader(writer.buffer);
   reader.readSequence();
-  t.ok(f.parse(reader));
+  expect(f.parse(reader)).toBeTruthy();
 
-  t.equal(f.attribute, 'fo(o');
-  t.equal(f.initial, 'ba(r)');
-  t.equal(f.any.length, 2);
-  t.equal(f.any[0], 'zi)g');
-  t.equal(f.any[1], 'z(ag');
-  t.equal(f.final, '(baz)');
-  t.end();
+  expect(f.attribute).toBe('fo(o');
+  expect(f.initial).toBe('ba(r)');
+  expect(f.any.length).toBe(2);
+  expect(f.any[0]).toBe('zi)g');
+  expect(f.any[1]).toBe('z(ag');
+  expect(f.final).toBe('(baz)');
 });

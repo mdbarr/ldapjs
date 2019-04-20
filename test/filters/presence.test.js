@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -15,78 +13,70 @@ const BerWriter = asn1.BerWriter;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   const filters = require('../../lib/index').filters;
-  t.ok(filters);
+  expect(filters).toBeTruthy();
   PresenceFilter = filters.PresenceFilter;
-  t.ok(PresenceFilter);
-  t.end();
+  expect(PresenceFilter).toBeTruthy();
 });
 
-test('Construct no args', (t) => {
+test('Construct no args', () => {
   const f = new PresenceFilter();
-  t.ok(f);
-  t.ok(!f.attribute);
-  t.end();
+  expect(f).toBeTruthy();
+  expect(!f.attribute).toBeTruthy();
 });
 
-test('Construct args', (t) => {
+test('Construct args', () => {
   const f = new PresenceFilter({ attribute: 'foo' });
-  t.ok(f);
-  t.equal(f.attribute, 'foo');
-  t.equal(f.toString(), '(foo=*)');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.attribute).toBe('foo');
+  expect(f.toString()).toBe('(foo=*)');
 });
 
-test('GH-109 = escape value only in toString()', (t) => {
+test('GH-109 = escape value only in toString()', () => {
   const f = new PresenceFilter({ attribute: 'fo)o' });
-  t.ok(f);
-  t.equal(f.attribute, 'fo)o');
-  t.equal(f.toString(), '(fo\\29o=*)');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.attribute).toBe('fo)o');
+  expect(f.toString()).toBe('(fo\\29o=*)');
 });
 
-test('match true', (t) => {
+test('match true', () => {
   const f = new PresenceFilter({ attribute: 'foo' });
-  t.ok(f);
-  t.ok(f.matches({ foo: 'bar' }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.matches({ foo: 'bar' })).toBeTruthy();
 });
 
-test('match false', (t) => {
+test('match false', () => {
   const f = new PresenceFilter({ attribute: 'foo' });
-  t.ok(f);
-  t.ok(!f.matches({ bar: 'foo' }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(!f.matches({ bar: 'foo' })).toBeTruthy();
 });
 
-test('parse ok', (t) => {
+test('parse ok', () => {
   const writer = new BerWriter();
   writer.writeString('foo', 0x87);
 
   const f = new PresenceFilter();
-  t.ok(f);
+  expect(f).toBeTruthy();
 
   const reader = new BerReader(writer.buffer);
   reader.readSequence();
-  t.ok(f.parse(reader));
-  t.ok(f.matches({ foo: 'bar' }));
-  t.end();
+  expect(f.parse(reader)).toBeTruthy();
+  expect(f.matches({ foo: 'bar' })).toBeTruthy();
 });
 
-test('GH-109 = to ber uses plain values', (t) => {
+test('GH-109 = to ber uses plain values', () => {
   let f = new PresenceFilter({ attribute: 'f(o)o' });
-  t.ok(f);
+  expect(f).toBeTruthy();
   const writer = new BerWriter();
   f.toBer(writer);
 
   f = new PresenceFilter();
-  t.ok(f);
+  expect(f).toBeTruthy();
 
   const reader = new BerReader(writer.buffer);
   reader.readSequence();
-  t.ok(f.parse(reader));
+  expect(f.parse(reader)).toBeTruthy();
 
-  t.equal(f.attribute, 'f(o)o');
-  t.end();
+  expect(f.attribute).toBe('f(o)o');
 });

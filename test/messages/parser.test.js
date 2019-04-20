@@ -1,7 +1,6 @@
 // Copyright 2014 Joyent, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
 const bunyan = require('bunyan');
 
 ////////////////////
@@ -13,38 +12,37 @@ const LOG = bunyan.createLogger({ name: 'ldapjs-test' });
 
 ////////////////////
 // Tests
-test('load library', (t) => {
+test('load library', () => {
   lib = require('../../lib/');
   Parser = lib.Parser;
 
-  t.ok(Parser);
-  t.end();
+  expect(Parser).toBeTruthy();
 });
 
-test('wrong protocol error', (t) => {
+test('wrong protocol error', done => {
   const p = new Parser({ log: LOG });
 
   p.once('error', (err) => {
-    t.ok(err);
-    t.end();
+    expect(err).toBeTruthy();
+    done();
   });
 
   // Send some bogus data to incur an error
   p.write(new Buffer([ 16, 1, 4 ]));
 });
 
-test('bad protocol op', (t) => {
+test('bad protocol op', done => {
   const p = new Parser({ log: LOG });
   const message = new lib.LDAPMessage({ protocolOp: 254 });// bogus (at least today)
   p.once('error', (err) => {
-    t.ok(err);
-    t.ok(/not supported$/.test(err.message));
-    t.end();
+    expect(err).toBeTruthy();
+    expect(/not supported$/.test(err.message)).toBeTruthy();
+    done();
   });
   p.write(message.toBer());
 });
 
-test('bad message structure', (t) => {
+test('bad message structure', done => {
   const p = new Parser({ log: LOG });
 
   // message with bogus structure
@@ -55,8 +53,8 @@ test('bad message structure', (t) => {
   };
 
   p.once('error', (err) => {
-    t.ok(err);
-    t.end();
+    expect(err).toBeTruthy();
+    done();
   });
 
   p.write(message.toBer());

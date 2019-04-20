@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 ////////////////////
 // Globals
 
@@ -12,22 +10,20 @@ let OrFilter;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   const filters = require('../../lib/index').filters;
-  t.ok(filters);
+  expect(filters).toBeTruthy();
   EqualityFilter = filters.EqualityFilter;
   OrFilter = filters.OrFilter;
-  t.ok(EqualityFilter);
-  t.ok(OrFilter);
-  t.end();
+  expect(EqualityFilter).toBeTruthy();
+  expect(OrFilter).toBeTruthy();
 });
 
-test('Construct no args', (t) => {
-  t.ok(new OrFilter());
-  t.end();
+test('Construct no args', () => {
+  expect(new OrFilter()).toBeTruthy();
 });
 
-test('Construct args', (t) => {
+test('Construct args', () => {
   const f = new OrFilter();
   f.addFilter(new EqualityFilter({
     attribute: 'foo',
@@ -37,12 +33,11 @@ test('Construct args', (t) => {
     attribute: 'zig',
     value: 'zag'
   }));
-  t.ok(f);
-  t.equal(f.toString(), '(|(foo=bar)(zig=zag))');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.toString()).toBe('(|(foo=bar)(zig=zag))');
 });
 
-test('match true', (t) => {
+test('match true', () => {
   const f = new OrFilter();
   f.addFilter(new EqualityFilter({
     attribute: 'foo',
@@ -52,15 +47,14 @@ test('match true', (t) => {
     attribute: 'zig',
     value: 'zag'
   }));
-  t.ok(f);
-  t.ok(f.matches({
+  expect(f).toBeTruthy();
+  expect(f.matches({
     foo: 'bar',
     zig: 'zonk'
-  }));
-  t.end();
+  })).toBeTruthy();
 });
 
-test('match false', (t) => {
+test('match false', () => {
   const f = new OrFilter();
   f.addFilter(new EqualityFilter({
     attribute: 'foo',
@@ -70,10 +64,9 @@ test('match false', (t) => {
     attribute: 'zig',
     value: 'zag'
   }));
-  t.ok(f);
-  t.ok(!f.matches({
+  expect(f).toBeTruthy();
+  expect(!f.matches({
     foo: 'baz',
     zig: 'zonk'
-  }));
-  t.end();
+  })).toBeTruthy();
 });

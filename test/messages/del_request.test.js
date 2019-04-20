@@ -3,7 +3,6 @@
 
 const asn1 = require('asn1');
 const Logger = require('bunyan');
-const test = require('tape').test;
 
 ////////////////////
 // Globals
@@ -16,49 +15,43 @@ let dn;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   DeleteRequest = require('../../lib/index').DeleteRequest;
   dn = require('../../lib/index').dn;
-  t.ok(DeleteRequest);
-  t.end();
+  expect(DeleteRequest).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new DeleteRequest());
-  t.end();
+test('new no args', () => {
+  expect(new DeleteRequest()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const req = new DeleteRequest({ entry: dn.parse('cn=test') });
-  t.ok(req);
-  t.equal(req.dn.toString(), 'cn=test');
-  t.end();
+  expect(req).toBeTruthy();
+  expect(req.dn.toString()).toBe('cn=test');
 });
 
-test('parse', (t) => {
+test('parse', () => {
   const ber = new BerWriter();
   ber.writeString('cn=test', 0x4a);
 
   const req = new DeleteRequest({ log: new Logger({ name: 'del_request.test.js' }) });
   const reader = new BerReader(ber.buffer);
   reader.readSequence(0x4a);
-  t.ok(req.parse(reader, reader.length));
-  t.equal(req.dn.toString(), 'cn=test');
-  t.end();
+  expect(req.parse(reader, reader.length)).toBeTruthy();
+  expect(req.dn.toString()).toBe('cn=test');
 });
 
-test('toBer', (t) => {
+test('toBer', () => {
   const req = new DeleteRequest({
     messageID: 123,
     entry: dn.parse('cn=test')
   });
-  t.ok(req);
+  expect(req).toBeTruthy();
 
   const ber = new BerReader(req.toBer());
-  t.ok(ber);
-  t.equal(ber.readSequence(), 0x30);
-  t.equal(ber.readInt(), 123);
-  t.equal(ber.readString(0x4a), 'cn=test');
-
-  t.end();
+  expect(ber).toBeTruthy();
+  expect(ber.readSequence()).toBe(0x30);
+  expect(ber.readInt()).toBe(123);
+  expect(ber.readString(0x4a)).toBe('cn=test');
 });

@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 ////////////////////
 // Globals
 
@@ -12,47 +10,42 @@ let NotFilter;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   const filters = require('../../lib/index').filters;
-  t.ok(filters);
+  expect(filters).toBeTruthy();
   EqualityFilter = filters.EqualityFilter;
   NotFilter = filters.NotFilter;
-  t.ok(EqualityFilter);
-  t.ok(NotFilter);
-  t.end();
+  expect(EqualityFilter).toBeTruthy();
+  expect(NotFilter).toBeTruthy();
 });
 
-test('Construct no args', (t) => {
-  t.ok(new NotFilter());
-  t.end();
+test('Construct no args', () => {
+  expect(new NotFilter()).toBeTruthy();
 });
 
-test('Construct args', (t) => {
+test('Construct args', () => {
   const f = new NotFilter({ filter: new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
   }) });
-  t.ok(f);
-  t.equal(f.toString(), '(!(foo=bar))');
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.toString()).toBe('(!(foo=bar))');
 });
 
-test('match true', (t) => {
+test('match true', () => {
   const f = new NotFilter({ filter: new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
   }) });
-  t.ok(f);
-  t.ok(f.matches({ foo: 'baz' }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(f.matches({ foo: 'baz' })).toBeTruthy();
 });
 
-test('match false', (t) => {
+test('match false', () => {
   const f = new NotFilter({ filter: new EqualityFilter({
     attribute: 'foo',
     value: 'bar'
   }) });
-  t.ok(f);
-  t.ok(!f.matches({ foo: 'bar' }));
-  t.end();
+  expect(f).toBeTruthy();
+  expect(!f.matches({ foo: 'bar' })).toBeTruthy();
 });

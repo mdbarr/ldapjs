@@ -1,8 +1,6 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const test = require('tape').test;
-
 const asn1 = require('asn1');
 
 ////////////////////
@@ -15,59 +13,53 @@ let ModifyDNResponse;
 ////////////////////
 // Tests
 
-test('load library', (t) => {
+test('load library', () => {
   ModifyDNResponse = require('../../lib/index').ModifyDNResponse;
-  t.ok(ModifyDNResponse);
-  t.end();
+  expect(ModifyDNResponse).toBeTruthy();
 });
 
-test('new no args', (t) => {
-  t.ok(new ModifyDNResponse());
-  t.end();
+test('new no args', () => {
+  expect(new ModifyDNResponse()).toBeTruthy();
 });
 
-test('new with args', (t) => {
+test('new with args', () => {
   const res = new ModifyDNResponse({
     messageID: 123,
     status: 0
   });
-  t.ok(res);
-  t.equal(res.messageID, 123);
-  t.equal(res.status, 0);
-  t.end();
+  expect(res).toBeTruthy();
+  expect(res.messageID).toBe(123);
+  expect(res.status).toBe(0);
 });
 
-test('parse', (t) => {
+test('parse', () => {
   const ber = new BerWriter();
   ber.writeEnumeration(0);
   ber.writeString('cn=root');
   ber.writeString('foo');
 
   const res = new ModifyDNResponse();
-  t.ok(res._parse(new BerReader(ber.buffer)));
-  t.equal(res.status, 0);
-  t.equal(res.matchedDN, 'cn=root');
-  t.equal(res.errorMessage, 'foo');
-  t.end();
+  expect(res._parse(new BerReader(ber.buffer))).toBeTruthy();
+  expect(res.status).toBe(0);
+  expect(res.matchedDN).toBe('cn=root');
+  expect(res.errorMessage).toBe('foo');
 });
 
-test('toBer', (t) => {
+test('toBer', () => {
   const res = new ModifyDNResponse({
     messageID: 123,
     status: 3,
     matchedDN: 'cn=root',
     errorMessage: 'foo'
   });
-  t.ok(res);
+  expect(res).toBeTruthy();
 
   const ber = new BerReader(res.toBer());
-  t.ok(ber);
-  t.equal(ber.readSequence(), 0x30);
-  t.equal(ber.readInt(), 123);
-  t.equal(ber.readSequence(), 0x6d);
-  t.equal(ber.readEnumeration(), 3);
-  t.equal(ber.readString(), 'cn=root');
-  t.equal(ber.readString(), 'foo');
-
-  t.end();
+  expect(ber).toBeTruthy();
+  expect(ber.readSequence()).toBe(0x30);
+  expect(ber.readInt()).toBe(123);
+  expect(ber.readSequence()).toBe(0x6d);
+  expect(ber.readEnumeration()).toBe(3);
+  expect(ber.readString()).toBe('cn=root');
+  expect(ber.readString()).toBe('foo');
 });
