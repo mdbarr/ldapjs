@@ -1,8 +1,8 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
+const async = require('async');
 const { v4: uuid } = require('uuid');
-const vasync = require('vasync');
 
 ////////////////////
 // Globals
@@ -127,10 +127,7 @@ test('route order', done => {
       });
     }
 
-    vasync.forEachParallel({
-      'func': runSearch,
-      'inputs': [ dnShort, dnMed, dnLong ],
-    }, (err) => {
+    async.each([ dnShort, dnMed, dnLong ], runSearch, (err) => {
       expect(err).toBeFalsy();
       client.unbind();
       server.close();
@@ -152,27 +149,25 @@ test('route absent', done => {
 
   server.listen(sock, () => {
     expect(true).toBeTruthy();
-    vasync.parallel({
-      'funcs': [
-        function presentBind (cb) {
-          const clt = ldap.createClient({ socketPath: sock });
-          clt.bind(DN_ROUTE, '', (err) => {
-            expect(err).toBeFalsy();
-            clt.unbind();
-            cb();
-          });
-        },
-        function absentBind (cb) {
-          const clt = ldap.createClient({ socketPath: sock });
-          clt.bind(DN_MISSING, '', (err) => {
-            expect(err).toBeTruthy();
-            expect(err.code).toBe(ldap.LDAP_NO_SUCH_OBJECT);
-            clt.unbind();
-            cb();
-          });
-        },
-      ],
-    }, (err) => {
+    async.parallel([
+      function presentBind (cb) {
+        const clt = ldap.createClient({ socketPath: sock });
+        clt.bind(DN_ROUTE, '', (err) => {
+          expect(err).toBeFalsy();
+          clt.unbind();
+          cb();
+        });
+      },
+      function absentBind (cb) {
+        const clt = ldap.createClient({ socketPath: sock });
+        clt.bind(DN_MISSING, '', (err) => {
+          expect(err).toBeTruthy();
+          expect(err.code).toBe(ldap.LDAP_NO_SUCH_OBJECT);
+          clt.unbind();
+          cb();
+        });
+      },
+    ], (err) => {
       expect(err).toBeFalsy();
       server.close();
       done();
@@ -208,58 +203,56 @@ test('route unbind', done => {
 test('strict routing', done => {
   const testDN = 'cn=valid';
   let clt;
-  vasync.pipeline({
-    funcs: [
-      function setup (_, cb) {
+  async.series([
+    function setup (cb) {
       // strictDN: true - on by default
-        server = ldap.createServer({});
-        sock = getSock();
-        // invalid DNs would go to default handler
-        server.search('', (req, res, next) => {
-          expect(req.dn).toBeTruthy();
-          expect(typeof req.dn).toBe('object');
-          expect(req.dn.toString()).toBe(testDN);
-          res.end();
-          next();
+      server = ldap.createServer({});
+      sock = getSock();
+      // invalid DNs would go to default handler
+      server.search('', (req, res, next) => {
+        expect(req.dn).toBeTruthy();
+        expect(typeof req.dn).toBe('object');
+        expect(req.dn.toString()).toBe(testDN);
+        res.end();
+        next();
+      });
+      server.listen(sock, () => {
+        expect(true).toBeTruthy();
+        clt = ldap.createClient({
+          socketPath: sock,
+          strictDN: false,
         });
-        server.listen(sock, () => {
-          expect(true).toBeTruthy();
-          clt = ldap.createClient({
-            socketPath: sock,
-            strictDN: false,
-          });
+        cb();
+      });
+    },
+    function testBad (cb) {
+      clt.search('not a dn', { scope: 'base' }, (err, res) => {
+        expect(err).toBeFalsy();
+        res.once('error', (err2) => {
+          expect(err2).toBeTruthy();
+          expect(err2.code).toBe(ldap.LDAP_INVALID_DN_SYNTAX);
           cb();
         });
-      },
-      function testBad (_, cb) {
-        clt.search('not a dn', { scope: 'base' }, (err, res) => {
-          expect(err).toBeFalsy();
-          res.once('error', (err2) => {
-            expect(err2).toBeTruthy();
-            expect(err2.code).toBe(ldap.LDAP_INVALID_DN_SYNTAX);
-            cb();
-          });
-          res.once('end', () => {
-            done.fail('accepted invalid dn');
-            cb('bogus');
-          });
+        res.once('end', () => {
+          done.fail('accepted invalid dn');
+          cb('bogus');
         });
-      },
-      function testGood (_, cb) {
-        clt.search(testDN, { scope: 'base' }, (err, res) => {
-          expect(err).toBeFalsy();
-          res.once('error', (err2) => {
-            expect(err2).toBeFalsy();
-            cb(err2);
-          });
-          res.once('end', (result) => {
-            expect(result).toBeTruthy();
-            cb();
-          });
+      });
+    },
+    function testGood (cb) {
+      clt.search(testDN, { scope: 'base' }, (err, res) => {
+        expect(err).toBeFalsy();
+        res.once('error', (err2) => {
+          expect(err2).toBeFalsy();
+          cb(err2);
         });
-      },
-    ],
-  }, (err) => {
+        res.once('end', (result) => {
+          expect(result).toBeTruthy();
+          cb();
+        });
+      });
+    },
+  ], (err) => {
     expect(err).toBeFalsy();
 
     if (clt) {

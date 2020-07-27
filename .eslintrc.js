@@ -99,9 +99,7 @@ module.exports = {
     'no-self-assign': 'error',
     'no-self-compare': 'error',
     'no-sequences': 'error',
-    'no-shadow': [ 'error', { allow: [
-      'body', 'error', 'reject', 'resolve', 'response', 'result', 'err', 'next', 'res',
-    ] } ],
+    'no-shadow': [ 'error', { allow: [ 'body', 'error', 'reject', 'resolve', 'response', 'result', 'err', 'next', 'res' ] } ],
     'no-shadow-restricted-names': 'error',
     'no-spaced-func': 'error',
     'no-sparse-arrays': 'error',

@@ -3,8 +3,8 @@
 
 const Logger = require('bunyan');
 
+const async = require('async');
 const { v4: uuid } = require('uuid');
-const vasync = require('vasync');
 const util = require('util');
 
 ////////////////////
@@ -978,7 +978,7 @@ test('setup reconnect', done => {
     });
   });
 
-  function doSearch (_, cb) {
+  function doSearch (cb) {
     rClient.search(SUFFIX, { scope: 'base' }, (err, res) => {
       expect(err).toBeFalsy();
       res.on('end', () => {
@@ -986,33 +986,31 @@ test('setup reconnect', done => {
       });
     });
   }
-  vasync.pipeline({
-    funcs: [
-      doSearch,
-      function cleanDisconnect (_, cb) {
-        expect(rClient.connected).toBeTruthy();
-        rClient.once('close', (hadError) => {
-          expect(hadError).toBeFalsy();
-          expect(rClient.connected).toBe(false);
-          cb();
-        });
-        rClient.unbind();
-      },
-      doSearch,
-      function simulateError (_, cb) {
-        const msg = 'fake socket error';
-        rClient.once('error', (err) => {
-          expect(err.message).toBe(msg);
-          expect(err).toBeTruthy();
-        });
-        rClient.once('close', () => {
-          cb();
-        });
-        rClient._socket.emit('error', new Error(msg));
-      },
-      doSearch,
-    ],
-  }, (err) => {
+  async.series([
+    doSearch,
+    function cleanDisconnect (cb) {
+      expect(rClient.connected).toBeTruthy();
+      rClient.once('close', (hadError) => {
+        expect(hadError).toBeFalsy();
+        expect(rClient.connected).toBe(false);
+        cb();
+      });
+      rClient.unbind();
+    },
+    doSearch,
+    function simulateError (cb) {
+      const msg = 'fake socket error';
+      rClient.once('error', (err) => {
+        expect(err.message).toBe(msg);
+        expect(err).toBeTruthy();
+      });
+      rClient.once('close', () => {
+        cb();
+      });
+      rClient._socket.emit('error', new Error(msg));
+    },
+    doSearch,
+  ], (err) => {
     expect(err).toBeFalsy();
     rClient.destroy();
     done();
@@ -1157,41 +1155,39 @@ test('search timeout (GH-51)', done => {
   });
 });
 
-test('resultError handling', () => {
-  expect.assertions(6);
-  vasync.pipeline({
-    funcs: [
-      function errSearch (_, cb) {
-        client.once('resultError', (error) => {
+test('resultError handling', (done) => {
+  async.series([
+    function errSearch (cb) {
+      client.once('resultError', (error) => {
+        expect(error.name).toBe('BusyError');
+      });
+      client.search('cn=busy', {}, (err, res) => {
+        expect(err).toBeFalsy();
+
+        res.once('error', (error) => {
           expect(error.name).toBe('BusyError');
+          cb();
         });
-        client.search('cn=busy', {}, (err, res) => {
-          expect(err).toBeFalsy();
+      });
+    },
+    function cleanSearch (cb) {
+      client.on('resultError', (error) => {
+        throw error;
+      });
 
-          res.once('error', (error) => {
-            expect(error.name).toBe('BusyError');
-            cb();
-          });
-        });
-      },
-      function cleanSearch (_, cb) {
-        client.on('resultError', (error) => {
-          throw error;
-        });
+      client.search(SUFFIX, {}, (err, res) => {
+        expect(err).toBeFalsy();
 
-        client.search(SUFFIX, {}, (err, res) => {
-          expect(err).toBeFalsy();
-
-          res.once('end', () => {
-            expect(true).toBeTruthy();
-            cb();
-          });
+        res.once('end', () => {
+          expect(true).toBeTruthy();
+          cb();
         });
-      },
-    ],
-  }, (err) => {
+      });
+    },
+  ], (err) => {
     expect(err).toBeFalsy();
     client.removeAllListeners('resultError');
+    done();
   });
 });
 
