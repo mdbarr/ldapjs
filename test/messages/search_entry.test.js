@@ -32,14 +32,16 @@ test('new with args', () => {
   const res = new SearchEntry({
     messageID: 123,
     objectName: dn.parse('cn=foo, o=test'),
-    attributes: [ new Attribute({
-      type: 'cn',
-      vals: [ 'foo' ]
-    }),
-    new Attribute({
-      type: 'objectclass',
-      vals: [ 'person' ]
-    }) ]
+    attributes: [
+      new Attribute({
+        type: 'cn',
+        vals: [ 'foo' ],
+      }),
+      new Attribute({
+        type: 'objectclass',
+        vals: [ 'person' ],
+      }),
+    ],
   });
   expect(res).toBeTruthy();
   expect(res.messageID).toBe(123);
@@ -87,14 +89,16 @@ test('toBer', () => {
   const res = new SearchEntry({
     messageID: 123,
     objectName: dn.parse('cn=foo, o=test'),
-    attributes: [ new Attribute({
-      type: 'cn',
-      vals: [ 'foo' ]
-    }),
-    new Attribute({
-      type: 'objectclass',
-      vals: [ 'person' ]
-    }) ]
+    attributes: [
+      new Attribute({
+        type: 'cn',
+        vals: [ 'foo' ],
+      }),
+      new Attribute({
+        type: 'objectclass',
+        vals: [ 'person' ],
+      }),
+    ],
   });
   expect(res).toBeTruthy();
 

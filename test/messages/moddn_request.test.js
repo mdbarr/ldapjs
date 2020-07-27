@@ -29,7 +29,7 @@ test('new with args', () => {
   const req = new ModifyDNRequest({
     entry: dn.parse('cn=foo, o=test'),
     newRdn: dn.parse('cn=foo2'),
-    deleteOldRdn: true
+    deleteOldRdn: true,
   });
   expect(req).toBeTruthy();
   expect(req.dn.toString()).toBe('cn=foo, o=test');
@@ -55,7 +55,7 @@ test('toBer', () => {
     messageID: 123,
     entry: dn.parse('cn=foo, o=test'),
     newRdn: dn.parse('cn=foo2'),
-    deleteOldRdn: true
+    deleteOldRdn: true,
   });
 
   expect(req).toBeTruthy();

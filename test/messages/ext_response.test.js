@@ -27,7 +27,7 @@ test('new with args', () => {
     messageID: 123,
     status: 0,
     responseName: '1.2.3.4',
-    responseValue: 'test'
+    responseValue: 'test',
   });
   expect(res).toBeTruthy();
   expect(res.messageID).toBe(123);
@@ -60,7 +60,7 @@ test('toBer', () => {
     matchedDN: 'cn=root',
     errorMessage: 'foo',
     responseName: '1.2.3.4',
-    responseValue: 'test'
+    responseValue: 'test',
   });
   expect(res).toBeTruthy();
 

@@ -20,31 +20,31 @@ const opts = [
     names: [ 'attribute', 'a' ],
     type: 'string',
     help: 'Attribute to modify',
-    helpArg: 'ATTR'
+    helpArg: 'ATTR',
   },
   {
     names: [ 'value', 'v' ],
     type: 'arrayOfString',
     help: 'Desired value',
-    helpArg: 'VAL'
+    helpArg: 'VAL',
   },
   {
     names: [ 'type', 't' ],
     type: 'string',
     help: 'Attribute type',
-    helpArg: 'TYPE'
+    helpArg: 'TYPE',
   },
   { group: 'General options' },
   {
     names: [ 'help', 'h' ],
     type: 'bool',
-    help: 'Print this help and exit.'
+    help: 'Print this help and exit.',
   },
   {
     names: [ 'debug', 'd' ],
     type: 'integer',
     help: 'Set debug level <0-2>',
-    helpArg: 'LEVEL'
+    helpArg: 'LEVEL',
   },
   { group: 'Connection Options' },
   {
@@ -52,36 +52,36 @@ const opts = [
     type: 'string',
     help: 'LDAP server URL',
     helpArg: 'URL',
-    default: 'ldap://127.0.0.1:389'
+    default: 'ldap://127.0.0.1:389',
   },
   {
     names: [ 'binddn', 'D' ],
     type: 'string',
     help: 'Bind DN',
     helpArg: 'BIND_DN',
-    default: ''
+    default: '',
   },
   {
     names: [ 'password', 'w' ],
     type: 'string',
     help: 'Bind password',
     helpArg: 'PASSWD',
-    default: ''
+    default: '',
   },
   {
     names: [ 'insecure', 'i' ],
     type: 'bool',
     env: 'LDAPJS_TLS_INSECURE',
     help: 'Disable SSL certificate verification',
-    default: false
-  }
+    default: false,
+  },
 ];
 const parser = dashdash.createParser({ options: opts });
 
 ////////////////////
 // Helpers
 
-function usage(code, message) {
+function usage (code, message) {
   const msg = `${ message ? `${ message }\n` : ''
   }Usage: ${ path.basename(process.argv[1]) } [OPTIONS] DN\n\n${
     parser.help({ includeEnv: true }) }`;
@@ -90,7 +90,7 @@ function usage(code, message) {
   process.exit(code);
 }
 
-function perror(err) {
+function perror (err) {
   if (parsed.debug) {
     process.stderr.write(`${ err.stack }\n`);
   } else {
@@ -130,14 +130,14 @@ const log = new Logger({
   name: 'ldapjs',
   component: 'client',
   stream: process.stderr,
-  level: logLevel
+  level: logLevel,
 });
 
 const client = ldap.createClient({
   url: parsed.url,
   log,
   strictDN: false,
-  tlsOptions: { rejectUnauthorized: !parsed.insecure }
+  tlsOptions: { rejectUnauthorized: !parsed.insecure },
 });
 
 client.on('error', (err) => {
@@ -157,10 +157,10 @@ client.bind(parsed.binddn, parsed.password, (err) => {
   });
   const change = new ldap.Change({
     type: parsed.type,
-    modification: mod
+    modification: mod,
   });
 
-  function callback(err) {
+  function callback (err) {
     if (err) { perror(err); }
 
     if (++finished === parsed._args.length) {

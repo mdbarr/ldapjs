@@ -17,7 +17,7 @@ let server;
 ////////////////////
 // Helper
 
-function search(done, options, callback) {
+function search (done, options, callback) {
   client.search(SUFFIX, options, (err, res) => {
     expect(err).toBeFalsy();
     expect(res).toBeTruthy();
@@ -60,8 +60,8 @@ test('setup', done => {
         cn: 'Pogo Stick',
         sn: 'Stick',
         givenname: 'ogo',
-        mail: `${ uuid() }@pogostick.org`
-      }
+        mail: `${ uuid() }@pogostick.org`,
+      },
     };
 
     if (req.filter.matches(entry.attributes)) {
@@ -99,7 +99,7 @@ test('GH-49 Client errors on bad attributes', (done) => {
   const searchOpts = {
     filter: 'cn=*ogo*',
     scope: 'one',
-    attributes: 'dn'
+    attributes: 'dn',
   };
   return search(done, searchOpts);
 });

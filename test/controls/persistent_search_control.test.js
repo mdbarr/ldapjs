@@ -29,8 +29,8 @@ test('new with args', () => {
     value: {
       changeTypes: 15,
       changesOnly: false,
-      returnECs: false
-    }
+      returnECs: false,
+    },
   });
   expect(c).toBeTruthy();
   expect(c.type).toBe('2.16.840.1.113730.3.4.3');
@@ -57,7 +57,8 @@ test('getControl with args', () => {
     0x30, 0x26, 0x04, 0x17, 0x32, 0x2e, 0x31, 0x36, 0x2e, 0x38, 0x34, 0x30,
     0x2e, 0x31, 0x2e, 0x31, 0x31, 0x33, 0x37, 0x33, 0x30, 0x2e, 0x33, 0x2e,
     0x34, 0x2e, 0x33, 0x04, 0x0b, 0x30, 0x09, 0x02, 0x01, 0x0f, 0x01, 0x01,
-    0xff, 0x01, 0x01, 0xff ]);
+    0xff, 0x01, 0x01, 0xff,
+  ]);
 
   const ber = new BerReader(buf);
   const psc = getControl(ber);
@@ -76,8 +77,8 @@ test('tober', () => {
     value: {
       changeTypes: 15,
       changesOnly: false,
-      returnECs: false
-    }
+      returnECs: false,
+    },
   });
 
   const ber = new BerWriter();

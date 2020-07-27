@@ -28,7 +28,7 @@ test('new no args', () => {
 test('new with args', () => {
   const c = new Control({
     type: '2.16.840.1.113730.3.4.2',
-    criticality: true
+    criticality: true,
   });
   expect(c).toBeTruthy();
   expect(c.type).toBe('2.16.840.1.113730.3.4.2');

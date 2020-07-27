@@ -25,7 +25,7 @@ test('new no args', () => {
 test('new with args', () => {
   const res = new AddResponse({
     messageID: 123,
-    status: 0
+    status: 0,
   });
   expect(res).toBeTruthy();
   expect(res.messageID).toBe(123);
@@ -50,7 +50,7 @@ test('toBer', () => {
     messageID: 123,
     status: 3,
     matchedDN: 'cn=root',
-    errorMessage: 'foo'
+    errorMessage: 'foo',
   });
   expect(res).toBeTruthy();
 

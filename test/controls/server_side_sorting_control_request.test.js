@@ -24,7 +24,7 @@ test('new no args', () => {
 test('new with args', () => {
   const c = new SSSRControl({
     criticality: true,
-    value: { attributeType: 'sn' }
+    value: { attributeType: 'sn' },
   });
   expect(c).toBeTruthy();
   expect(c.type).toBe('1.2.840.113556.1.4.473');
@@ -39,8 +39,8 @@ test('toBer - object', () => {
     value: {
       attributeType: 'sn',
       orderingRule: 'caseIgnoreOrderingMatch',
-      reverseOrder: true
-    }
+      reverseOrder: true,
+    },
   });
 
   const ber = new BerWriter();
@@ -62,13 +62,13 @@ test('toBer - array', () => {
       {
         attributeType: 'sn',
         orderingRule: 'caseIgnoreOrderingMatch',
-        reverseOrder: true
+        reverseOrder: true,
       },
       {
         attributeType: 'givenName',
-        orderingRule: 'caseIgnoreOrderingMatch'
-      }
-    ]
+        orderingRule: 'caseIgnoreOrderingMatch',
+      },
+    ],
   });
 
   const ber = new BerWriter();

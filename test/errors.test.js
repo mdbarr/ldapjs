@@ -20,16 +20,16 @@ test('"custom" errors', () => {
   const errors = [
     {
       name: 'ConnectionError',
-      Func: ldap.ConnectionError
+      Func: ldap.ConnectionError,
     },
     {
       name: 'AbandonedError',
-      Func: ldap.AbandonedError
+      Func: ldap.AbandonedError,
     },
     {
       name: 'TimeoutError',
-      Func: ldap.TimeoutError
-    }
+      Func: ldap.TimeoutError,
+    },
   ];
 
   errors.forEach((entry) => {

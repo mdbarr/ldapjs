@@ -34,13 +34,15 @@ test('new no args', () => {
 test('new with args', () => {
   const req = new ModifyRequest({
     object: dn.parse('cn=foo, o=test'),
-    changes: [ new Change({
-      operation: 'Replace',
-      modification: new Attribute({
-        type: 'objectclass',
-        vals: [ 'person' ]
-      })
-    }) ]
+    changes: [
+      new Change({
+        operation: 'Replace',
+        modification: new Attribute({
+          type: 'objectclass',
+          vals: [ 'person' ],
+        }),
+      }),
+    ],
   });
   expect(req).toBeTruthy();
   expect(req.dn.toString()).toBe('cn=foo, o=test');
@@ -82,13 +84,15 @@ test('toBer', () => {
   const req = new ModifyRequest({
     messageID: 123,
     object: dn.parse('cn=foo, o=test'),
-    changes: [ new Change({
-      operation: 'Replace',
-      modification: new Attribute({
-        type: 'objectclass',
-        vals: [ 'person' ]
-      })
-    }) ]
+    changes: [
+      new Change({
+        operation: 'Replace',
+        modification: new Attribute({
+          type: 'objectclass',
+          vals: [ 'person' ],
+        }),
+      }),
+    ],
   });
 
   expect(req).toBeTruthy();

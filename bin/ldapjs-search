@@ -21,7 +21,7 @@ dashdash.addOptionType({
   helpArg: 'LDAP_FILTER',
   parseArg (option, optstr, arg) {
     return ldap.parseFilter(arg);
-  }
+  },
 });
 
 dashdash.addOptionType({
@@ -33,7 +33,7 @@ dashdash.addOptionType({
       throw new TypeError('Scope must be <base|one|sub>');
     }
     return arg;
-  }
+  },
 });
 
 dashdash.addOptionType({
@@ -46,7 +46,7 @@ dashdash.addOptionType({
       throw new TypeError('Must be valid format type');
     }
     return arg;
-  }
+  },
 });
 
 const opts = [
@@ -55,51 +55,51 @@ const opts = [
     type: 'string',
     help: 'Base DN of search',
     helpArg: 'BASE_DN',
-    default: ''
+    default: '',
   },
   {
     names: [ 'scope', 's' ],
     type: 'ldap.scope',
     help: 'Search scope <base|sub|one>',
     helpArg: 'SCOPE',
-    default: 'sub'
+    default: 'sub',
   },
   {
     names: [ 'timeout', 't' ],
     type: 'integer',
     help: 'Search timeout',
-    helpArg: 'SECS'
+    helpArg: 'SECS',
   },
   {
     names: [ 'persistent', 'p' ],
     type: 'bool',
     help: 'Enable persistent search control',
-    default: false
+    default: false,
   },
   {
     names: [ 'paged', 'g' ],
     type: 'number',
     help: 'Enable paged search result control',
-    helpArg: 'PAGE_SIZE'
+    helpArg: 'PAGE_SIZE',
   },
   {
     names: [ 'control', 'c' ],
     type: 'arrayOfString',
     help: 'Send addition control OID',
     helpArg: 'OID',
-    default: []
+    default: [],
   },
   { group: 'General Options' },
   {
     names: [ 'help', 'h' ],
     type: 'bool',
-    help: 'Print this help and exit.'
+    help: 'Print this help and exit.',
   },
   {
     names: [ 'debug', 'd' ],
     type: 'integer',
     help: 'Set debug level <0-2>',
-    helpArg: 'LEVEL'
+    helpArg: 'LEVEL',
   },
   { group: 'Output Options' },
   {
@@ -110,7 +110,7 @@ const opts = [
             '  json:  JSON objects (default)\n' +
             '  jsonl: Line-delimited JSON\n' +
             '  jsona: Array of JSON objects\n',
-    default: 'json'
+    default: 'json',
   },
   { group: 'Connection Options' },
   {
@@ -118,36 +118,36 @@ const opts = [
     type: 'string',
     help: 'LDAP server URL',
     helpArg: 'URL',
-    default: 'ldap://127.0.0.1:389'
+    default: 'ldap://127.0.0.1:389',
   },
   {
     names: [ 'binddn', 'D' ],
     type: 'string',
     help: 'Bind DN',
     helpArg: 'BIND_DN',
-    default: ''
+    default: '',
   },
   {
     names: [ 'password', 'w' ],
     type: 'string',
     help: 'Bind password',
     helpArg: 'PASSWD',
-    default: ''
+    default: '',
   },
   {
     names: [ 'insecure', 'i' ],
     type: 'bool',
     env: 'LDAPJS_TLS_INSECURE',
     help: 'Disable SSL certificate verification',
-    default: false
-  }
+    default: false,
+  },
 ];
 const parser = dashdash.createParser({ options: opts });
 
 ////////////////////
 // Helpers
 
-function usage(code, message) {
+function usage (code, message) {
   const msg = `${ message ? `${ message }\n` : ''
   }Usage: ${ path.basename(process.argv[1])
   } [OPTIONS] FILTER [ATTRIBUTES...]\n\n${
@@ -157,7 +157,7 @@ function usage(code, message) {
   process.exit(code);
 }
 
-function perror(err) {
+function perror (err) {
   if (parsed.debug) {
     process.stderr.write(`${ err.stack }\n`);
   } else {
@@ -166,14 +166,14 @@ function perror(err) {
   process.exit(1);
 }
 
-function EntryFormatter(fp, format) {
+function EntryFormatter (fp, format) {
   this.format = format;
   this.started = false;
   this.ended = false;
   this.fp = fp;
 }
 
-EntryFormatter.prototype.write = function write(entry) {
+EntryFormatter.prototype.write = function write (entry) {
   switch (this.format) {
     case 'json':
       this.fp.write(`${ JSON.stringify(entry.object, null, 2) }\n`);
@@ -188,7 +188,7 @@ EntryFormatter.prototype.write = function write(entry) {
       this.fp.write(
         JSON.stringify(entry.object, null, 2).
           split('\n').
-          map((line) => { return `  ${ line }`; }).
+          map((line) => `  ${ line }`).
           join('\n'));
       break;
     default:
@@ -196,7 +196,7 @@ EntryFormatter.prototype.write = function write(entry) {
   }
 };
 
-EntryFormatter.prototype.end = function end() {
+EntryFormatter.prototype.end = function end () {
   if (this.ended) {
     return;
   }
@@ -242,7 +242,7 @@ const log = new Logger({
   name: 'ldapjs',
   component: 'client',
   stream: process.stderr,
-  level: logLevel
+  level: logLevel,
 });
 
 const client = ldap.createClient({
@@ -250,7 +250,7 @@ const client = ldap.createClient({
   log,
   strictDN: false,
   timeout: parsed.timeout || false,
-  tlsOptions: { rejectUnauthorized: !parsed.insecure }
+  tlsOptions: { rejectUnauthorized: !parsed.insecure },
 });
 
 client.on('error', (err) => {
@@ -269,7 +269,7 @@ client.bind(parsed.binddn, parsed.password, (err) => {
   parsed.control.forEach((c) => {
     controls.push(new ldap.Control({
       type: c,
-      criticality: true
+      criticality: true,
     }));
   });
   if (parsed.persistent) {
@@ -278,15 +278,15 @@ client.bind(parsed.binddn, parsed.password, (err) => {
       value: {
         changeTypes: 15,
         changesOnly: false,
-        returnECs: true
-      }
+        returnECs: true,
+      },
     });
     controls.push(pCtrl);
   }
   const req = {
     scope: parsed.scope || 'sub',
     filter: parsed._args[0],
-    attributes: parsed._args.length > 1 ? parsed._args.slice(1) : []
+    attributes: parsed._args.length > 1 ? parsed._args.slice(1) : [],
   };
   if (parsed.paged) {
     req.paged = { pageSize: parsed.paged };

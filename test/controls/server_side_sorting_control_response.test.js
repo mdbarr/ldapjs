@@ -32,8 +32,8 @@ test('new with args', () => {
     criticality: true,
     value: {
       result: ldap.LDAP_SUCCESS,
-      failedAttribute: 'cn'
-    }
+      failedAttribute: 'cn',
+    },
   });
   expect(c).toBeTruthy();
   expect(c.type).toBe(OID);
@@ -43,10 +43,12 @@ test('new with args', () => {
 });
 
 test('toBer - success', () => {
-  const sssc = new SSSResponseControl({ value: {
-    result: ldap.LDAP_SUCCESS,
-    failedAttribute: 'foobar'
-  } });
+  const sssc = new SSSResponseControl({
+    value: {
+      result: ldap.LDAP_SUCCESS,
+      failedAttribute: 'foobar',
+    },
+  });
 
   const ber = new BerWriter();
   sssc.toBer(ber);
@@ -74,10 +76,12 @@ test('toBer - simple failure', () => {
 });
 
 test('toBer - detailed failure', () => {
-  const sssc = new SSSResponseControl({ value: {
-    result: ldap.LDAP_NO_SUCH_ATTRIBUTE,
-    failedAttribute: 'foobar'
-  } });
+  const sssc = new SSSResponseControl({
+    value: {
+      result: ldap.LDAP_NO_SUCH_ATTRIBUTE,
+      failedAttribute: 'foobar',
+    },
+  });
 
   const ber = new BerWriter();
   sssc.toBer(ber);

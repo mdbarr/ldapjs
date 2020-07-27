@@ -16,7 +16,7 @@ let client;
 let server;
 let sock;
 
-function getSock() {
+function getSock () {
   if (process.platform === 'win32') {
     return `\\\\.\\pipe\\${ uuid() }`;
   }
@@ -89,11 +89,11 @@ test('listen on ephemeral port', done => {
 });
 
 test('route order', done => {
-  function generateHandler(response) {
-    const func = function handler(req, res, next) {
+  function generateHandler (response) {
+    const func = function handler (req, res, next) {
       res.send({
         dn: response,
-        attributes: { }
+        attributes: { },
       });
       res.end();
       return next();
@@ -114,7 +114,7 @@ test('route order', done => {
   server.listen(sock, () => {
     expect(true).toBeTruthy();
     client = ldap.createClient({ socketPath: sock });
-    function runSearch(value, cb) {
+    function runSearch (value, cb) {
       client.search(value, '(objectclass=*)', (err, res) => {
         expect(err).toBeFalsy();
         expect(res).toBeTruthy();
@@ -129,7 +129,7 @@ test('route order', done => {
 
     vasync.forEachParallel({
       'func': runSearch,
-      'inputs': [ dnShort, dnMed, dnLong ]
+      'inputs': [ dnShort, dnMed, dnLong ],
     }, (err) => {
       expect(err).toBeFalsy();
       client.unbind();
@@ -152,25 +152,27 @@ test('route absent', done => {
 
   server.listen(sock, () => {
     expect(true).toBeTruthy();
-    vasync.parallel({ 'funcs': [
-      function presentBind(cb) {
-        const clt = ldap.createClient({ socketPath: sock });
-        clt.bind(DN_ROUTE, '', (err) => {
-          expect(err).toBeFalsy();
-          clt.unbind();
-          cb();
-        });
-      },
-      function absentBind(cb) {
-        const clt = ldap.createClient({ socketPath: sock });
-        clt.bind(DN_MISSING, '', (err) => {
-          expect(err).toBeTruthy();
-          expect(err.code).toBe(ldap.LDAP_NO_SUCH_OBJECT);
-          clt.unbind();
-          cb();
-        });
-      }
-    ] }, (err) => {
+    vasync.parallel({
+      'funcs': [
+        function presentBind (cb) {
+          const clt = ldap.createClient({ socketPath: sock });
+          clt.bind(DN_ROUTE, '', (err) => {
+            expect(err).toBeFalsy();
+            clt.unbind();
+            cb();
+          });
+        },
+        function absentBind (cb) {
+          const clt = ldap.createClient({ socketPath: sock });
+          clt.bind(DN_MISSING, '', (err) => {
+            expect(err).toBeTruthy();
+            expect(err.code).toBe(ldap.LDAP_NO_SUCH_OBJECT);
+            clt.unbind();
+            cb();
+          });
+        },
+      ],
+    }, (err) => {
       expect(err).toBeFalsy();
       server.close();
       done();
@@ -206,56 +208,58 @@ test('route unbind', done => {
 test('strict routing', done => {
   const testDN = 'cn=valid';
   let clt;
-  vasync.pipeline({ funcs: [
-    function setup(_, cb) {
+  vasync.pipeline({
+    funcs: [
+      function setup (_, cb) {
       // strictDN: true - on by default
-      server = ldap.createServer({});
-      sock = getSock();
-      // invalid DNs would go to default handler
-      server.search('', (req, res, next) => {
-        expect(req.dn).toBeTruthy();
-        expect(typeof req.dn).toBe('object');
-        expect(req.dn.toString()).toBe(testDN);
-        res.end();
-        next();
-      });
-      server.listen(sock, () => {
-        expect(true).toBeTruthy();
-        clt = ldap.createClient({
-          socketPath: sock,
-          strictDN: false
+        server = ldap.createServer({});
+        sock = getSock();
+        // invalid DNs would go to default handler
+        server.search('', (req, res, next) => {
+          expect(req.dn).toBeTruthy();
+          expect(typeof req.dn).toBe('object');
+          expect(req.dn.toString()).toBe(testDN);
+          res.end();
+          next();
         });
-        cb();
-      });
-    },
-    function testBad(_, cb) {
-      clt.search('not a dn', { scope: 'base' }, (err, res) => {
-        expect(err).toBeFalsy();
-        res.once('error', (err2) => {
-          expect(err2).toBeTruthy();
-          expect(err2.code).toBe(ldap.LDAP_INVALID_DN_SYNTAX);
+        server.listen(sock, () => {
+          expect(true).toBeTruthy();
+          clt = ldap.createClient({
+            socketPath: sock,
+            strictDN: false,
+          });
           cb();
         });
-        res.once('end', () => {
-          done.fail('accepted invalid dn');
-          cb('bogus');
+      },
+      function testBad (_, cb) {
+        clt.search('not a dn', { scope: 'base' }, (err, res) => {
+          expect(err).toBeFalsy();
+          res.once('error', (err2) => {
+            expect(err2).toBeTruthy();
+            expect(err2.code).toBe(ldap.LDAP_INVALID_DN_SYNTAX);
+            cb();
+          });
+          res.once('end', () => {
+            done.fail('accepted invalid dn');
+            cb('bogus');
+          });
         });
-      });
-    },
-    function testGood(_, cb) {
-      clt.search(testDN, { scope: 'base' }, (err, res) => {
-        expect(err).toBeFalsy();
-        res.once('error', (err2) => {
-          expect(err2).toBeFalsy();
-          cb(err2);
+      },
+      function testGood (_, cb) {
+        clt.search(testDN, { scope: 'base' }, (err, res) => {
+          expect(err).toBeFalsy();
+          res.once('error', (err2) => {
+            expect(err2).toBeFalsy();
+            cb(err2);
+          });
+          res.once('end', (result) => {
+            expect(result).toBeTruthy();
+            cb();
+          });
         });
-        res.once('end', (result) => {
-          expect(result).toBeTruthy();
-          cb();
-        });
-      });
-    }
-  ] }, (err) => {
+      },
+    ],
+  }, (err) => {
     expect(err).toBeFalsy();
 
     if (clt) {
@@ -284,7 +288,7 @@ test('non-strict routing', done => {
     expect(true).toBeTruthy();
     const clt = ldap.createClient({
       socketPath: sock,
-      strictDN: false
+      strictDN: false,
     });
     clt.search(testDN, { scope: 'base' }, (err, res) => {
       expect(err).toBeFalsy();

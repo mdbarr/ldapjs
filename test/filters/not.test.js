@@ -24,28 +24,34 @@ test('Construct no args', () => {
 });
 
 test('Construct args', () => {
-  const f = new NotFilter({ filter: new EqualityFilter({
-    attribute: 'foo',
-    value: 'bar'
-  }) });
+  const f = new NotFilter({
+    filter: new EqualityFilter({
+      attribute: 'foo',
+      value: 'bar',
+    }),
+  });
   expect(f).toBeTruthy();
   expect(f.toString()).toBe('(!(foo=bar))');
 });
 
 test('match true', () => {
-  const f = new NotFilter({ filter: new EqualityFilter({
-    attribute: 'foo',
-    value: 'bar'
-  }) });
+  const f = new NotFilter({
+    filter: new EqualityFilter({
+      attribute: 'foo',
+      value: 'bar',
+    }),
+  });
   expect(f).toBeTruthy();
   expect(f.matches({ foo: 'baz' })).toBeTruthy();
 });
 
 test('match false', () => {
-  const f = new NotFilter({ filter: new EqualityFilter({
-    attribute: 'foo',
-    value: 'bar'
-  }) });
+  const f = new NotFilter({
+    filter: new EqualityFilter({
+      attribute: 'foo',
+      value: 'bar',
+    }),
+  });
   expect(f).toBeTruthy();
   expect(!f.matches({ foo: 'bar' })).toBeTruthy();
 });

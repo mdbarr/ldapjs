@@ -27,11 +27,11 @@ test('Construct args', () => {
   const f = new AndFilter();
   f.addFilter(new EqualityFilter({
     attribute: 'foo',
-    value: 'bar'
+    value: 'bar',
   }));
   f.addFilter(new EqualityFilter({
     attribute: 'zig',
-    value: 'zag'
+    value: 'zag',
   }));
   expect(f).toBeTruthy();
   expect(f.toString()).toBe('(&(foo=bar)(zig=zag))');
@@ -41,16 +41,16 @@ test('match true', () => {
   const f = new AndFilter();
   f.addFilter(new EqualityFilter({
     attribute: 'foo',
-    value: 'bar'
+    value: 'bar',
   }));
   f.addFilter(new EqualityFilter({
     attribute: 'zig',
-    value: 'zag'
+    value: 'zag',
   }));
   expect(f).toBeTruthy();
   expect(f.matches({
     foo: 'bar',
-    zig: 'zag'
+    zig: 'zag',
   })).toBeTruthy();
 });
 
@@ -58,15 +58,15 @@ test('match false', () => {
   const f = new AndFilter();
   f.addFilter(new EqualityFilter({
     attribute: 'foo',
-    value: 'bar'
+    value: 'bar',
   }));
   f.addFilter(new EqualityFilter({
     attribute: 'zig',
-    value: 'zag'
+    value: 'zag',
   }));
   expect(f).toBeTruthy();
   expect(!f.matches({
     foo: 'bar',
-    zig: 'zonk'
+    zig: 'zonk',
   })).toBeTruthy();
 });

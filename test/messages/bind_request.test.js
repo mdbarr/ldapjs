@@ -29,7 +29,7 @@ test('new with args', () => {
   const req = new BindRequest({
     version: 3,
     name: dn.parse('cn=root'),
-    credentials: 'secret'
+    credentials: 'secret',
   });
   expect(req).toBeTruthy();
   expect(req.version).toBe(3);
@@ -55,7 +55,7 @@ test('toBer', () => {
     messageID: 123,
     version: 3,
     name: dn.parse('cn=root'),
-    credentials: 'secret'
+    credentials: 'secret',
   });
   expect(req).toBeTruthy();
 

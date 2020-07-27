@@ -25,7 +25,7 @@ test('Construct no args', () => {
 test('Construct args', () => {
   const f = new ExtensibleFilter({
     matchType: 'foo',
-    value: 'bar'
+    value: 'bar',
   });
   expect(f).toBeTruthy();
   expect(f.matchType).toBe('foo');

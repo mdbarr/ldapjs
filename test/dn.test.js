@@ -170,7 +170,7 @@ test('format persists across clone', () => {
   const OUT = 'UID="user", CN=foo+SN=bar, DC=test, DC=com';
   _dn.setFormat({
     keepQuote: true,
-    upperName: true
+    upperName: true,
   });
   const clone = _dn.clone();
   expect(_dn.toString()).toBe(OUT);
@@ -185,7 +185,7 @@ test('initialization', () => {
 
   const data = [
     new dn.RDN({ foo: 'bar' }),
-    new dn.RDN({ o: 'base' })
+    new dn.RDN({ o: 'base' }),
   ];
   const dn2 = new dn.DN(data);
   expect(dn2).toBeTruthy();
@@ -224,7 +224,7 @@ test('isDN duck-testing', () => {
   expect(isDN(valid)).toBeTruthy();
   const duck = {
     rdns: [ { look: 'ma' }, { a: 'dn' } ],
-    toString () { return 'look=ma, a=dn'; }
+    toString () { return 'look=ma, a=dn'; },
   };
   expect(isDN(duck)).toBeTruthy();
 });

@@ -28,7 +28,7 @@ test('new no args', () => {
 test('new with args', () => {
   const req = new ExtendedRequest({
     requestName: '1.2.3.4',
-    requestValue: 'test'
+    requestValue: 'test',
   });
   expect(req).toBeTruthy();
   expect(req.requestName).toBe('1.2.3.4');
@@ -50,7 +50,7 @@ test('toBer', () => {
   const req = new ExtendedRequest({
     messageID: 123,
     requestName: '1.2.3.4',
-    requestValue: 'test'
+    requestValue: 'test',
   });
 
   expect(req).toBeTruthy();

@@ -30,8 +30,8 @@ test('new with args', () => {
     operation: 'add',
     modification: new Attribute({
       type: 'cn',
-      vals: [ 'foo', 'bar' ]
-    })
+      vals: [ 'foo', 'bar' ],
+    }),
   });
   expect(change).toBeTruthy();
 
@@ -51,7 +51,7 @@ test('validate fields', () => {
   expect(() => {
     c.modification = {
       too: 'many',
-      fields: 'here'
+      fields: 'here',
     };
   }).toThrow();
   c.modification = { foo: [ 'bar', 'baz' ] };
@@ -64,8 +64,8 @@ test('GH-31 (multiple attributes per Change)', () => {
       operation: 'replace',
       modification: {
         cn: 'foo',
-        sn: 'bar'
-      }
+        sn: 'bar',
+      },
     });
     expect(c).toBeFalsy();
   }).toThrow();
@@ -76,8 +76,8 @@ test('toBer', () => {
     operation: 'Add',
     modification: new Attribute({
       type: 'cn',
-      vals: [ 'foo', 'bar' ]
-    })
+      vals: [ 'foo', 'bar' ],
+    }),
   });
   expect(change).toBeTruthy();
 
@@ -122,22 +122,22 @@ test('apply - replace', () => {
     operation: 'replace',
     modification: {
       type: 'cn',
-      vals: [ 'new' ]
-    }
+      vals: [ 'new' ],
+    },
   });
   const twin = new Change({
     operation: 'replace',
     modification: {
       type: 'cn',
-      vals: [ 'new', 'two' ]
-    }
+      vals: [ 'new', 'two' ],
+    },
   });
   const empty = new Change({
     operation: 'replace',
     modification: {
       type: 'cn',
-      vals: []
-    }
+      vals: [],
+    },
   });
 
   // plain
@@ -153,7 +153,7 @@ test('apply - replace', () => {
   expect(res.cn).toBe(undefined);
   expect(Object.keys(res).indexOf('cn') === -1).toBeTruthy();
 
-  //absent
+  // absent
   res = Change.apply(single, { dn: [ 'otherjunk' ] });
   expect(res.cn).toEqual([ 'new' ]);
 
@@ -172,8 +172,8 @@ test('apply - add', () => {
     operation: 'add',
     modification: {
       type: 'cn',
-      vals: [ 'new' ]
-    }
+      vals: [ 'new' ],
+    },
   });
 
   // plain
@@ -184,7 +184,7 @@ test('apply - add', () => {
   res = Change.apply(single, { cn: [ 'old', 'also' ] });
   expect(res.cn).toEqual([ 'old', 'also', 'new' ]);
 
-  //absent
+  // absent
   res = Change.apply(single, { dn: [ 'otherjunk' ] });
   expect(res.cn).toEqual([ 'new' ]);
 
@@ -207,8 +207,8 @@ test('apply - delete', () => {
     operation: 'delete',
     modification: {
       type: 'cn',
-      vals: [ 'old' ]
-    }
+      vals: [ 'old' ],
+    },
   });
 
   // plain
@@ -228,7 +228,7 @@ test('apply - delete', () => {
   res = Change.apply(single, { cn: [ 'old', 'several', 'items' ] }, true);
   expect(res.cn).toEqual([ 'several', 'items' ]);
 
-  //absent
+  // absent
   res = Change.apply(single, { dn: [ 'otherjunk' ] });
   expect(res).toBeTruthy();
   expect(res.cn).toBe(undefined);

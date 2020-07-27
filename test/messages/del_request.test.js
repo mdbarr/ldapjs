@@ -45,7 +45,7 @@ test('parse', () => {
 test('toBer', () => {
   const req = new DeleteRequest({
     messageID: 123,
-    entry: dn.parse('cn=test')
+    entry: dn.parse('cn=test'),
   });
   expect(req).toBeTruthy();
 

@@ -31,14 +31,16 @@ test('new no args', () => {
 test('new with args', () => {
   const req = new AddRequest({
     entry: dn.parse('cn=foo, o=test'),
-    attributes: [ new Attribute({
-      type: 'cn',
-      vals: [ 'foo' ]
-    }),
-    new Attribute({
-      type: 'objectclass',
-      vals: [ 'person' ]
-    }) ]
+    attributes: [
+      new Attribute({
+        type: 'cn',
+        vals: [ 'foo' ],
+      }),
+      new Attribute({
+        type: 'objectclass',
+        vals: [ 'person' ],
+      }),
+    ],
   });
   expect(req).toBeTruthy();
   expect(req.dn.toString()).toBe('cn=foo, o=test');
@@ -85,14 +87,16 @@ test('toBer', () => {
   const req = new AddRequest({
     messageID: 123,
     entry: dn.parse('cn=foo, o=test'),
-    attributes: [ new Attribute({
-      type: 'cn',
-      vals: [ 'foo' ]
-    }),
-    new Attribute({
-      type: 'objectclass',
-      vals: [ 'person' ]
-    }) ]
+    attributes: [
+      new Attribute({
+        type: 'cn',
+        vals: [ 'foo' ],
+      }),
+      new Attribute({
+        type: 'objectclass',
+        vals: [ 'person' ],
+      }),
+    ],
   });
 
   expect(req).toBeTruthy();
@@ -119,14 +123,16 @@ test('toBer', () => {
 test('toObject', () => {
   const req = new AddRequest({
     entry: dn.parse('cn=foo, o=test'),
-    attributes: [ new Attribute({
-      type: 'cn',
-      vals: [ 'foo', 'bar' ]
-    }),
-    new Attribute({
-      type: 'objectclass',
-      vals: [ 'person' ]
-    }) ]
+    attributes: [
+      new Attribute({
+        type: 'cn',
+        vals: [ 'foo', 'bar' ],
+      }),
+      new Attribute({
+        type: 'objectclass',
+        vals: [ 'person' ],
+      }),
+    ],
   });
 
   expect(req).toBeTruthy();

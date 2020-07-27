@@ -32,7 +32,7 @@ test('Construct args', () => {
     attribute: 'foo',
     initial: 'bar',
     any: [ 'zig', 'zag' ],
-    'final': 'baz'
+    'final': 'baz',
   });
   expect(f).toBeTruthy();
   expect(f.attribute).toBe('foo');
@@ -49,7 +49,7 @@ test('GH-109 = escape value only in toString()', () => {
     attribute: 'fo(o',
     initial: 'ba(r)',
     any: [ 'zi)g', 'z(ag' ],
-    'final': '(baz)'
+    'final': '(baz)',
   });
   expect(f).toBeTruthy();
   expect(f.attribute).toBe('fo(o');
@@ -66,7 +66,7 @@ test('match true', () => {
     attribute: 'foo',
     initial: 'bar',
     any: [ 'zig', 'zag' ],
-    'final': 'baz'
+    'final': 'baz',
   });
   expect(f).toBeTruthy();
   expect(f.matches({ foo: 'barmoozigbarzagblahbaz' })).toBeTruthy();
@@ -77,7 +77,7 @@ test('match false', () => {
     attribute: 'foo',
     initial: 'bar',
     foo: [ 'zig', 'zag' ],
-    'final': 'baz'
+    'final': 'baz',
   });
   expect(f).toBeTruthy();
   expect(!f.matches({ foo: 'bafmoozigbarzagblahbaz' })).toBeTruthy();
@@ -86,7 +86,7 @@ test('match false', () => {
 test('match any', () => {
   const f = new SubstringFilter({
     attribute: 'foo',
-    initial: 'bar'
+    initial: 'bar',
   });
   expect(f).toBeTruthy();
   expect(f.matches({ foo: [ 'beuha', 'barista' ] })).toBeTruthy();
@@ -97,7 +97,7 @@ test('GH-109 = escape for regex in matches', () => {
     attribute: 'fo(o',
     initial: 'ba(r)',
     any: [ 'zi)g', 'z(ag' ],
-    'final': '(baz)'
+    'final': '(baz)',
   });
   expect(f).toBeTruthy();
   expect(f.matches({ 'fo(o': [ 'ba(r)_zi)g-z(ag~(baz)' ] })).toBeTruthy();
@@ -137,7 +137,7 @@ test('GH-109 = to ber uses plain values', () => {
     attribute: 'fo(o',
     initial: 'ba(r)',
     any: [ 'zi)g', 'z(ag' ],
-    'final': '(baz)'
+    'final': '(baz)',
   });
   expect(f).toBeTruthy();
   const writer = new BerWriter();

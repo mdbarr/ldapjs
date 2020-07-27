@@ -30,7 +30,7 @@ test('Construct no args', () => {
 test('Construct args', () => {
   const f = new EqualityFilter({
     attribute: 'foo',
-    value: 'bar'
+    value: 'bar',
   });
   expect(f).toBeTruthy();
   expect(f.attribute).toBe('foo');
@@ -41,7 +41,7 @@ test('Construct args', () => {
 test('GH-109 = escape value only in toString()', () => {
   const f = new EqualityFilter({
     attribute: 'foo',
-    value: 'ba(r)'
+    value: 'ba(r)',
   });
   expect(f).toBeTruthy();
   expect(f.attribute).toBe('foo');
@@ -52,7 +52,7 @@ test('GH-109 = escape value only in toString()', () => {
 test('match true', () => {
   const f = new EqualityFilter({
     attribute: 'foo',
-    value: 'bar'
+    value: 'bar',
   });
   expect(f).toBeTruthy();
   expect(f.matches({ foo: 'bar' })).toBeTruthy();
@@ -61,7 +61,7 @@ test('match true', () => {
 test('match multiple', () => {
   const f = new EqualityFilter({
     attribute: 'foo',
-    value: 'bar'
+    value: 'bar',
   });
   expect(f).toBeTruthy();
   expect(f.matches({ foo: [ 'plop', 'bar' ] })).toBeTruthy();
@@ -70,7 +70,7 @@ test('match multiple', () => {
 test('match false', () => {
   const f = new EqualityFilter({
     attribute: 'foo',
-    value: 'bar'
+    value: 'bar',
   });
   expect(f).toBeTruthy();
   expect(!f.matches({ foo: 'baz' })).toBeTruthy();
@@ -92,7 +92,7 @@ test('parse ok', () => {
 test('escape EqualityFilter inputs', () => {
   const f = new EqualityFilter({
     attribute: '(|(foo',
-    value: 'bar))('
+    value: 'bar))(',
   });
 
   expect(f.attribute).toBe('(|(foo');
@@ -119,7 +119,7 @@ test('parse bad', done => {
 test('GH-109 = to ber uses plain values', () => {
   let f = new EqualityFilter({
     attribute: 'foo',
-    value: 'ba(r)'
+    value: 'ba(r)',
   });
   expect(f).toBeTruthy();
   const writer = new BerWriter();
@@ -140,7 +140,7 @@ test('handle values passed via buffer', () => {
   const b = Buffer.from([ 32, 64, 128, 254 ]);
   const f = new EqualityFilter({
     attribute: 'foo',
-    value: b
+    value: b,
   });
   expect(f).toBeTruthy();
 
@@ -162,7 +162,7 @@ test('handle values passed via buffer', () => {
 test('GH-277 objectClass should be case-insensitive', () => {
   const f = new EqualityFilter({
     attribute: 'objectClass',
-    value: 'CaseInsensitiveObj'
+    value: 'CaseInsensitiveObj',
   });
   expect(f).toBeTruthy();
   expect(f.matches({ objectClass: 'CaseInsensitiveObj' })).toBeTruthy();

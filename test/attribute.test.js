@@ -25,7 +25,7 @@ test('new no args', () => {
 test('new with args', () => {
   let attr = new Attribute({
     type: 'cn',
-    vals: [ 'foo', 'bar' ]
+    vals: [ 'foo', 'bar' ],
   });
   expect(attr).toBeTruthy();
   attr.addValue('baz');
@@ -46,7 +46,7 @@ test('new with args', () => {
 test('toBer', () => {
   const attr = new Attribute({
     type: 'cn',
-    vals: [ 'foo', 'bar' ]
+    vals: [ 'foo', 'bar' ],
   });
   expect(attr).toBeTruthy();
   const ber = new BerWriter();
@@ -95,7 +95,7 @@ test('parse - without 0x31', () => {
 test('toString', () => {
   const attr = new Attribute({
     type: 'foobar',
-    vals: [ 'asdf' ]
+    vals: [ 'asdf' ],
   });
   const expected = attr.toString();
   const actual = JSON.stringify(attr.json);
@@ -108,20 +108,20 @@ test('isAttribute', () => {
   expect(isA('asdf')).toBeFalsy();
   expect(isA(new Attribute({
     type: 'foobar',
-    vals: [ 'asdf' ]
+    vals: [ 'asdf' ],
   }))).toBeTruthy();
 
   expect(isA({
     type: 'foo',
     vals: [ 'item', Buffer.alloc(5) ],
-    toBer () { /* placeholder */ }
+    toBer () { /* placeholder */ },
   })).toBeTruthy();
 
   // bad type in vals
   expect(isA({
     type: 'foo',
     vals: [ 'item', null ],
-    toBer () { /* placeholder */ }
+    toBer () { /* placeholder */ },
   })).toBeFalsy();
 });
 
@@ -129,11 +129,11 @@ test('compare', () => {
   const comp = Attribute.compare;
   const a = new Attribute({
     type: 'foo',
-    vals: [ 'bar' ]
+    vals: [ 'bar' ],
   });
   const b = new Attribute({
     type: 'foo',
-    vals: [ 'bar' ]
+    vals: [ 'bar' ],
   });
   const notAnAttribute = 'this is not an attribute';
 

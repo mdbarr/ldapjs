@@ -9,7 +9,7 @@ const BerWriter = asn1.BerWriter;
 let getControl;
 let PagedResultsControl;
 
-function bufferEqual(t, a, b) {
+function bufferEqual (t, a, b) {
   t.equal(a.toString('hex'), b.toString('hex'));
 }
 
@@ -36,8 +36,8 @@ test('new with args', (t) => {
     criticality: true,
     value: {
       size: 1000,
-      cookie: Buffer.from([ 1, 2, 3 ])
-    }
+      cookie: Buffer.from([ 1, 2, 3 ]),
+    },
   });
   t.ok(c);
   t.equal(c.type, '1.2.840.113556.1.4.319');
@@ -65,8 +65,8 @@ test('tober', (t) => {
     criticality: true,
     value: {
       size: 20,
-      cookie: Buffer.alloc(0)
-    }
+      cookie: Buffer.alloc(0),
+    },
   });
 
   const ber = new BerWriter();

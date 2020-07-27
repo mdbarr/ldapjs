@@ -33,9 +33,9 @@ test('new with args', () => {
     baseObject: dn.parse('cn=foo, o=test'),
     filter: new EqualityFilter({
       attribute: 'email',
-      value: 'foo@bar.com'
+      value: 'foo@bar.com',
     }),
-    attributes: [ 'cn', 'sn' ]
+    attributes: [ 'cn', 'sn' ],
   });
   expect(req).toBeTruthy();
   expect(req.dn.toString()).toBe('cn=foo, o=test');
@@ -48,7 +48,7 @@ test('new with args', () => {
 test('parse', () => {
   const f = new EqualityFilter({
     attribute: 'email',
-    value: 'foo@bar.com'
+    value: 'foo@bar.com',
   });
 
   let ber = new BerWriter();
@@ -83,9 +83,9 @@ test('toBer', () => {
     typesOnly: true,
     filter: new EqualityFilter({
       attribute: 'email',
-      value: 'foo@bar.com'
+      value: 'foo@bar.com',
     }),
-    attributes: [ 'cn', 'sn' ]
+    attributes: [ 'cn', 'sn' ],
   });
 
   expect(req).toBeTruthy();

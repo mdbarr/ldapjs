@@ -21,7 +21,7 @@ const LOG = new Logger({
   stream: process.stderr,
   level: process.env.LOG_LEVEL || 'info',
   serializers: Logger.stdSerializers,
-  src: true
+  src: true,
 });
 
 let ldap;
@@ -92,8 +92,8 @@ test('setup', done => {
       attributes: {
         'you': 'wish',
         'this': 'was',
-        'faster': '.'
-      }
+        'faster': '.',
+      },
     });
     setTimeout(() => {
       res.end();
@@ -114,16 +114,16 @@ test('setup', done => {
         attributes: {
           'foo;binary': 'wr0gKyDCvCA9IMK+',
           'gb18030': Buffer.from([ 0xB5, 0xE7, 0xCA, 0xD3, 0xBB, 0xFA ]),
-          'objectclass': 'binary'
-        }
+          'objectclass': 'binary',
+        },
       }));
     } else {
       const e = res.createSearchEntry({
         objectName: req.dn,
         attributes: {
           cn: [ 'unit', 'test' ],
-          SN: 'testy'
-        }
+          SN: 'testy',
+        },
       });
       res.send(e);
       res.send(e);
@@ -147,8 +147,8 @@ test('setup', done => {
         dn: util.format('o=%d, cn=sizelimit', i),
         attributes: {
           o: [ i ],
-          objectclass: [ 'pagedResult' ]
-        }
+          objectclass: [ 'pagedResult' ],
+        },
       });
     }
     res.end();
@@ -159,7 +159,7 @@ test('setup', done => {
     const min = 0;
     const max = 1000;
 
-    function sendResults(start, end) {
+    function sendResults (start, end) {
       start = start < min ? min : start;
       end = end > max || end < min ? max : end;
       let i;
@@ -168,8 +168,8 @@ test('setup', done => {
           dn: util.format('o=%d, cn=paged', i),
           attributes: {
             o: [ i ],
-            objectclass: [ 'pagedResult' ]
-          }
+            objectclass: [ 'pagedResult' ],
+          },
         });
       }
       return i;
@@ -198,10 +198,12 @@ test('setup', done => {
       } else {
         resultCookie = Buffer.from('');
       }
-      res.controls.push(new ldap.PagedResultsControl({ value: {
-        size: pageSize, // correctness not required here
-        cookie: resultCookie
-      } }));
+      res.controls.push(new ldap.PagedResultsControl({
+        value: {
+          size: pageSize, // correctness not required here
+          cookie: resultCookie,
+        },
+      }));
       res.end();
       return next();
     }
@@ -222,13 +224,15 @@ test('setup', done => {
         dn: util.format('o=result, cn=pagederr'),
         attributes: {
           o: 'result',
-          objectclass: [ 'pagedResult' ]
-        }
+          objectclass: [ 'pagedResult' ],
+        },
       });
-      res.controls.push(new ldap.PagedResultsControl({ value: {
-        size: 2,
-        cookie: Buffer.from('a')
-      } }));
+      res.controls.push(new ldap.PagedResultsControl({
+        value: {
+          size: 2,
+          cookie: Buffer.from('a'),
+        },
+      }));
       res.end();
       return next();
     }
@@ -242,8 +246,8 @@ test('setup', done => {
       dn: 'dc=empty',
       attributes: {
         member: [],
-        'member;range=0-1': [ 'cn=user1, dc=empty', 'cn=user2, dc=empty' ]
-      }
+        'member;range=0-1': [ 'cn=user1, dc=empty', 'cn=user2, dc=empty' ],
+      },
     });
     res.end();
     return next();
@@ -257,7 +261,7 @@ test('setup', done => {
     if (req.dn.toString() === '') {
       res.send({
         dn: '',
-        attributes: { objectclass: [ 'RootDSE', 'top' ] }
+        attributes: { objectclass: [ 'RootDSE', 'top' ] },
       });
       res.end();
     } else {
@@ -277,7 +281,7 @@ test('setup', done => {
     client = ldap.createClient({
       connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
       socketPath: SOCKET,
-      log: LOG
+      log: LOG,
     });
     expect(client).toBeTruthy();
     done();
@@ -322,7 +326,7 @@ test('auto-bind bad credentials', done => {
     socketPath: SOCKET,
     bindDN: BIND_DN,
     bindCredentials: 'totallybogus',
-    log: LOG
+    log: LOG,
   });
   clt.once('error', (err) => {
     expect(err.code).toBe(ldap.LDAP_INVALID_CREDENTIALS);
@@ -336,7 +340,7 @@ test('auto-bind success', done => {
     socketPath: SOCKET,
     bindDN: BIND_DN,
     bindCredentials: BIND_PW,
-    log: LOG
+    log: LOG,
   });
   clt.once('connect', () => {
     expect(clt).toBeTruthy();
@@ -349,8 +353,8 @@ test('add success', done => {
   const attrs = [
     new Attribute({
       type: 'cn',
-      vals: [ 'test' ]
-    })
+      vals: [ 'test' ],
+    }),
   ];
   client.add(`cn=add, ${ SUFFIX }`, attrs, (err, res) => {
     expect(err).toBeFalsy();
@@ -363,7 +367,7 @@ test('add success', done => {
 test('add success with object', done => {
   const entry = {
     cn: [ 'unit', 'add' ],
-    sn: 'test'
+    sn: 'test',
   };
   client.add(`cn=add, ${ SUFFIX }`, entry, (err, res) => {
     expect(err).toBeFalsy();
@@ -418,7 +422,7 @@ test('delete success', done => {
 test('delete with control (GH-212)', done => {
   const control = new ldap.Control({
     type: '1.2.3.4',
-    criticality: false
+    criticality: false,
   });
   client.del(`cn=delete, ${ SUFFIX }`, control, (err, res) => {
     expect(err).toBeFalsy();
@@ -458,8 +462,8 @@ test('modify success', done => {
     type: 'Replace',
     modification: new Attribute({
       type: 'cn',
-      vals: [ 'test' ]
-    })
+      vals: [ 'test' ],
+    }),
   });
   client.modify(`cn=modify, ${ SUFFIX }`, change, (err, res) => {
     expect(err).toBeFalsy();
@@ -472,7 +476,7 @@ test('modify success', done => {
 test('modify change plain object success', done => {
   const change = new Change({
     type: 'Replace',
-    modification: { cn: 'test' }
+    modification: { cn: 'test' },
   });
   client.modify(`cn=modify, ${ SUFFIX }`, change, (err, res) => {
     expect(err).toBeFalsy();
@@ -488,13 +492,13 @@ test('modify array success', done => {
       operation: 'Replace',
       modification: new Attribute({
         type: 'cn',
-        vals: [ 'test' ]
-      })
+        vals: [ 'test' ],
+      }),
     }),
     new Change({
       operation: 'Delete',
-      modification: new Attribute({ type: 'sn' })
-    })
+      modification: new Attribute({ type: 'sn' }),
+    }),
   ];
   client.modify(`cn=modify, ${ SUFFIX }`, changes, (err, res) => {
     expect(err).toBeFalsy();
@@ -509,8 +513,8 @@ test('modify change plain object success (GH-31)', done => {
     type: 'replace',
     modification: {
       cn: 'test',
-      sn: 'bar'
-    }
+      sn: 'bar',
+    },
   };
   client.modify(`cn=modify, ${ SUFFIX }`, change, (err, res) => {
     expect(err).toBeFalsy();
@@ -619,10 +623,12 @@ describe('search paged', () => {
 
   test('paged - pauses', (t2) => {
     let countPages = 0;
-    client.search('cn=paged', { paged: {
-      pageSize: 100,
-      pagePause: true
-    } }, (err, res) => {
+    client.search('cn=paged', {
+      paged: {
+        pageSize: 100,
+        pagePause: true,
+      },
+    }, (err, res) => {
       t2.ifError(err);
       res.on('page', (result, cb) => {
         countPages++;
@@ -823,7 +829,7 @@ test('GH-21 binary attributes', done => {
 test('GH-23 case insensitive attribute filtering', done => {
   const opts = {
     filter: '(objectclass=*)',
-    attributes: [ 'Cn' ]
+    attributes: [ 'Cn' ],
   };
   client.search(`cn=test, ${ SUFFIX }`, opts, (err, res) => {
     expect(err).toBeFalsy();
@@ -855,7 +861,7 @@ test('GH-23 case insensitive attribute filtering', done => {
 test('GH-24 attribute selection of *', done => {
   const opts = {
     filter: '(objectclass=*)',
-    attributes: [ '*' ]
+    attributes: [ '*' ],
   };
   client.search(`cn=test, ${ SUFFIX }`, opts, (err, res) => {
     expect(err).toBeFalsy();
@@ -887,7 +893,7 @@ test('GH-24 attribute selection of *', done => {
 
 test('idle timeout', done => {
   client.idleTimeout = 250;
-  function premature() {
+  function premature () {
     expect(true).toBeFalsy();
   }
   client.on('idle', premature);
@@ -919,7 +925,7 @@ test('setup action', done => {
   const setupClient = ldap.createClient({
     connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
     socketPath: SOCKET,
-    log: LOG
+    log: LOG,
   });
   setupClient.on('setup', (clt, cb) => {
     clt.bind(BIND_DN, BIND_PW, (err) => {
@@ -942,7 +948,7 @@ test('setup reconnect', done => {
     connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
     socketPath: SOCKET,
     reconnect: true,
-    log: LOG
+    log: LOG,
   });
   rClient.on('setup', (clt, cb) => {
     clt.bind(BIND_DN, BIND_PW, (err) => {
@@ -951,7 +957,7 @@ test('setup reconnect', done => {
     });
   });
 
-  function doSearch(_, cb) {
+  function doSearch (_, cb) {
     rClient.search(SUFFIX, { scope: 'base' }, (err, res) => {
       expect(err).toBeFalsy();
       res.on('end', () => {
@@ -959,31 +965,33 @@ test('setup reconnect', done => {
       });
     });
   }
-  vasync.pipeline({ funcs: [
-    doSearch,
-    function cleanDisconnect(_, cb) {
-      expect(rClient.connected).toBeTruthy();
-      rClient.once('close', (hadError) => {
-        expect(hadError).toBeFalsy();
-        expect(rClient.connected).toBe(false);
-        cb();
-      });
-      rClient.unbind();
-    },
-    doSearch,
-    function simulateError(_, cb) {
-      const msg = 'fake socket error';
-      rClient.once('error', (err) => {
-        expect(err.message).toBe(msg);
-        expect(err).toBeTruthy();
-      });
-      rClient.once('close', () => {
-        cb();
-      });
-      rClient._socket.emit('error', new Error(msg));
-    },
-    doSearch
-  ] }, (err) => {
+  vasync.pipeline({
+    funcs: [
+      doSearch,
+      function cleanDisconnect (_, cb) {
+        expect(rClient.connected).toBeTruthy();
+        rClient.once('close', (hadError) => {
+          expect(hadError).toBeFalsy();
+          expect(rClient.connected).toBe(false);
+          cb();
+        });
+        rClient.unbind();
+      },
+      doSearch,
+      function simulateError (_, cb) {
+        const msg = 'fake socket error';
+        rClient.once('error', (err) => {
+          expect(err.message).toBe(msg);
+          expect(err).toBeTruthy();
+        });
+        rClient.once('close', () => {
+          cb();
+        });
+        rClient._socket.emit('error', new Error(msg));
+      },
+      doSearch,
+    ],
+  }, (err) => {
     expect(err).toBeFalsy();
     rClient.destroy();
     done();
@@ -995,7 +1003,7 @@ test('setup abort', done => {
     connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
     socketPath: SOCKET,
     reconnect: true,
-    log: LOG
+    log: LOG,
   });
   const message = 'It\'s a trap!';
   setupClient.on('setup', (clt, cb) => {
@@ -1016,7 +1024,7 @@ test('abort reconnect', done => {
     connectTimeout: parseInt(process.env.LDAP_CONNECT_TIMEOUT || 0, 10),
     socketPath: '/dev/null',
     reconnect: true,
-    log: LOG
+    log: LOG,
   });
   let retryCount = 0;
   abortClient.on('connectError', () => {
@@ -1041,9 +1049,9 @@ test('reconnect max retries', done => {
       failAfter: RETRIES,
       // Keep the test duration low
       initialDelay: 10,
-      maxDelay: 100
+      maxDelay: 100,
     },
-    log: LOG
+    log: LOG,
   });
   let count = 0;
   rClient.on('connectError', () => {
@@ -1060,7 +1068,7 @@ test('reconnect on server close', done => {
   const clt = ldap.createClient({
     socketPath: SOCKET,
     reconnect: true,
-    log: LOG
+    log: LOG,
   });
   clt.on('setup', (sclt, cb) => {
     sclt.bind(BIND_DN, BIND_PW, (err) => {
@@ -1085,7 +1093,7 @@ test('no auto-reconnect on unbind', done => {
   const clt = ldap.createClient({
     socketPath: SOCKET,
     reconnect: true,
-    log: LOG
+    log: LOG,
   });
   clt.on('setup', (sclt, cb) => {
     sclt.bind(BIND_DN, BIND_PW, (err) => {
@@ -1130,32 +1138,34 @@ test('search timeout (GH-51)', done => {
 
 test('resultError handling', () => {
   expect.assertions(6);
-  vasync.pipeline({ funcs: [
-    function errSearch(_, cb) {
-      client.once('resultError', (error) => {
-        expect(error.name).toBe('BusyError');
-      });
-      client.search('cn=busy', {}, (err, res) => {
-        expect(err).toBeFalsy();
-
-        res.once('error', (error) => {
+  vasync.pipeline({
+    funcs: [
+      function errSearch (_, cb) {
+        client.once('resultError', (error) => {
           expect(error.name).toBe('BusyError');
-          cb();
         });
-      });
-    },
-    function cleanSearch(_, cb) {
-      client.on('resultError', t.ifError.bind(null));
-      client.search(SUFFIX, {}, (err, res) => {
-        expect(err).toBeFalsy();
+        client.search('cn=busy', {}, (err, res) => {
+          expect(err).toBeFalsy();
 
-        res.once('end', () => {
-          expect(true).toBeTruthy();
-          cb();
+          res.once('error', (error) => {
+            expect(error.name).toBe('BusyError');
+            cb();
+          });
         });
-      });
-    }
-  ] }, (err) => {
+      },
+      function cleanSearch (_, cb) {
+        client.on('resultError', t.ifError.bind(null));
+        client.search(SUFFIX, {}, (err, res) => {
+          expect(err).toBeFalsy();
+
+          res.once('end', () => {
+            expect(true).toBeTruthy();
+            cb();
+          });
+        });
+      },
+    ],
+  }, (err) => {
     expect(err).toBeFalsy();
     client.removeAllListeners('resultError');
   });

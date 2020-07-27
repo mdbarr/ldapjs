@@ -29,7 +29,7 @@ test('new with args', () => {
   const req = new CompareRequest({
     entry: dn.parse('cn=foo, o=test'),
     attribute: 'sn',
-    value: 'testy'
+    value: 'testy',
   });
   expect(req).toBeTruthy();
   expect(req.dn.toString()).toBe('cn=foo, o=test');
@@ -58,7 +58,7 @@ test('toBer', () => {
     messageID: 123,
     entry: dn.parse('cn=foo, o=test'),
     attribute: 'sn',
-    value: 'testy'
+    value: 'testy',
   });
 
   expect(req).toBeTruthy();

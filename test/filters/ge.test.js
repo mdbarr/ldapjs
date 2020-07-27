@@ -30,7 +30,7 @@ test('Construct no args', () => {
 test('Construct args', () => {
   const f = new GreaterThanEqualsFilter({
     attribute: 'foo',
-    value: 'bar'
+    value: 'bar',
   });
   expect(f).toBeTruthy();
   expect(f.attribute).toBe('foo');
@@ -41,7 +41,7 @@ test('Construct args', () => {
 test('GH-109 = escape value only in toString()', () => {
   const f = new GreaterThanEqualsFilter({
     attribute: 'foo',
-    value: 'ba(r)'
+    value: 'ba(r)',
   });
   expect(f).toBeTruthy();
   expect(f.attribute).toBe('foo');
@@ -52,7 +52,7 @@ test('GH-109 = escape value only in toString()', () => {
 test('match true', () => {
   const f = new GreaterThanEqualsFilter({
     attribute: 'foo',
-    value: 'bar'
+    value: 'bar',
   });
   expect(f).toBeTruthy();
   expect(f.matches({ foo: 'baz' })).toBeTruthy();
@@ -61,7 +61,7 @@ test('match true', () => {
 test('match multiple', () => {
   const f = new GreaterThanEqualsFilter({
     attribute: 'foo',
-    value: 'bar'
+    value: 'bar',
   });
   expect(f).toBeTruthy();
   expect(f.matches({ foo: [ 'beuha', 'baz' ] })).toBeTruthy();
@@ -70,7 +70,7 @@ test('match multiple', () => {
 test('match false', () => {
   const f = new GreaterThanEqualsFilter({
     attribute: 'foo',
-    value: 'bar'
+    value: 'bar',
   });
   expect(f).toBeTruthy();
   expect(!f.matches({ foo: 'abc' })).toBeTruthy();
@@ -106,7 +106,7 @@ test('parse bad', done => {
 test('GH-109 = to ber uses plain values', () => {
   let f = new GreaterThanEqualsFilter({
     attribute: 'foo',
-    value: 'ba(r)'
+    value: 'ba(r)',
   });
   expect(f).toBeTruthy();
   const writer = new BerWriter();

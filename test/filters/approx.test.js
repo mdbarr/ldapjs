@@ -30,7 +30,7 @@ test('Construct no args', () => {
 test('Construct args', () => {
   const f = new ApproximateFilter({
     attribute: 'foo',
-    value: 'bar'
+    value: 'bar',
   });
   expect(f).toBeTruthy();
   expect(f.attribute).toBe('foo');
@@ -41,7 +41,7 @@ test('Construct args', () => {
 test('GH-109 = escape value only in toString()', () => {
   const f = new ApproximateFilter({
     attribute: 'foo',
-    value: 'ba(r)'
+    value: 'ba(r)',
   });
   expect(f).toBeTruthy();
   expect(f.attribute).toBe('foo');
@@ -78,7 +78,7 @@ test('parse bad', done => {
 test('GH-109 = to ber uses plain values', () => {
   let f = new ApproximateFilter({
     attribute: 'foo',
-    value: 'ba(r)'
+    value: 'ba(r)',
   });
   expect(f).toBeTruthy();
   const writer = new BerWriter();

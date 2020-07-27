@@ -33,8 +33,8 @@ test('new with args', (t) => {
     value: {
       changeType: 8,
       previousDN: 'cn=foobarbazcar',
-      changeNumber: 123456789
-    }
+      changeNumber: 123456789,
+    },
   });
   t.ok(c);
   t.equal(c.type, '2.16.840.1.113730.3.4.7');
@@ -65,8 +65,8 @@ test('tober', (t) => {
     value: {
       changeType: 8,
       previousDN: 'cn=foobarbazcar',
-      changeNumber: 123456789
-    }
+      changeNumber: 123456789,
+    },
   });
 
   const ber = new BerWriter();
