@@ -128,6 +128,7 @@ test('parse bad', done => {
     f.parse(new BerReader(writer.buffer));
     done.fail('Should have thrown InvalidAsn1Error');
   } catch (e) {
+    done();
   }
 });
 

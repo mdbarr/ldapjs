@@ -3,7 +3,7 @@
 
 const Logger = require('bunyan');
 
-const uuid = require('uuid/v4');
+const { v4: uuid } = require('uuid');
 const vasync = require('vasync');
 const util = require('util');
 
@@ -113,7 +113,7 @@ test('setup', done => {
         objectName: req.dn,
         attributes: {
           'foo;binary': 'wr0gKyDCvCA9IMK+',
-          'gb18030': new Buffer([ 0xB5, 0xE7, 0xCA, 0xD3, 0xBB, 0xFA ]),
+          'gb18030': Buffer.from([ 0xB5, 0xE7, 0xCA, 0xD3, 0xBB, 0xFA ]),
           'objectclass': 'binary'
         }
       }));
@@ -194,9 +194,9 @@ test('setup', done => {
 
       let resultCookie;
       if (last < max) {
-        resultCookie = new Buffer(last.toString());
+        resultCookie = Buffer.from(last.toString());
       } else {
-        resultCookie = new Buffer('');
+        resultCookie = Buffer.from('');
       }
       res.controls.push(new ldap.PagedResultsControl({ value: {
         size: pageSize, // correctness not required here
@@ -227,7 +227,7 @@ test('setup', done => {
       });
       res.controls.push(new ldap.PagedResultsControl({ value: {
         size: 2,
-        cookie: new Buffer('a')
+        cookie: Buffer.from('a')
       } }));
       res.end();
       return next();
@@ -787,8 +787,8 @@ test('GH-21 binary attributes', done => {
     expect(err).toBeFalsy();
     expect(res).toBeTruthy();
     let gotEntry = 0;
-    const expect = new Buffer('\u00bd + \u00bc = \u00be', 'utf8');
-    const expect2 = new Buffer([ 0xB5, 0xE7, 0xCA, 0xD3, 0xBB, 0xFA ]);
+    const expect = Buffer.from('\u00bd + \u00bc = \u00be', 'utf8');
+    const expect2 = Buffer.from([ 0xB5, 0xE7, 0xCA, 0xD3, 0xBB, 0xFA ]);
     res.on('searchEntry', (entry) => {
       expect(entry).toBeTruthy();
       expect(entry instanceof ldap.SearchEntry).toBeTruthy();

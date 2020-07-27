@@ -1,7 +1,7 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const uuid = require('uuid/v4');
+const { v4: uuid } = require('uuid');
 
 const ldap = require('../lib/index');
 
@@ -17,7 +17,7 @@ let server;
 ////////////////////
 // Helper
 
-function search(t, options, callback) {
+function search(done, options, callback) {
   client.search(SUFFIX, options, (err, res) => {
     expect(err).toBeFalsy();
     expect(res).toBeTruthy();
@@ -30,7 +30,7 @@ function search(t, options, callback) {
       expect(found).toBeTruthy();
       if (callback) { return callback(); }
 
-      return t.end();
+      return done();
     });
   });
 }
@@ -72,7 +72,7 @@ test('setup', done => {
   });
 });
 
-test('Evolution search filter (GH-3)', () => {
+test('Evolution search filter (GH-3)', (done) => {
   // This is what Evolution sends, when searching for a contact 'ogo'. Wow.
   const filter =
     '(|(cn=ogo*)(givenname=ogo*)(sn=ogo*)(mail=ogo*)(member=ogo*)' +
@@ -92,16 +92,16 @@ test('Evolution search filter (GH-3)', () => {
     '(anniversary=ogo*)(birthdate=ogo*)(mailer=ogo*)(fileas=ogo*)' +
     '(category=ogo*)(calcaluri=ogo*)(calfburl=ogo*)(icscalendar=ogo*))';
 
-  return search(t, filter);
+  return search(done, filter);
 });
 
-test('GH-49 Client errors on bad attributes', () => {
+test('GH-49 Client errors on bad attributes', (done) => {
   const searchOpts = {
     filter: 'cn=*ogo*',
     scope: 'one',
     attributes: 'dn'
   };
-  return search(t, searchOpts);
+  return search(done, searchOpts);
 });
 
 test('GH-55 Client emits connect multiple times', done => {

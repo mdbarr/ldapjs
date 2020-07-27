@@ -1,7 +1,7 @@
 // Copyright 2011 Mark Cavage, Inc.  All rights reserved.
 'use strict';
 
-const uuid = require('uuid/v4');
+const { v4: uuid } = require('uuid');
 const vasync = require('vasync');
 
 ////////////////////
@@ -9,7 +9,7 @@ const vasync = require('vasync');
 
 const SUFFIX = 'dc=test';
 
-const SERVER_PORT = process.env.SERVER_PORT || 1389;
+const SERVER_PORT = process.env.SERVER_PORT || 45636;
 
 let ldap;
 let client;

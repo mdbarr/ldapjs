@@ -112,6 +112,7 @@ test('parse bad', done => {
     done.fail('Should have thrown InvalidAsn1Error');
   } catch (e) {
     expect(e.name).toBe('InvalidAsn1Error');
+    done();
   }
 });
 
@@ -136,7 +137,7 @@ test('GH-109 = to ber uses plain values', () => {
 });
 
 test('handle values passed via buffer', () => {
-  const b = new Buffer([ 32, 64, 128, 254 ]);
+  const b = Buffer.from([ 32, 64, 128, 254 ]);
   const f = new EqualityFilter({
     attribute: 'foo',
     value: b

@@ -99,6 +99,7 @@ test('parse bad', done => {
     done.fail('Should have thrown InvalidAsn1Error');
   } catch (e) {
     expect(e.name).toBe('InvalidAsn1Error');
+    done();
   }
 });
 

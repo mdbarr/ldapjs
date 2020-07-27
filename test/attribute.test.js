@@ -113,7 +113,7 @@ test('isAttribute', () => {
 
   expect(isA({
     type: 'foo',
-    vals: [ 'item', new Buffer(5) ],
+    vals: [ 'item', Buffer.alloc(5) ],
     toBer () { /* placeholder */ }
   })).toBeTruthy();
 

@@ -1,6 +1,11 @@
 {
+  "name": "@metastack/ldapjs",
+  "description": "LDAP client and server APIs",
+  "version": "1.2.0",
+  "license": "MIT",
   "author": "Mark Cavage <mcavage@gmail.com>",
   "contributors": [
+    "Mark Barr <mark@hyperingenuity.com>",
     "Craig Baker",
     "Austin King <shout@ozten.com>",
     "Mathieu Lecarme <mathieu@garambrogne.net>>",
@@ -11,22 +16,11 @@
     "Patrick Mooney <patrick.f.mooney@gmail.com>",
     "Matt Simerson <matt@tnpi.net>"
   ],
-  "name": "@metastack/ldapjs",
-  "homepage": "http://ldapjs.org",
-  "description": "LDAP client and server APIs",
-  "version": "1.1.0",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:mdbarr/node-ldapjs.git"
-  },
+  "repository": "git@github.com:mdbarr/ldapjs.git",
   "main": "lib/index.js",
   "directories": {
     "bin": "./bin",
     "lib": "./lib"
-  },
-  "engines": {
-    "node": ">=0.10"
   },
   "dependencies": {
     "asn1": "0.2.4",
@@ -45,7 +39,6 @@
     "uuid": "^8.2.0"
   },
   "scripts": {
-    "doPublish": "npm publish --access public",
     "lint": "eslint lib/*.js lib/**/*.js test/*.js test/**/*.js bin/*",
     "report": "jest --coverage",
     "test": "jest"
