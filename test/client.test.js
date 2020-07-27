@@ -572,56 +572,62 @@ test('search basic', done => {
 });
 
 describe('search sizeLimit', () => {
-  test('over limit', (t2) => {
+  test('over limit', (done) => {
     client.search('cn=sizelimit', {}, (err, res) => {
-      t2.ifError(err);
+      expect(err).toBeFalsy();
       res.on('error', (error) => {
-        t2.equal(error.name, 'SizeLimitExceededError');
-        t2.end();
+        expect(error.name).toBe('SizeLimitExceededError');
+        done();
       });
     });
   });
 
-  test('under limit', (t2) => {
+  test('under limit', (done) => {
     const limit = 100;
     client.search('cn=sizelimit', { sizeLimit: limit }, (err, res) => {
-      t2.ifError(err);
+      expect(err).toBeFalsy();
       let count = 0;
       res.on('searchEntry', () => {
         count++;
       });
       res.on('end', () => {
-        t2.pass();
-        t2.equal(count, limit);
-        t2.end();
+        expect(count).toEqual(limit);
+        done();
       });
-      res.on('error', t2.ifError.bind(t));
+      res.on('error', (error) => {
+        throw error;
+      });
     });
   });
 });
 
 describe('search paged', () => {
-  test('paged - no pauses', (t2) => {
+  test('paged - no pauses', (done) => {
     let countEntries = 0;
     let countPages = 0;
     client.search('cn=paged', { paged: { pageSize: 100 } }, (err, res) => {
-      t2.ifError(err);
+      expect(err).toBeFalsy();
       res.on('searchEntry', () => {
         countEntries++;
       });
+
       res.on('page', () => {
         countPages++;
       });
-      res.on('error', t2.ifError.bind(t2));
+
+      res.on('error', (error) => {
+        throw error;
+      });
+
       res.on('end', () => {
-        t2.equal(countEntries, 1000);
-        t2.equal(countPages, 10);
-        t2.end();
+        expect(countEntries).toEqual(1000);
+        expect(countPages).toEqual(10);
+        done();
       });
     });
   });
 
-  test('paged - pauses', (t2) => {
+  test('paged - pauses', (done) => {
     let countPages = 0;
     client.search('cn=paged', {
       paged: {
@@ -629,81 +635,94 @@ describe('search paged', () => {
         pagePause: true,
       },
     }, (err, res) => {
-      t2.ifError(err);
+      expect(err).toBeFalsy();
       res.on('page', (result, cb) => {
         countPages++;
         // cancel after 9 to verify callback usage
         if (countPages === 9) {
           // another page should never be encountered
           res.removeAllListeners('page').
-            on('page', t2.fail.bind(null, 'unexpected page'));
+            on('page', () => {
+              throw new Error('Unexpected page');
+            });
+
           return cb(new Error());
         }
         return cb();
       });
-      res.on('error', t2.ifError.bind(t2));
-      res.on('end', () => {
-        t2.equal(countPages, 9);
-        t2.end();
-      });
-    });
-  });
 
-  test('paged - no support (err handled)', (t2) => {
-    client.search(SUFFIX, { paged: { pageSize: 100 } }, (err, res) => {
-      t2.ifError(err);
-      res.on('pageError', t2.ok.bind(t2));
-      res.on('end', () => {
-        t2.pass();
-        t2.end();
-      });
-    });
-  });
-
-  test('paged - no support (err not handled)', (t2) => {
-    client.search(SUFFIX, { paged: { pageSize: 100 } }, (err, res) => {
-      t2.ifError(err);
-      res.on('end', t2.fail.bind(t2));
       res.on('error', (error) => {
-        t2.ok(error);
-        t2.end();
+        throw error;
+      });
+
+      res.on('end', () => {
+        expect(countPages).toEqual(9);
+        done();
       });
     });
   });
 
-  test('paged - redundant control', (t2) => {
+  test('paged - no support (err handled)', (done) => {
+    client.search(SUFFIX, { paged: { pageSize: 100 } }, (err, res) => {
+      expect(err).toBeFalsy();
+
+      res.on('pageError', (error) => {
+        expect(error).toBeTruthy();
+      });
+
+      res.on('end', () => {
+        done();
+      });
+    });
+  });
+
+  test('paged - no support (err not handled)', (done) => {
+    client.search(SUFFIX, { paged: { pageSize: 100 } }, (err, res) => {
+      expect(err).toBeFalsy();
+
+      res.on('end', () => {
+        done.fail('Unespected end');
+      });
+
+      res.on('error', (error) => {
+        expect(error).toBeTruthy();
+        done();
+      });
+    });
+  });
+
+  test('paged - redundant control', (done) => {
     try {
       client.search(SUFFIX,
         { paged: { pageSize: 100 } },
         new ldap.PagedResultsControl(),
         (err) => {
-          t2.ifError(err);
-          t2.fail();
+          expect(err).toBeFalsy();
         });
     } catch (e) {
-      t2.ok(e);
-      t2.end();
+      expect(e).toBeTruthy();
+      done();
     }
   });
 
-  test('paged - handle later error', (t2) => {
+  test('paged - handle later error', (done) => {
     let countEntries = 0;
     let countPages = 0;
     client.search('cn=pagederr', { paged: { pageSize: 1 } }, (err, res) => {
-      t2.ifError(err);
+      expect(err).toBeFalsy();
       res.on('searchEntry', () => {
-        t2.ok(++countEntries);
+        expect(++countEntries).toBeTruthy();
       });
       res.on('page', () => {
-        t2.ok(++countPages);
+        expect(++countPages).toBeTruthy();
       });
       res.on('error', () => {
-        t2.equal(countEntries, 1);
-        t2.equal(countPages, 1);
-        t2.end();
+        expect(countEntries).toEqual(1);
+        expect(countPages).toEqual(1);
+        done();
       });
       res.on('end', () => {
-        t2.fail('should not be reached');
+        done.fail('should not be reached');
       });
     });
   });
@@ -793,8 +812,8 @@ test('GH-21 binary attributes', done => {
     expect(err).toBeFalsy();
     expect(res).toBeTruthy();
     let gotEntry = 0;
-    const expect = Buffer.from('\u00bd + \u00bc = \u00be', 'utf8');
-    const expect2 = Buffer.from([ 0xB5, 0xE7, 0xCA, 0xD3, 0xBB, 0xFA ]);
+    const expected = Buffer.from('\u00bd + \u00bc = \u00be', 'utf8');
+    const expected2 = Buffer.from([ 0xB5, 0xE7, 0xCA, 0xD3, 0xBB, 0xFA ]);
     res.on('searchEntry', (entry) => {
       expect(entry).toBeTruthy();
       expect(entry instanceof ldap.SearchEntry).toBeTruthy();
@@ -802,20 +821,22 @@ test('GH-21 binary attributes', done => {
       expect(entry.attributes).toBeTruthy();
       expect(entry.attributes.length).toBeTruthy();
       expect(entry.attributes[0].type).toBe('foo;binary');
-      expect(entry.attributes[0].vals[0]).toBe(expect.toString('base64'));
-      expect(entry.attributes[0].buffers[0].toString('base64')).toBe(expect.toString('base64'));
+      expect(entry.attributes[0].vals[0]).toBe(expected.toString('base64'));
+      expect(entry.attributes[0].buffers[0].toString('base64')).toBe(expected.toString('base64'));
 
       expect(entry.attributes[1].type).toBeTruthy();
       expect(entry.attributes[1].buffers.length).toBe(1);
-      expect(expect2.length).toBe(entry.attributes[1].buffers[0].length);
-      for (let i = 0; i < expect2.length; i++) { expect(expect2[i]).toBe(entry.attributes[1].buffers[0][i]); }
+      expect(expected2.length).toBe(entry.attributes[1].buffers[0].length);
+      for (let i = 0; i < expected2.length; i++) { expect(expected2[i]).toBe(entry.attributes[1].buffers[0][i]); }
 
       expect(entry.object).toBeTruthy();
       gotEntry++;
     });
+
     res.on('error', (err) => {
       done.fail(err);
     });
+
     res.on('end', (res) => {
       expect(res).toBeTruthy();
       expect(res instanceof ldap.SearchResponse).toBeTruthy();
@@ -1154,7 +1175,10 @@ test('resultError handling', () => {
         });
       },
       function cleanSearch (_, cb) {
-        client.on('resultError', t.ifError.bind(null));
+        client.on('resultError', (error) => {
+          throw error;
+        });
+
         client.search(SUFFIX, {}, (err, res) => {
           expect(err).toBeFalsy();
 
