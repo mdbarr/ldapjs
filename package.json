@@ -1,5 +1,5 @@
 {
-  "name": "@metastack/ldapjs",
+  "name": "@hyperingenuity/ldapjs",
   "description": "LDAP client and server APIs",
   "version": "1.2.0",
   "license": "MIT",
